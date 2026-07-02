@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ROLE_BY_ID, TEAMS } from '../data/roles.js'
 import {
   formatMatchDate,
@@ -133,44 +134,51 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
         )}
       </button>
 
-      {open && (
-        <>
-          <button
-            type="button"
-            className="history-backdrop"
-            aria-label="Đóng lịch sử"
-            onClick={() => setOpen(false)}
-          />
-          <div id="match-history-panel" className="history-panel" role="dialog" aria-label="Lịch sử ván">
-            <div className="history-panel-head">
-              <h2>Lịch sử ván</h2>
-              <button
-                type="button"
-                className="ghost-btn small history-close-btn"
-                onClick={() => setOpen(false)}
-              >
-                Đóng
-              </button>
-            </div>
+      {open &&
+        createPortal(
+          <>
+            <button
+              type="button"
+              className="history-backdrop"
+              aria-label="Đóng lịch sử"
+              onClick={() => setOpen(false)}
+            />
+            <div
+              id="match-history-panel"
+              className="history-panel"
+              role="dialog"
+              aria-label="Lịch sử ván"
+            >
+              <div className="history-panel-head">
+                <h2>Lịch sử ván</h2>
+                <button
+                  type="button"
+                  className="ghost-btn small history-close-btn"
+                  onClick={() => setOpen(false)}
+                >
+                  Đóng
+                </button>
+              </div>
 
-            {matches.length === 0 ? (
-              <p className="empty history-empty">
-                Chưa có trận nào được lưu. Kết thúc ván để thêm vào lịch sử.
-              </p>
-            ) : (
-              <ul className="history-list">
-                {matches.map((match) => (
-                  <MatchHistoryItem
-                    key={match.id}
-                    match={match}
-                    onLoad={handleLoad}
-                  />
-                ))}
-              </ul>
-            )}
-          </div>
-        </>
-      )}
+              {matches.length === 0 ? (
+                <p className="empty history-empty">
+                  Chưa có trận nào được lưu. Kết thúc ván để thêm vào lịch sử.
+                </p>
+              ) : (
+                <ul className="history-list">
+                  {matches.map((match) => (
+                    <MatchHistoryItem
+                      key={match.id}
+                      match={match}
+                      onLoad={handleLoad}
+                    />
+                  ))}
+                </ul>
+              )}
+            </div>
+          </>,
+          document.body,
+        )}
     </div>
   )
 }

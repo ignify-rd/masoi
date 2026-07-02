@@ -79,22 +79,20 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="brand">
-          <div className="brand-leading">
-            <img src="/wolf.svg" alt="" className="brand-icon" />
-            {!started && (
-              <MatchHistory
-                hasCurrentSetup={totalPlayers > 0}
-                onLoadSetup={loadSetup}
-              />
-            )}
-          </div>
+          <img src="/wolf.svg" alt="" className="brand-icon" />
           <div className="brand-text">
             <h1>Quản Trò Ma Sói</h1>
             <p className="muted">
-              Công cụ sắp ván &amp; gọi vai trò ban đêm (Ultimate Werewolf)
+              Công cụ sắp ván &amp; gọi vai trò
             </p>
           </div>
         </div>
+        {!started && (
+          <MatchHistory
+            hasCurrentSetup={totalPlayers > 0}
+            onLoadSetup={loadSetup}
+          />
+        )}
       </header>
 
       {started ? (

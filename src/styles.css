@@ -39,6 +39,10 @@ body {
 
 /* Header */
 .app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 22px;
 }
 
@@ -47,14 +51,7 @@ body {
   align-items: center;
   gap: 14px;
   min-width: 0;
-}
-
-.brand-leading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  flex: 1;
 }
 
 .brand-text {
@@ -681,10 +678,12 @@ body {
 
   .app-header {
     margin-bottom: 16px;
+    align-items: flex-start;
   }
 
-  .brand-leading {
-    gap: 6px;
+  .match-history {
+    align-self: center;
+    margin-top: 2px;
   }
 
   .history-header-label {
@@ -693,37 +692,10 @@ body {
 
   .history-header-btn {
     min-width: 44px;
+    min-height: 44px;
     justify-content: center;
     padding: 8px 10px;
     border-radius: 12px;
-  }
-
-  .history-panel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: 0;
-    width: auto;
-    max-height: min(78vh, 100dvh);
-    border-radius: 18px 18px 0 0;
-    border-bottom: none;
-    padding: 16px 14px calc(16px + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.42);
-  }
-
-  .history-list {
-    max-height: min(58vh, calc(100dvh - 220px));
-  }
-
-  .history-item {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .history-load-btn {
-    width: 100%;
-    min-height: 44px;
   }
 
   .app-header h1 {
@@ -1305,6 +1277,49 @@ body {
   flex-shrink: 0;
   white-space: nowrap;
   min-height: 40px;
+}
+
+@media (max-width: 920px) {
+  .history-backdrop {
+    z-index: 200;
+  }
+
+  .history-panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    top: auto;
+    width: 100%;
+    max-width: none;
+    max-height: min(78vh, 100dvh);
+    border-radius: 18px 18px 0 0;
+    border-bottom: none;
+    padding: 16px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.42);
+    z-index: 210;
+  }
+
+  .history-panel-head {
+    padding-bottom: 4px;
+  }
+
+  .history-close-btn {
+    min-height: 40px;
+    min-width: 64px;
+  }
+
+  .history-list {
+    max-height: min(58vh, calc(100dvh - 220px));
+  }
+
+  .history-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .history-load-btn {
+    width: 100%;
+    min-height: 44px;
+  }
 }
 
 .steps {
