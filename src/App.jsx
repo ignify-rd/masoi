@@ -3,6 +3,7 @@ import { ROLE_BY_ID, canIncreaseRole, clampRoleCount } from './data/roles.js'
 import RoleLibrary from './components/RoleLibrary.jsx'
 import SetupPanel from './components/SetupPanel.jsx'
 import NightCallOrder from './components/NightCallOrder.jsx'
+import MatchHistory from './components/MatchHistory.jsx'
 
 const STORAGE_KEY = 'masoi.setup'
 
@@ -26,6 +27,7 @@ function loadSelected() {
 export default function App() {
   const [selected, setSelected] = useState(loadSelected)
   const [started, setStarted] = useState(false)
+  const [startedAt, setStartedAt] = useState(null)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(selected))
@@ -57,6 +59,8 @@ export default function App() {
 
   const clear = () => setSelected({})
 
+  const loadSetup = (roles) => setSelected(roles)
+
   const totalPlayers = useMemo(
     () => Object.values(selected).reduce((a, b) => a + b, 0),
     [selected],
@@ -75,8 +79,16 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="brand">
-          <img src="/wolf.svg" alt="" className="brand-icon" />
-          <div>
+          <div className="brand-leading">
+            <img src="/wolf.svg" alt="" className="brand-icon" />
+            {!started && (
+              <MatchHistory
+                hasCurrentSetup={totalPlayers > 0}
+                onLoadSetup={loadSetup}
+              />
+            )}
+          </div>
+          <div className="brand-text">
             <h1>Quản Trò Ma Sói</h1>
             <p className="muted">
               Công cụ sắp ván &amp; gọi vai trò ban đêm (Ultimate Werewolf)
@@ -90,7 +102,15 @@ export default function App() {
           <NightCallOrder
             selected={selected}
             totalPlayers={totalPlayers}
-            onBack={() => setStarted(false)}
+            startedAt={startedAt}
+            onBack={() => {
+              setStarted(false)
+              setStartedAt(null)
+            }}
+            onEndMatch={() => {
+              setStarted(false)
+              setStartedAt(null)
+            }}
           />
         </main>
       ) : (
@@ -104,7 +124,10 @@ export default function App() {
             onDec={dec}
             onRemove={remove}
             onClear={clear}
-            onStart={() => setStarted(true)}
+            onStart={() => {
+              setStartedAt(new Date().toISOString())
+              setStarted(true)
+            }}
           />
         </main>
       )}

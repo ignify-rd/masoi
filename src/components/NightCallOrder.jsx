@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ROLE_BY_ID, TEAMS, PHASE_LABEL, NIGHT_EXTRAS } from '../data/roles.js'
+import { saveMatch, WINNER_TEAM_IDS } from '../data/matchHistory.js'
 
 const NOTES_STORAGE_KEY = 'masoi.nightNotes'
 const HIDDEN_STORAGE_KEY = 'masoi.nightHidden'
@@ -266,9 +267,16 @@ function StepCard({
   )
 }
 
-export default function NightCallOrder({ selected, totalPlayers, onBack }) {
+export default function NightCallOrder({
+  selected,
+  totalPlayers,
+  startedAt,
+  onBack,
+  onEndMatch,
+}) {
   const [notes, setNotes] = useState(loadNotes)
   const [hiddenSteps, setHiddenSteps] = useState(loadHidden)
+  const [winner, setWinner] = useState('')
 
   const steps = useMemo(
     () => buildNightSteps(selected, totalPlayers),
@@ -304,6 +312,35 @@ export default function NightCallOrder({ selected, totalPlayers, onBack }) {
       }
       return { ...prev, [key]: value }
     })
+  }
+
+  const handleEndMatch = () => {
+    if (!winner) {
+      window.alert('Hãy chọn phe thắng trước khi lưu.')
+      return
+    }
+
+    if (
+      !window.confirm(
+        'Kết thúc trận và lưu vào lịch sử? Ghi chú ban đêm của ván này cũng sẽ được lưu.',
+      )
+    ) {
+      return
+    }
+
+    saveMatch({
+      startedAt,
+      totalPlayers,
+      roles: selected,
+      notes,
+      winner,
+    })
+
+    localStorage.removeItem(NOTES_STORAGE_KEY)
+    localStorage.removeItem(HIDDEN_STORAGE_KEY)
+    setNotes({})
+    setHiddenSteps(new Set())
+    onEndMatch()
   }
 
   return (
@@ -367,6 +404,36 @@ export default function NightCallOrder({ selected, totalPlayers, onBack }) {
       <p className="call-outro">
         Khi xong, đọc to: <em>"Trời sáng rồi, mọi người hãy thức dậy!"</em>
       </p>
+
+      <div className="call-footer">
+        <div className="winner-pick">
+          <span className="winner-pick-label">Phe thắng</span>
+          <div className="winner-pick-options">
+            {WINNER_TEAM_IDS.map((teamId) => {
+              const team = TEAMS[teamId]
+              return (
+                <button
+                  key={teamId}
+                  type="button"
+                  className={`winner-btn${winner === teamId ? ' active' : ''}`}
+                  style={{ '--team-color': team.color }}
+                  onClick={() => setWinner(teamId)}
+                >
+                  {team.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+        <button
+          type="button"
+          className="end-match-btn"
+          onClick={handleEndMatch}
+          disabled={!winner}
+        >
+          Kết thúc trận và lưu lại
+        </button>
+      </div>
     </section>
   )
 }
