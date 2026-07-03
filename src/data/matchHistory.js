@@ -63,3 +63,17 @@ export function saveMatch({ startedAt, totalPlayers, roles, notes = {}, winner }
   localStorage.setItem(MATCHES_STORAGE_KEY, JSON.stringify(matches))
   return match
 }
+
+export function deleteMatch(id) {
+  const matches = loadMatches().filter((match) => match.id !== id)
+  localStorage.setItem(MATCHES_STORAGE_KEY, JSON.stringify(matches))
+  return matches
+}
+
+export function updateMatchWinner(id, winner) {
+  const matches = loadMatches().map((match) =>
+    match.id === id ? { ...match, winner: winner || null } : match,
+  )
+  localStorage.setItem(MATCHES_STORAGE_KEY, JSON.stringify(matches))
+  return matches
+}

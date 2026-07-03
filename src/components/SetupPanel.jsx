@@ -5,6 +5,11 @@ import {
   canIncreaseRole,
   getRoleImageSrc,
 } from '../data/roles.js'
+import {
+  SUGGEST_MAX_PLAYERS,
+  SUGGEST_MIN_PLAYERS,
+  suggestSetup,
+} from '../data/suggestSetup.js'
 import BalanceMeter from './BalanceMeter.jsx'
 
 const TEAM_ORDER = ['other', 'vampire', 'werewolf', 'village']
@@ -70,8 +75,31 @@ export default function SetupPanel({
   onRemove,
   onClear,
   onStart,
+  onLoadSetup,
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [suggestCount, setSuggestCount] = useState('9')
+
+  const handleSuggest = () => {
+    const count = Number(suggestCount)
+    if (
+      !Number.isFinite(count) ||
+      count < SUGGEST_MIN_PLAYERS ||
+      count > SUGGEST_MAX_PLAYERS
+    ) {
+      window.alert(
+        `Nhập số người chơi từ ${SUGGEST_MIN_PLAYERS} đến ${SUGGEST_MAX_PLAYERS}.`,
+      )
+      return
+    }
+    if (
+      totalPlayers > 0 &&
+      !window.confirm('Thay thế ván đấu hiện tại bằng setup gợi ý?')
+    ) {
+      return
+    }
+    onLoadSetup(suggestSetup(count))
+  }
   const entries = Object.entries(selected).filter(([, c]) => c > 0)
   const sortedEntries = sortEntriesByTeam(entries)
   const teamCounts = countByTeam(entries)
@@ -138,6 +166,33 @@ export default function SetupPanel({
         <div className="panel-head">
           <h2>Ván đấu</h2>
           <span className="muted">{totalPlayers} người chơi</span>
+        </div>
+
+        <div className="suggest-row">
+          <label className="suggest-label" htmlFor="suggest-count">
+            Gợi ý setup
+          </label>
+          <input
+            id="suggest-count"
+            type="number"
+            className="suggest-input"
+            min={SUGGEST_MIN_PLAYERS}
+            max={SUGGEST_MAX_PLAYERS}
+            value={suggestCount}
+            onChange={(e) => setSuggestCount(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSuggest()
+            }}
+            aria-label="Số người chơi cho setup gợi ý"
+          />
+          <span className="suggest-unit muted">người</span>
+          <button
+            type="button"
+            className="ghost-btn small suggest-btn"
+            onClick={handleSuggest}
+          >
+            Gợi ý
+          </button>
         </div>
 
         {entries.length > 0 && <TeamBreakdown counts={teamCounts} />}
