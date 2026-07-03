@@ -4,6 +4,7 @@ import RoleLibrary from './components/RoleLibrary.jsx'
 import SetupPanel from './components/SetupPanel.jsx'
 import NightCallOrder from './components/NightCallOrder.jsx'
 import MatchHistory from './components/MatchHistory.jsx'
+import DiscussionTimer from './components/DiscussionTimer.jsx'
 
 const STORAGE_KEY = 'masoi.setup'
 
@@ -110,6 +111,7 @@ export default function App() {
               setStartedAt(null)
             }}
           />
+          <DiscussionTimer />
         </main>
       ) : (
         <main className="app-main">
@@ -122,6 +124,7 @@ export default function App() {
             onDec={dec}
             onRemove={remove}
             onClear={clear}
+            onLoadSetup={loadSetup}
             onStart={() => {
               setStartedAt(new Date().toISOString())
               setStarted(true)

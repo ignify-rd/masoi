@@ -99,18 +99,6 @@ const ROLES_DATA = [
     script: 'Thanh niên cứng hãy thức dậy để tôi ghi nhận vai trò của bạn.',
   },
   {
-    id: 'tough_guy',
-    name: 'Thanh Niên Cứng',
-    nameEn: 'Tough Guy',
-    team: 'village',
-    value: 3,
-    wakesAtNight: true,
-    nightOrder: 0,
-    phase: 'night1',
-    ability: 'Nếu sói cắn bạn, bạn sẽ không chết ngay và cầm cự đến đêm tiếp theo.',
-    script: 'Thanh niên cứng hãy thức dậy để tôi ghi nhận vai trò của bạn.',
-  },
-  {
     id: 'rusty_knight',
     name: 'Hiệp sĩ Kiếm Rỉ',
     nameEn: 'Rusty Knight',
@@ -340,7 +328,7 @@ const ROLES_DATA = [
   {
     id: 'mystic_seeker',
     name: 'Tiên Tri Bí Ẩn',
-    nameEn: 'Healer',
+    nameEn: 'Mystic Seeker',
     team: 'village',
     value: 9,
     wakesAtNight: true,

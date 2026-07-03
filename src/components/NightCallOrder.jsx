@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ROLE_BY_ID, TEAMS, PHASE_LABEL, NIGHT_EXTRAS } from '../data/roles.js'
 import { saveMatch, WINNER_TEAM_IDS } from '../data/matchHistory.js'
+import { pickStory } from '../data/gameOpenings.js'
 
 const NOTES_STORAGE_KEY = 'masoi.nightNotes'
 const HIDDEN_STORAGE_KEY = 'masoi.nightHidden'
@@ -277,6 +278,7 @@ export default function NightCallOrder({
   const [notes, setNotes] = useState(loadNotes)
   const [hiddenSteps, setHiddenSteps] = useState(loadHidden)
   const [winner, setWinner] = useState('')
+  const [story, setStory] = useState(() => pickStory(totalPlayers))
 
   const steps = useMemo(
     () => buildNightSteps(selected, totalPlayers),
@@ -350,6 +352,34 @@ export default function NightCallOrder({
         <button className="ghost-btn small" onClick={onBack}>
           Quay lại
         </button>
+      </div>
+
+      <div className="game-opening">
+        <div className="game-opening-head">
+          <span className="game-opening-label">Cốt truyện làng</span>
+          <button
+            type="button"
+            className="ghost-btn small"
+            onClick={() => setStory(pickStory(totalPlayers))}
+          >
+            Câu chuyện khác
+          </button>
+        </div>
+        <h3 className="game-opening-title">{story.title}</h3>
+        <div className="game-opening-body">
+          {story.paragraphs.map((paragraph, i) => (
+            <p key={i}>{paragraph}</p>
+          ))}
+          {story.hook && (
+            <p className="game-opening-hook">
+              <em>{story.hook}</em>
+            </p>
+          )}
+        </div>
+        <p className="game-opening-hint muted">
+          Đọc to cho cả bàn nghe trước khi chia vai — như mở đầu một phiên
+          DnD.
+        </p>
       </div>
 
       <p className="call-intro">

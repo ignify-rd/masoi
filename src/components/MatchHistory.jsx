@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ROLE_BY_ID, TEAMS } from '../data/roles.js'
 import {
+  WINNER_TEAM_IDS,
+  deleteMatch,
   formatMatchDate,
   loadMatches,
   normalizeRolesFromMatch,
+  updateMatchWinner,
 } from '../data/matchHistory.js'
 
 function HistoryIcon() {
@@ -28,7 +31,8 @@ function HistoryIcon() {
   )
 }
 
-function MatchHistoryItem({ match, onLoad }) {
+function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
+  const [editingWinner, setEditingWinner] = useState(false)
   const winnerTeam = match.winner ? TEAMS[match.winner] : null
   const roleSummary = Object.entries(match.roles || {})
     .filter(([, c]) => c > 0)
@@ -49,27 +53,79 @@ function MatchHistoryItem({ match, onLoad }) {
             {match.totalPlayers} người
           </span>
         </div>
-        {winnerTeam ? (
-          <span
-            className="team-tag small history-winner"
-            style={{ '--team-color': winnerTeam.color }}
-          >
-            {winnerTeam.label} thắng
-          </span>
+        {editingWinner ? (
+          <div className="history-winner-edit">
+            {WINNER_TEAM_IDS.map((teamId) => {
+              const team = TEAMS[teamId]
+              return (
+                <button
+                  key={teamId}
+                  type="button"
+                  className={`winner-btn small${
+                    match.winner === teamId ? ' active' : ''
+                  }`}
+                  style={{ '--team-color': team.color }}
+                  onClick={() => {
+                    onChangeWinner(match.id, teamId)
+                    setEditingWinner(false)
+                  }}
+                >
+                  {team.label}
+                </button>
+              )
+            })}
+            <button
+              type="button"
+              className="ghost-btn small"
+              onClick={() => setEditingWinner(false)}
+            >
+              Hủy
+            </button>
+          </div>
         ) : (
-          <span className="history-winner unknown">Chưa ghi phe thắng</span>
+          <button
+            type="button"
+            className="history-winner-btn"
+            onClick={() => setEditingWinner(true)}
+            title="Bấm để đổi phe thắng"
+          >
+            {winnerTeam ? (
+              <span
+                className="team-tag small history-winner"
+                style={{ '--team-color': winnerTeam.color }}
+              >
+                {winnerTeam.label} thắng
+              </span>
+            ) : (
+              <span className="history-winner unknown">
+                Chưa ghi phe thắng
+              </span>
+            )}
+            <span className="history-winner-edit-hint" aria-hidden="true">
+              ✎
+            </span>
+          </button>
         )}
         {roleSummary && (
           <p className="history-item-roles muted">{roleSummary}</p>
         )}
       </div>
-      <button
-        type="button"
-        className="ghost-btn small history-load-btn"
-        onClick={() => onLoad(match)}
-      >
-        Dùng lại
-      </button>
+      <div className="history-item-actions">
+        <button
+          type="button"
+          className="ghost-btn small history-load-btn"
+          onClick={() => onLoad(match)}
+        >
+          Dùng lại
+        </button>
+        <button
+          type="button"
+          className="ghost-btn small danger history-delete-btn"
+          onClick={() => onDelete(match)}
+        >
+          Xóa
+        </button>
+      </div>
     </li>
   )
 }
@@ -77,7 +133,7 @@ function MatchHistoryItem({ match, onLoad }) {
 export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
   const [open, setOpen] = useState(false)
   const [matches, setMatches] = useState(() => loadMatches())
-  const matchCount = loadMatches().length
+  const matchCount = matches.length
 
   useEffect(() => {
     if (open) setMatches(loadMatches())
@@ -115,6 +171,21 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
 
     onLoadSetup(roles)
     setOpen(false)
+  }
+
+  const handleDelete = (match) => {
+    if (
+      !window.confirm(
+        `Xóa ván ${formatMatchDate(match.playedAt)} (${match.totalPlayers} người) khỏi lịch sử?`,
+      )
+    ) {
+      return
+    }
+    setMatches(deleteMatch(match.id))
+  }
+
+  const handleChangeWinner = (id, winner) => {
+    setMatches(updateMatchWinner(id, winner))
   }
 
   return (
@@ -171,6 +242,8 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
                       key={match.id}
                       match={match}
                       onLoad={handleLoad}
+                      onDelete={handleDelete}
+                      onChangeWinner={handleChangeWinner}
                     />
                   ))}
                 </ul>
