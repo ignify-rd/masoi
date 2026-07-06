@@ -6,7 +6,29 @@ export const SUGGEST_MAX_PLAYERS = 24
 const WOLF_ID = 'werewolf'
 const VILLAGER_ID = 'villager'
 
-/** Bậc mở khóa vai chức năng làng theo số người chơi. */
+/** Vai có chữ "Sói" trong tên (Ma Sói, Sói Con, …). */
+export function isWolfNamedRole(id) {
+  return (ROLE_BY_ID[id]?.name || '').includes('Sói')
+}
+
+/** Số lá Dân Làng (dân thường). */
+export function countVillagers(setup) {
+  return setup[VILLAGER_ID] || 0
+}
+
+/** Tổng số lá có tên chứa "Sói". */
+export function countWolfNamed(setup) {
+  return Object.entries(setup).reduce(
+    (sum, [id, count]) => (isWolfNamedRole(id) ? sum + count : sum),
+    0,
+  )
+}
+
+/** Dân Làng >= số vai tên Sói. */
+export function meetsVillagerGteWolf(setup) {
+  return countVillagers(setup) >= countWolfNamed(setup)
+}
+
 const SPECIAL_TIERS = [
   { id: 'seer', minPlayers: 0 },
   { id: 'guard', minPlayers: 7 },
@@ -16,10 +38,6 @@ const SPECIAL_TIERS = [
   { id: 'cursed', minPlayers: 12 },
 ]
 
-/**
- * Các cặp hoán đổi dùng để tinh chỉnh cân bằng mà không đổi tổng số người.
- * delta = value[to] - value[from]; chọn cặp đưa tổng điểm về gần 0 nhất.
- */
 const SWAPS = [
   { from: VILLAGER_ID, to: 'cursed' },
   { from: 'cursed', to: VILLAGER_ID },
@@ -33,6 +51,10 @@ const SWAPS = [
   { from: WOLF_ID, to: VILLAGER_ID },
 ]
 
+function specialCountFor(n) {
+  return SPECIAL_TIERS.filter((t) => n >= t.minPlayers).length
+}
+
 function computeTotalValue(setup) {
   return Object.entries(setup).reduce(
     (sum, [id, count]) => sum + (ROLE_BY_ID[id]?.value || 0) * count,
@@ -42,11 +64,13 @@ function computeTotalValue(setup) {
 
 function canSwap(setup, { from, to }) {
   if ((setup[from] || 0) <= 0) return false
-  // Luôn giữ lại ít nhất 1 Sói để ván chơi hợp lệ.
   if (from === WOLF_ID && setup[from] <= 1) return false
   const toRole = ROLE_BY_ID[to]
   if (!toRole) return false
-  return (setup[to] || 0) < toRole.max
+  if ((setup[to] || 0) >= toRole.max) return false
+
+  const next = applySwap(setup, { from, to })
+  return meetsVillagerGteWolf(next)
 }
 
 function applySwap(setup, { from, to }) {
@@ -57,9 +81,29 @@ function applySwap(setup, { from, to }) {
   return next
 }
 
+/** Giảm Sói hoặc đổi vai đặc biệt → Dân Làng cho đến khi đủ ràng buộc. */
+function enforceVillagerGteWolf(setup) {
+  let next = { ...setup }
+  while (!meetsVillagerGteWolf(next)) {
+    if ((next[WOLF_ID] || 0) > 1) {
+      next[WOLF_ID] -= 1
+      if (next[WOLF_ID] <= 0) delete next[WOLF_ID]
+      next[VILLAGER_ID] = (next[VILLAGER_ID] || 0) + 1
+      continue
+    }
+    const special = [...SPECIAL_TIERS]
+      .reverse()
+      .find((t) => (next[t.id] || 0) > 0)
+    if (!special) break
+    next[special.id] -= 1
+    if (next[special.id] <= 0) delete next[special.id]
+    next[VILLAGER_ID] = (next[VILLAGER_ID] || 0) + 1
+  }
+  return next
+}
+
 /**
- * Gợi ý một lineup cân bằng cho số người chơi cho trước.
- * Trả về object { roleId: count } với tổng count = totalPlayers.
+ * Gợi ý lineup cân bằng: số lá Dân Làng >= tổng vai có "Sói" trong tên.
  */
 export function suggestSetup(totalPlayers) {
   const n = Math.max(
@@ -67,11 +111,15 @@ export function suggestSetup(totalPlayers) {
     Math.min(SUGGEST_MAX_PLAYERS, Math.floor(totalPlayers) || 0),
   )
 
+  const specials = specialCountFor(n)
   let setup = {}
 
-  // Khoảng 1 Sói cho mỗi 3 người chơi.
+  // Chỗ cho Dân Làng = n - sói - đặc biệt; cần >= số sói → sói <= (n - đặc biệt) / 2.
+  const slotsAfterSpecials = n - specials
+  const maxWolves = Math.max(1, Math.floor(slotsAfterSpecials / 2))
   const wolves = Math.min(
     Math.max(1, Math.round(n / 3)),
+    maxWolves,
     ROLE_BY_ID[WOLF_ID].max,
   )
   setup[WOLF_ID] = wolves
@@ -86,7 +134,6 @@ export function suggestSetup(totalPlayers) {
 
   if (used < n) setup[VILLAGER_ID] = n - used
 
-  // Tinh chỉnh: hoán đổi vai để tổng điểm về khoảng cân bằng ±3.
   for (let i = 0; i < 12; i++) {
     const total = computeTotalValue(setup)
     if (total >= -3 && total <= 3) break
@@ -108,5 +155,5 @@ export function suggestSetup(totalPlayers) {
     setup = applySwap(setup, best)
   }
 
-  return setup
+  return enforceVillagerGteWolf(setup)
 }
