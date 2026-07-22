@@ -99,6 +99,18 @@ const ROLES_DATA = [
     script: 'Thanh niên cứng hãy thức dậy để tôi ghi nhận vai trò của bạn.',
   },
   {
+    id: 'terrorist',
+    name: 'Kẻ Khủng Bố',
+    nameEn: 'Terrorist',
+    team: 'village',
+    value: -1,
+    wakesAtNight: true,
+    nightOrder: 0,
+    phase: 'night1',
+    ability: 'Khi bạn chết, bạn kích hoạt một vụ nổ, giết chết 2 người bên cạnh bạn.',
+    script: 'Kẻ Khủng Bố hãy thức dậy để tôi ghi nhận vai trò của bạn.',
+  },
+  {
     id: 'rusty_knight',
     name: 'Hiệp sĩ Kiếm Rỉ',
     nameEn: 'Rusty Knight',
@@ -174,7 +186,7 @@ const ROLES_DATA = [
     value: 3,
     wakesAtNight: true,
     nightOrder: 2,
-    phase: 'every',
+    phase: 'night1',
     ability:
       'Vào ban đêm, chọn 1 người để ban phước (1 lần duy nhất). Người chơi ấy không thể chết vào ban đêm (trừ tự sát).',
     script:
@@ -225,6 +237,20 @@ const ROLES_DATA = [
       'Sói Con giơ tay lên để các Ma Sói còn lại biết.',
   },
   {
+    id: 'wolf_man',
+    name: 'Người sói',
+    nameEn: 'Wolf Man',
+    team: 'werewolf',
+    value: -7,
+    wakesAtNight: true,
+    nightOrder: 3.2,
+    phase: 'night1',
+    ability:
+      'Bạn là sói nhưng có dòng máu của con người nên Tiên tri không soi ra bạn là Sói.',
+    script:
+      'Người Sói hãy thức dậy để các Ma Sói còn lại biết.',
+  },
+  {
     id: 'minion',
     name: 'Kẻ phản bội',
     nameEn: 'Minion',
@@ -265,6 +291,20 @@ const ROLES_DATA = [
       'Đên đầu tiên, Nanh sói cũng thức dậy cùng những Sói khác. Nanh sói sẽ tiếp tục ngủ vào các đêm tiếp theo, cho đến khi là con sói duy nhất.',
     script:
       'Nanh Sói hãy thức dậy để xem bạn là con sói cuối cùng hay không?',
+  },
+  {
+    id: 'white_wolf',
+    name: 'Sói Trắng',
+    nameEn: 'White Wolf',
+    team: 'other',
+    value: -2,
+    wakesAtNight: true,
+    nightOrder: 3.999,
+    phase: 'every',
+    ability:
+      'Bạn thức dậy cùng bầy sói. Mỗi 2 đêm, Sói Trắng có thể chọn 1 phe Sói để ăn thịt. Bạn chỉ thắng nếu là con sói cuối cùng và giết hết phe còn lại.',
+    script:
+      'Sói trắng hãy thức dậy, đêm nay bạn có muốn giết một con sói nào không.',
   },
   {
     id: 'vampire',
