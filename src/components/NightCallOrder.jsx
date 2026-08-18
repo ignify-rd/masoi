@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ROLE_BY_ID, TEAMS, PHASE_LABEL, NIGHT_EXTRAS } from '../data/roles.js'
+import { ROLES, ROLE_BY_ID, TEAMS, PHASE_LABEL, NIGHT_EXTRAS } from '../data/roles.js'
 import { saveMatch, WINNER_TEAM_IDS } from '../data/matchHistory.js'
 import { pickStory } from '../data/gameOpenings.js'
 
@@ -124,6 +124,33 @@ function buildNightSteps(selected, totalPlayers) {
 
   items.sort((a, b) => a.sortKey - b.sortKey)
   return items
+}
+
+const TEAM_ORDER = ['vampire', 'werewolf', 'village', 'other']
+
+function buildRoleListText(selected, totalPlayers) {
+  const chosen = ROLES.filter((role) => (selected[role.id] || 0) > 0).sort(
+    (a, b) => {
+      const teamA = TEAM_ORDER.indexOf(a.team)
+      const teamB = TEAM_ORDER.indexOf(b.team)
+      if (teamA !== teamB) return teamA - teamB
+
+      if (Boolean(b.recommended) !== Boolean(a.recommended)) {
+        return b.recommended ? 1 : -1
+      }
+
+      return b.value - a.value
+    },
+  )
+  const lines = chosen.map((role) => {
+    const count = selected[role.id]
+    return `${count}x ${role.name}`
+  })
+  const header =
+    totalPlayers > 0
+      ? `Danh sách vai trò (${totalPlayers} người chơi):`
+      : 'Danh sách vai trò:'
+  return [header, ...lines].join('\n')
 }
 
 function pickTwoRandomPlayers(totalPlayers) {
@@ -279,6 +306,7 @@ export default function NightCallOrder({
   const [hiddenSteps, setHiddenSteps] = useState(loadHidden)
   const [winner, setWinner] = useState('')
   const [story, setStory] = useState(() => pickStory(totalPlayers))
+  const [copied, setCopied] = useState(false)
 
   const steps = useMemo(
     () => buildNightSteps(selected, totalPlayers),
@@ -316,6 +344,30 @@ export default function NightCallOrder({
     })
   }
 
+  const handleReset = () => {
+    if (
+      !window.confirm(
+        'Đặt lại ván này? Toàn bộ ghi chú sẽ bị xóa và các bước đang ẩn sẽ hiện lại.',
+      )
+    ) {
+      return
+    }
+    setNotes({})
+    setHiddenSteps(new Set())
+  }
+
+  const handleCopyRoleList = async () => {
+    const text = buildRoleListText(selected, totalPlayers)
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      window.prompt('Sao chép danh sách bên dưới:', text)
+      return
+    }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const handleEndMatch = () => {
     if (!winner) {
       window.alert('Hãy chọn phe thắng trước khi lưu.')
@@ -349,9 +401,25 @@ export default function NightCallOrder({
     <section className="panel call-order">
       <div className="panel-head">
         <h2>Thứ tự gọi ban đêm</h2>
-        <button className="ghost-btn small" onClick={onBack}>
-          Quay lại
-        </button>
+        <div className="panel-head-actions">
+          <button
+            type="button"
+            className="ghost-btn small"
+            onClick={handleCopyRoleList}
+          >
+            {copied ? 'Đã copy!' : 'Copy danh sách vai trò'}
+          </button>
+          <button
+            type="button"
+            className="ghost-btn small"
+            onClick={handleReset}
+          >
+            Đặt lại
+          </button>
+          <button className="ghost-btn small" onClick={onBack}>
+            Quay lại
+          </button>
+        </div>
       </div>
 
       <div className="game-opening">
