@@ -47,6 +47,31 @@ export const NIGHT_EXTRAS = {
 
 const ROLES_DATA = [
   {
+    id: 'tanner',
+    name: 'Chán Đời',
+    nameEn: 'Tanner',
+    team: 'other',
+    value: -2,
+    wakesAtNight: true,
+    nightOrder: 20,
+    phase: 'every',
+    ability: 'Bạn chỉ thắng khi bị giết trong buổi sáng.',
+    script: 'Chán Đời hãy thức dậy để tôi ghi nhận vai trò của bạn.',
+  },
+  {
+    id: 'prince',
+    name: 'Hoàng Tử',
+    nameEn: 'Prince',
+    team: 'village',
+    value: 2,
+    wakesAtNight: true,
+    nightOrder: 0,
+    phase: 'every',
+    ability:
+      'Nếu bạn bị bình chọn để giết buổi sáng, bạn tiết lộ thân phận và được sống tiếp.',
+    script: 'Hoàng Tử hãy thức dậy để tôi ghi nhận vai trò của bạn.',
+  },
+  {
     id: 'lone_wolf',
     name: 'Sói đơn độc',
     nameEn: 'Lone Wolf',
@@ -299,7 +324,7 @@ const ROLES_DATA = [
     team: 'other',
     value: -2,
     wakesAtNight: true,
-    nightOrder: 3.999,
+    nightOrder: 3.99,
     phase: 'every',
     ability:
       'Bạn thức dậy cùng bầy sói. Mỗi 2 đêm, Sói Trắng có thể chọn 1 phe Sói để ăn thịt. Bạn chỉ thắng nếu là con sói cuối cùng và giết hết phe còn lại.',
@@ -386,7 +411,7 @@ const ROLES_DATA = [
     team: 'village',
     value: 9,
     wakesAtNight: true,
-    nightOrder: 6,
+    nightOrder: 100,
     phase: 'every',
     ability:
       'Mỗi đêm, chọn 1 người và biết chính xác chức năng cụ thể của họ.',
@@ -587,31 +612,6 @@ const ROLES_DATA = [
       'Mỗi đêm, chọn 1 người chơi tham gia vào giáo phái của bạn. Nếu tất cả người chơi còn sống đều trong giáo phái, bạn thắng.',
     script:
       'Chủ Giáo Phái hãy thức dậy. Bạn chọn 1 người chơi để tham gia vào giáo phái của bạn.',
-  },
-  {
-    id: 'prince',
-    name: 'Hoàng Tử',
-    nameEn: 'Prince',
-    team: 'village',
-    value: 2,
-    wakesAtNight: false,
-    nightOrder: 999,
-    phase: 'every',
-    ability:
-      'Nếu bạn bị bình chọn để giết buổi sáng, bạn tiết lộ thân phận và được sống tiếp.',
-    script: '',
-  },
-  {
-    id: 'tanner',
-    name: 'Chán Đời',
-    nameEn: 'Tanner',
-    team: 'other',
-    value: -2,
-    wakesAtNight: false,
-    nightOrder: 999,
-    phase: 'every',
-    ability: 'Bạn chỉ thắng khi bị giết trong buổi sáng.',
-    script: '',
   },
   {
     id: 'villager',
