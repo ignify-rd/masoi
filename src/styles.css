@@ -1693,6 +1693,36 @@ body {
   font-size: 13px;
 }
 
+.code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+}
+
+.code-input {
+  flex: 1;
+  min-width: 100px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.5px;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
+
 .suggest-btn {
   margin-left: auto;
   color: var(--accent-2);

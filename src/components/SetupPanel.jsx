@@ -10,6 +10,7 @@ import {
   SUGGEST_MIN_PLAYERS,
   suggestSetup,
 } from '../data/suggestSetup.js'
+import { decodeSetupCode, encodeSetupCode } from '../data/roleCode.js'
 import BalanceMeter from './BalanceMeter.jsx'
 
 const TEAM_ORDER = ['other', 'vampire', 'werewolf', 'village']
@@ -79,6 +80,40 @@ export default function SetupPanel({
 }) {
   const [expanded, setExpanded] = useState(false)
   const [suggestCount, setSuggestCount] = useState('9')
+  const [codeInput, setCodeInput] = useState('')
+  const [copiedCode, setCopiedCode] = useState(false)
+
+  const handleCopyCode = async () => {
+    const code = encodeSetupCode(selected)
+    if (!code) {
+      window.alert('Chưa có vai trò nào để tạo mã.')
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(code)
+    } catch {
+      window.prompt('Sao chép mã ván bên dưới:', code)
+      return
+    }
+    setCopiedCode(true)
+    setTimeout(() => setCopiedCode(false), 2000)
+  }
+
+  const handleLoadCode = () => {
+    const roles = decodeSetupCode(codeInput)
+    if (!roles || Object.keys(roles).length === 0) {
+      window.alert('Mã ván không hợp lệ.')
+      return
+    }
+    if (
+      totalPlayers > 0 &&
+      !window.confirm('Thay thế ván đấu hiện tại bằng ván từ mã này?')
+    ) {
+      return
+    }
+    onLoadSetup(roles)
+    setCodeInput('')
+  }
 
   const handleSuggest = () => {
     const count = Number(suggestCount)
@@ -192,6 +227,36 @@ export default function SetupPanel({
             onClick={handleSuggest}
           >
             Gợi ý
+          </button>
+        </div>
+
+        <div className="code-row">
+          <input
+            type="text"
+            className="code-input"
+            placeholder="Nhập mã ván..."
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleLoadCode()
+            }}
+            aria-label="Mã ván để tải setup"
+          />
+          <button
+            type="button"
+            className="ghost-btn small"
+            disabled={!codeInput.trim()}
+            onClick={handleLoadCode}
+          >
+            Tải mã
+          </button>
+          <button
+            type="button"
+            className="ghost-btn small"
+            disabled={entries.length === 0}
+            onClick={handleCopyCode}
+          >
+            {copiedCode ? 'Đã copy!' : 'Copy mã ván'}
           </button>
         </div>
 
