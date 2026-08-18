@@ -9,12 +9,30 @@ const PRESETS = [
 
 const FLASH_DURATION_MS = 6000
 
-/** Phát 3 tiếng bíp bằng Web Audio API (không cần file âm thanh). */
-function playBeep() {
+/**
+ * Mở khoá AudioContext trong một user gesture (tap nút) — bắt buộc trên
+ * mobile Safari/Chrome, nếu không âm thanh phát lúc hết giờ sẽ bị chặn
+ * im lặng vì không nằm trong user gesture.
+ */
+function unlockAudioContext(ctxRef) {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext
     if (!AudioCtx) return
-    const ctx = new AudioCtx()
+    if (!ctxRef.current) ctxRef.current = new AudioCtx()
+    if (ctxRef.current.state === 'suspended') ctxRef.current.resume()
+  } catch {
+    // Bỏ qua nếu trình duyệt không hỗ trợ.
+  }
+}
+
+/** Phát 3 tiếng bíp bằng Web Audio API (không cần file âm thanh). */
+function playBeep(ctxRef) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext
+    if (!AudioCtx) return
+    if (!ctxRef.current) ctxRef.current = new AudioCtx()
+    const ctx = ctxRef.current
+    if (ctx.state === 'suspended') ctx.resume()
     for (let i = 0; i < 3; i++) {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
@@ -29,7 +47,6 @@ function playBeep() {
       osc.start(start)
       osc.stop(start + 0.4)
     }
-    setTimeout(() => ctx.close(), 2000)
   } catch {
     // Trình duyệt chặn âm thanh — bỏ qua, vẫn còn nhấp nháy đỏ.
   }
@@ -66,6 +83,7 @@ export default function DiscussionTimer() {
 
   const endAtRef = useRef(null)
   const flashTimeoutRef = useRef(null)
+  const audioCtxRef = useRef(null)
 
   useEffect(() => {
     if (!running) return undefined
@@ -76,7 +94,7 @@ export default function DiscussionTimer() {
         setRemainingMs(0)
         setRunning(false)
         setFinished(true)
-        playBeep()
+        playBeep(audioCtxRef)
         clearTimeout(flashTimeoutRef.current)
         flashTimeoutRef.current = setTimeout(
           () => setFinished(false),
@@ -92,9 +110,16 @@ export default function DiscussionTimer() {
     return () => clearInterval(interval)
   }, [running])
 
-  useEffect(() => () => clearTimeout(flashTimeoutRef.current), [])
+  useEffect(
+    () => () => {
+      clearTimeout(flashTimeoutRef.current)
+      audioCtxRef.current?.close()
+    },
+    [],
+  )
 
   const startWith = (seconds) => {
+    unlockAudioContext(audioCtxRef)
     clearTimeout(flashTimeoutRef.current)
     setFinished(false)
     setDuration(seconds)
@@ -110,6 +135,7 @@ export default function DiscussionTimer() {
 
   const resume = () => {
     if (remainingMs <= 0) return
+    unlockAudioContext(audioCtxRef)
     endAtRef.current = Date.now() + remainingMs
     setRunning(true)
   }

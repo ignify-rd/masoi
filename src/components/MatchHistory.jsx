@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ROLE_BY_ID, TEAMS } from '../data/roles.js'
 import {
@@ -130,14 +130,47 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
   )
 }
 
+const SORT_OPTIONS = [
+  { value: 'date-desc', label: 'Mới nhất' },
+  { value: 'date-asc', label: 'Cũ nhất' },
+  { value: 'players-desc', label: 'Đông người nhất' },
+  { value: 'players-asc', label: 'Ít người nhất' },
+]
+
 export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
   const [open, setOpen] = useState(false)
   const [matches, setMatches] = useState(() => loadMatches())
+  const [winnerFilter, setWinnerFilter] = useState('all')
+  const [sortBy, setSortBy] = useState('date-desc')
   const matchCount = matches.length
 
   useEffect(() => {
     if (open) setMatches(loadMatches())
   }, [open])
+
+  const visibleMatches = useMemo(() => {
+    const filtered =
+      winnerFilter === 'all'
+        ? matches
+        : winnerFilter === 'none'
+          ? matches.filter((m) => !m.winner)
+          : matches.filter((m) => m.winner === winnerFilter)
+
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'date-asc':
+          return new Date(a.playedAt) - new Date(b.playedAt)
+        case 'players-desc':
+          return b.totalPlayers - a.totalPlayers
+        case 'players-asc':
+          return a.totalPlayers - b.totalPlayers
+        case 'date-desc':
+        default:
+          return new Date(b.playedAt) - new Date(a.playedAt)
+      }
+    })
+    return sorted
+  }, [matches, winnerFilter, sortBy])
 
   useEffect(() => {
     if (!open) return undefined
@@ -236,17 +269,54 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
                   Chưa có trận nào được lưu. Kết thúc ván để thêm vào lịch sử.
                 </p>
               ) : (
-                <ul className="history-list">
-                  {matches.map((match) => (
-                    <MatchHistoryItem
-                      key={match.id}
-                      match={match}
-                      onLoad={handleLoad}
-                      onDelete={handleDelete}
-                      onChangeWinner={handleChangeWinner}
-                    />
-                  ))}
-                </ul>
+                <>
+                  <div className="history-toolbar">
+                    <select
+                      className="history-filter-select"
+                      value={winnerFilter}
+                      onChange={(e) => setWinnerFilter(e.target.value)}
+                      aria-label="Lọc theo phe thắng"
+                    >
+                      <option value="all">Tất cả phe thắng</option>
+                      {WINNER_TEAM_IDS.map((teamId) => (
+                        <option key={teamId} value={teamId}>
+                          {TEAMS[teamId].label}
+                        </option>
+                      ))}
+                      <option value="none">Chưa ghi phe thắng</option>
+                    </select>
+                    <select
+                      className="history-filter-select"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      aria-label="Sắp xếp"
+                    >
+                      {SORT_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {visibleMatches.length === 0 ? (
+                    <p className="empty history-empty">
+                      Không có trận nào khớp với bộ lọc.
+                    </p>
+                  ) : (
+                    <ul className="history-list">
+                      {visibleMatches.map((match) => (
+                        <MatchHistoryItem
+                          key={match.id}
+                          match={match}
+                          onLoad={handleLoad}
+                          onDelete={handleDelete}
+                          onChangeWinner={handleChangeWinner}
+                        />
+                      ))}
+                    </ul>
+                  )}
+                </>
               )}
             </div>
           </>,

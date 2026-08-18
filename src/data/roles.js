@@ -322,6 +322,20 @@ const ROLES_DATA = [
       'Ma Cà Rồng hãy thức dậy, nhìn nhau và cùng chọn 1 người để cắn đêm nay.',
   },
   {
+    id: 'dracula',
+    name: 'Dracula',
+    nameEn: 'Dracula',
+    team: 'vampire',
+    value: -10,
+    wakesAtNight: true,
+    nightOrder: 4.1,
+    phase: 'every',
+    ability:
+      'Sau khi Ma Cà Rồng chọn mục tiêu. Bạn có thể biến con mồi trở thành Ma Cà Rồng nếu con mồi bị cắn thành công (1 ván 1 lần duy nhất).',
+    script:
+      'Dracula hãy thức dậy. Bạn có muốn biến con mồi trở thành Ma Cà Rồng không?',
+  },
+  {
     id: 'witch',
     name: 'Phù Thủy',
     nameEn: 'Witch',
