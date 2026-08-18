@@ -25,7 +25,11 @@ function unlockAudioContext(ctxRef) {
   }
 }
 
-/** Phát 3 tiếng bíp bằng Web Audio API (không cần file âm thanh). */
+const ALARM_BEEP_COUNT = 10
+const ALARM_BEEP_INTERVAL_S = 0.5
+const ALARM_BEEP_DURATION_S = 0.4
+
+/** Phát chuỗi tiếng cảnh báo dài (~5s) bằng Web Audio API (không cần file âm thanh). */
 function playBeep(ctxRef) {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext
@@ -33,23 +37,43 @@ function playBeep(ctxRef) {
     if (!ctxRef.current) ctxRef.current = new AudioCtx()
     const ctx = ctxRef.current
     if (ctx.state === 'suspended') ctx.resume()
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < ALARM_BEEP_COUNT; i++) {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.type = 'sine'
-      osc.frequency.value = 880
-      const start = ctx.currentTime + i * 0.45
+      // Xen kẽ 2 tần số để nghe rõ là báo động, không lẫn với tiếng khác.
+      osc.frequency.value = i % 2 === 0 ? 880 : 660
+      const start = ctx.currentTime + i * ALARM_BEEP_INTERVAL_S
       gain.gain.setValueAtTime(0.0001, start)
       gain.gain.exponentialRampToValueAtTime(0.4, start + 0.02)
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.35)
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        start + ALARM_BEEP_DURATION_S,
+      )
       osc.connect(gain)
       gain.connect(ctx.destination)
       osc.start(start)
-      osc.stop(start + 0.4)
+      osc.stop(start + ALARM_BEEP_DURATION_S)
     }
   } catch {
     // Trình duyệt chặn âm thanh — bỏ qua, vẫn còn nhấp nháy đỏ.
   }
+}
+
+/** Giữ màn hình sáng trong lúc đếm ngược — chỉ có tác dụng nếu người
+ * dùng không tự tay khóa máy; không giúp phát âm thanh khi màn hình tắt. */
+async function acquireWakeLock(wakeLockRef) {
+  try {
+    if (!('wakeLock' in navigator)) return
+    wakeLockRef.current = await navigator.wakeLock.request('screen')
+  } catch {
+    // Bị từ chối (VD: tab không active) — bỏ qua.
+  }
+}
+
+function releaseWakeLock(wakeLockRef) {
+  wakeLockRef.current?.release().catch(() => {})
+  wakeLockRef.current = null
 }
 
 function formatTime(ms) {
@@ -84,9 +108,19 @@ export default function DiscussionTimer() {
   const endAtRef = useRef(null)
   const flashTimeoutRef = useRef(null)
   const audioCtxRef = useRef(null)
+  const wakeLockRef = useRef(null)
 
   useEffect(() => {
     if (!running) return undefined
+
+    acquireWakeLock(wakeLockRef)
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        acquireWakeLock(wakeLockRef)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
 
     const tick = () => {
       const left = endAtRef.current - Date.now()
@@ -94,6 +128,7 @@ export default function DiscussionTimer() {
         setRemainingMs(0)
         setRunning(false)
         setFinished(true)
+        releaseWakeLock(wakeLockRef)
         playBeep(audioCtxRef)
         clearTimeout(flashTimeoutRef.current)
         flashTimeoutRef.current = setTimeout(
@@ -107,7 +142,11 @@ export default function DiscussionTimer() {
 
     const interval = setInterval(tick, 200)
     tick()
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      releaseWakeLock(wakeLockRef)
+    }
   }, [running])
 
   useEffect(
