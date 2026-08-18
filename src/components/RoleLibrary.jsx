@@ -43,29 +43,31 @@ export default function RoleLibrary({ selected, onAdd }) {
 
   return (
     <section className="panel">
-      <div className="panel-head">
-        <h2>Thư viện vai trò</h2>
-        <span className="muted">{roles.length} vai trò</span>
-      </div>
+      <div className="role-library-sticky">
+        <div className="panel-head">
+          <h2>Thư viện vai trò</h2>
+          <span className="muted">{roles.length} vai trò</span>
+        </div>
 
-      <div className="toolbar">
-        <input
-          className="search"
-          type="text"
-          placeholder="Tìm vai trò..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <div className="filters">
-          {FILTERS.map((f) => (
-            <button
-              key={f.id}
-              className={`chip ${filter === f.id ? 'active' : ''}`}
-              onClick={() => setFilter(f.id)}
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="toolbar">
+          <input
+            className="search"
+            type="text"
+            placeholder="Tìm vai trò..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="filters">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                className={`chip ${filter === f.id ? 'active' : ''}`}
+                onClick={() => setFilter(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
