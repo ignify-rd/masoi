@@ -25,11 +25,15 @@ function unlockAudioContext(ctxRef) {
   }
 }
 
-const ALARM_BEEP_COUNT = 10
-const ALARM_BEEP_INTERVAL_S = 0.5
-const ALARM_BEEP_DURATION_S = 0.4
+const ALARM_BEEP_COUNT = 16
+const ALARM_BEEP_INTERVAL_S = 0.3
+const ALARM_BEEP_DURATION_S = 0.22
 
-/** Phát chuỗi tiếng cảnh báo dài (~5s) bằng Web Audio API (không cần file âm thanh). */
+/**
+ * Phát chuỗi tiếng báo thức lớn, gấp gáp (~5s) bằng Web Audio API.
+ * Dùng sóng vuông (harsh, nhiều họa âm) thay vì sine cho giống chuông báo
+ * thức thật, kèm 1 oscillator bè quãng 5 để dày tiếng hơn.
+ */
 function playBeep(ctxRef) {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext
@@ -37,23 +41,28 @@ function playBeep(ctxRef) {
     if (!ctxRef.current) ctxRef.current = new AudioCtx()
     const ctx = ctxRef.current
     if (ctx.state === 'suspended') ctx.resume()
+
     for (let i = 0; i < ALARM_BEEP_COUNT; i++) {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
       // Xen kẽ 2 tần số để nghe rõ là báo động, không lẫn với tiếng khác.
-      osc.frequency.value = i % 2 === 0 ? 880 : 660
+      const baseFreq = i % 2 === 0 ? 1000 : 800
       const start = ctx.currentTime + i * ALARM_BEEP_INTERVAL_S
-      gain.gain.setValueAtTime(0.0001, start)
-      gain.gain.exponentialRampToValueAtTime(0.4, start + 0.02)
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        start + ALARM_BEEP_DURATION_S,
-      )
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start(start)
-      osc.stop(start + ALARM_BEEP_DURATION_S)
+
+      for (const freq of [baseFreq, baseFreq * 1.5]) {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'square'
+        osc.frequency.value = freq
+        gain.gain.setValueAtTime(0.0001, start)
+        gain.gain.exponentialRampToValueAtTime(0.35, start + 0.015)
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          start + ALARM_BEEP_DURATION_S,
+        )
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(start)
+        osc.stop(start + ALARM_BEEP_DURATION_S)
+      }
     }
   } catch {
     // Trình duyệt chặn âm thanh — bỏ qua, vẫn còn nhấp nháy đỏ.
