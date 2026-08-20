@@ -12,6 +12,7 @@ import {
 } from '../data/suggestSetup.js'
 import { decodeSetupCode, encodeSetupCode } from '../data/roleCode.js'
 import BalanceMeter from './BalanceMeter.jsx'
+import ThemePicker from './ThemePicker.jsx'
 
 const TEAM_ORDER = ['other', 'vampire', 'werewolf', 'village']
 
@@ -71,6 +72,8 @@ export default function SetupPanel({
   selected,
   totalPlayers,
   totalValue,
+  themeId,
+  onChangeTheme,
   onInc,
   onDec,
   onRemove,
@@ -84,7 +87,7 @@ export default function SetupPanel({
   const [copiedCode, setCopiedCode] = useState(false)
 
   const handleCopyCode = async () => {
-    const code = encodeSetupCode(selected)
+    const code = encodeSetupCode(selected, themeId)
     if (!code) {
       window.alert('Chưa có vai trò nào để tạo mã.')
       return
@@ -100,8 +103,8 @@ export default function SetupPanel({
   }
 
   const handleLoadCode = () => {
-    const roles = decodeSetupCode(codeInput)
-    if (!roles || Object.keys(roles).length === 0) {
+    const decoded = decodeSetupCode(codeInput)
+    if (!decoded || Object.keys(decoded.roles).length === 0) {
       window.alert('Mã ván không hợp lệ.')
       return
     }
@@ -111,7 +114,7 @@ export default function SetupPanel({
     ) {
       return
     }
-    onLoadSetup(roles)
+    onLoadSetup(decoded.roles, decoded.themeId)
     setCodeInput('')
   }
 
@@ -261,6 +264,12 @@ export default function SetupPanel({
         </div>
 
         {entries.length > 0 && <TeamBreakdown counts={teamCounts} />}
+
+        <ThemePicker
+          selected={selected}
+          themeId={themeId}
+          onChangeTheme={onChangeTheme}
+        />
 
         <BalanceMeter total={totalValue} />
 

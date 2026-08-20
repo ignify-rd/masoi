@@ -1,4 +1,5 @@
 import { ROLE_BY_ID, clampRoleCount } from './roles.js'
+import { THEME_BY_ID } from './themes.js'
 
 export const MATCHES_STORAGE_KEY = 'masoi.matches'
 
@@ -32,6 +33,11 @@ export function normalizeRolesFromMatch(roles) {
   )
 }
 
+/** Chủ đề của ván đã lưu (null nếu ván chơi mặc định hoặc chủ đề đã bị xóa). */
+export function normalizeThemeFromMatch(themeId) {
+  return themeId && THEME_BY_ID[themeId] ? themeId : null
+}
+
 export function formatMatchDate(iso) {
   if (!iso) return ''
   try {
@@ -47,7 +53,14 @@ export function formatMatchDate(iso) {
   }
 }
 
-export function saveMatch({ startedAt, totalPlayers, roles, notes = {}, winner }) {
+export function saveMatch({
+  startedAt,
+  totalPlayers,
+  roles,
+  notes = {},
+  winner,
+  themeId = null,
+}) {
   const match = {
     id: newId(),
     playedAt: new Date().toISOString(),
@@ -56,6 +69,7 @@ export function saveMatch({ startedAt, totalPlayers, roles, notes = {}, winner }
     roles: { ...roles },
     notes: { ...notes },
     winner: winner || null,
+    themeId: normalizeThemeFromMatch(themeId),
   }
 
   const matches = loadMatches()

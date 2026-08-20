@@ -5,8 +5,10 @@ import SetupPanel from './components/SetupPanel.jsx'
 import NightCallOrder from './components/NightCallOrder.jsx'
 import MatchHistory from './components/MatchHistory.jsx'
 import DiscussionTimer from './components/DiscussionTimer.jsx'
+import { THEME_BY_ID, getThemeValue, isThemeAvailable } from './data/themes.js'
 
 const STORAGE_KEY = 'masoi.setup'
+const THEME_STORAGE_KEY = 'masoi.theme'
 
 function loadSelected() {
   try {
@@ -25,14 +27,35 @@ function loadSelected() {
   }
 }
 
+function loadThemeId() {
+  try {
+    const raw = localStorage.getItem(THEME_STORAGE_KEY)
+    return raw && THEME_BY_ID[raw] ? raw : null
+  } catch {
+    return null
+  }
+}
+
 export default function App() {
   const [selected, setSelected] = useState(loadSelected)
+  const [themeId, setThemeId] = useState(loadThemeId)
   const [started, setStarted] = useState(false)
   const [startedAt, setStartedAt] = useState(null)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(selected))
   }, [selected])
+
+  useEffect(() => {
+    if (themeId) localStorage.setItem(THEME_STORAGE_KEY, themeId)
+    else localStorage.removeItem(THEME_STORAGE_KEY)
+  }, [themeId])
+
+  // Bỏ chủ đề khi setup không còn thỏa yêu cầu vai bắt buộc.
+  useEffect(() => {
+    const theme = THEME_BY_ID[themeId]
+    if (theme && !isThemeAvailable(theme, selected)) setThemeId(null)
+  }, [themeId, selected])
 
   const add = (id) =>
     setSelected((s) => {
@@ -60,14 +83,17 @@ export default function App() {
 
   const clear = () => setSelected({})
 
-  const loadSetup = (roles) => setSelected(roles)
+  const loadSetup = (roles, nextThemeId = null) => {
+    setSelected(roles)
+    setThemeId(THEME_BY_ID[nextThemeId] ? nextThemeId : null)
+  }
 
   const totalPlayers = useMemo(
     () => Object.values(selected).reduce((a, b) => a + b, 0),
     [selected],
   )
 
-  const totalValue = useMemo(
+  const rolesValue = useMemo(
     () =>
       Object.entries(selected).reduce(
         (sum, [id, c]) => sum + (ROLE_BY_ID[id]?.value || 0) * c,
@@ -75,6 +101,10 @@ export default function App() {
       ),
     [selected],
   )
+
+  const totalValue = rolesValue + getThemeValue(themeId, selected)
+
+  const theme = THEME_BY_ID[themeId] || null
 
   return (
     <div className="app">
@@ -100,6 +130,7 @@ export default function App() {
         <main className="app-main single">
           <NightCallOrder
             selected={selected}
+            theme={theme}
             totalPlayers={totalPlayers}
             startedAt={startedAt}
             onBack={() => {
@@ -120,6 +151,8 @@ export default function App() {
             selected={selected}
             totalPlayers={totalPlayers}
             totalValue={totalValue}
+            themeId={themeId}
+            onChangeTheme={setThemeId}
             onInc={inc}
             onDec={dec}
             onRemove={remove}
