@@ -54,7 +54,7 @@ const THEMES_DATA = [
     name: 'Toà Án Dị Giáo',
     description:
       'Giáo hội giám sát mọi phiên xử: người bị treo cổ luôn bị lật bài, quản trò công bố vai trò của họ cho cả làng.',
-    value: 5,
+    value: 3,
     favors: 'village',
     requires: [],
   },
@@ -144,7 +144,7 @@ const THEMES_DATA = [
     id: 'village_militia',
     name: 'Dân Quân Tự Vệ',
     description:
-      'Làng đông người và đang giận dữ: ngày đầu tiên làng được treo cổ 2 người (bỏ phiếu hai lượt liên tiếp).',
+      'Làng đông người và đang giận dữ: Chọn 1 buổi sáng trong game, làng được treo cổ 2 người (bỏ phiếu hai lượt liên tiếp).',
     value: 3,
     favors: 'village',
     requires: [{ roles: ['villager'], min: 3, label: 'Có ít nhất 3 Dân Làng' }],
@@ -163,10 +163,181 @@ const THEMES_DATA = [
     name: 'Chiếu Chỉ Hoàng Gia',
     description:
       'Hoàng Tử nắm quyền phán xử: sau khi lộ thân phận, mỗi ngày phiếu bầu của Hoàng Tử được tính gấp đôi.',
-    value: 3,
+    value: 1,
     favors: 'village',
     requires: [{ roles: ['prince'], min: 1, label: 'Có Hoàng Tử' }],
   },
+  {
+    id: 'death_note',
+    name: 'Sổ Tang',
+    description:
+      'Làng ghi lại lời trăng trối: mỗi người chết ban đêm được để lại MỘT câu trước khi rời game. Quản trò sẽ quyết định câu đấy có hợp pháp hay không, chỉ được nói về người khác, không được khai vai của mình. Phe sói sẽ được quyền xóa lời trăn trối của người bị cắn 1 lần 1 game.',
+    value: 3,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'creeping_curse',
+    name: 'Lời Nguyền Lan Rộng',
+    description:
+      'Lời nguyền lan theo máu: Kẻ Bị Nguyền hoá sói khi bị cắn HOẶC khi ngồi cạnh (trái/phải, tính trong số người còn sống) nạn nhân bị Sói cắn đêm đó.',
+    value: -3,
+    favors: 'werewolf',
+    requires: [{ roles: ['cursed'], min: 1, label: 'Có Kẻ Bị Nguyền' }],
+  },
+  {
+    id: 'reverse_trial',
+    name: 'Phiên Toà Ngược',
+    description:
+      'Bị cáo được quyền có luật sư: người bị treo cổ chọn một người bào chữa, người này phản biện hộ người bị treo cổ. Nếu bị cáo bị treo thì luật sư mất quyền vote ngày hôm sau; bị cáo thoát thì luật sư được tính 2 vote trong ngày hôm sau.',
+    value: 0,
+    favors: 'other',
+    requires: [],
+  },
+  {
+    id: 'sheriff',
+    name: 'Cảnh Sát Trưởng',
+    description:
+      'Làng lập lại trật tự: ngày đầu tiên cả làng bầu công khai một Cảnh Sát Trưởng. Từ đó mọi phiên vote treo cổ nếu hoà phiếu thì Cảnh Sát Trưởng quyết định ai bị treo. Cảnh Sát Trưởng chết thì làng bầu người mới ngay trong ngày hôm đó.',
+    value: 1,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'first_dawn',
+    name: 'Bình Minh Đầu Tiên',
+    description:
+      'Ván mở màn giữa ban ngày: Trò chơi bắt đầu vào ban ngày thay vì ban đêm. Làng thảo luận và treo cổ một người trước khi đêm thật sự bắt đầu.',
+    value: 1,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'undying_village',
+    name: 'Làng Bất Tử',
+    description:
+      'Không ai thật sự rời làng: người bị cắn hay bị treo cổ vẫn ngồi lại, vẫn nói và vote như thường, chỉ mất năng lực của vai mình. Phe Sói / Ma Cà Rồng chỉ mất quyền cắn khi cả phe đã chết. Phù Thủy không được biết ai bị cắn, chỉ chọn cứu hay không cứu nạn nhân đêm đó. Quản trò âm thầm ghi ai đã chết thật và tự tuyên bố khi ván kết thúc.',
+    value: 3,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'night_watch',
+    name: 'Đèn Canh Đêm',
+    description:
+      'Làng cắt cử người thức gác: mỗi đêm trước khi trời tối, cả làng công khai chọn một người gác đêm. Người đó không thể bị giết trong đêm ấy, nhưng cũng không được dùng năng lực ban đêm của mình.',
+    value: 2,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'village_ledger',
+    name: 'Nhật Ký Làng',
+    description:
+      'Làng ghi biên bản mọi lời khai: ai đã công khai nhận mình là một vai cụ thể thì quản trò ghi lại, và người đó không được đổi lời khai cho tới hết ván. Nói mập mờ không tính là khai, nhưng đã nêu tên vai thì bị ghi.',
+    value: 2,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'rumor_mill',
+    name: 'Lời Đồn',
+    description:
+      'Tin đồn bay khắp làng: mỗi sáng quản trò đưa kín cho một người còn sống ngẫu nhiên một mẩu giấy ghi phe của một người còn sống ngẫu nhiên khác. Người nhận được toàn quyền giữ kín, công bố hay bịa lại.',
+    value: 2,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'secret_ballot',
+    name: 'Bỏ Phiếu Kín',
+    description:
+      'Làng bỏ phiếu bằng giấy: mỗi người ghi kín tên người mình muốn treo cổ, quản trò chỉ công bố kết quả cuối cùng chứ không nói ai đã bầu cho ai.',
+    value: -2,
+    favors: 'werewolf',
+    requires: [],
+  },
+  {
+    id: 'curfew',
+    name: 'Lệnh Giới Nghiêm',
+    description:
+      'Làng sợ bóng tối nên họp vội: mỗi ngày cả làng chỉ được thảo luận đúng 3 phút rồi phải vote ngay, không gia hạn.',
+    value: -2,
+    favors: 'werewolf',
+    requires: [],
+  },
+  {
+    id: 'vow_of_silence',
+    name: 'Lời Thề Im Lặng',
+    description:
+      'Kẻ bị nghi phải câm lặng: sau vòng vote đầu tiên, người nhận nhiều phiếu nhất không được nói thêm câu nào cho tới khi cả làng vote lần cuối.',
+    value: -3,
+    favors: 'werewolf',
+    requires: [],
+  },
+  {
+    id: 'distant_howl',
+    name: 'Tiếng Hú Xa',
+    description:
+      'Bầy Sói đánh hơi được sức mạnh: đêm 1 quản trò cho bầy Sói biết những ai có năng lực ban đêm, nhưng không cho biết đó là vai gì.',
+    value: -5,
+    favors: 'werewolf',
+    requires: [],
+  },
+  {
+    id: 'endless_night',
+    name: 'Đêm Vô Tận',
+    description:
+      'Mặt trời gần như không mọc: cứ sau mỗi ngày lại có hai đêm liên tiếp, bầy Sói được cắn ở cả hai đêm rồi làng mới được họp lại.',
+    value: -7,
+    favors: 'werewolf',
+    requires: [],
+  },
+  {
+    id: 'talisman',
+    name: 'Bùa Hộ Mệnh',
+    description:
+      'Cả làng đeo bùa: đầu ván mỗi người được phát một lá bùa dùng một lần. Ai cũng sẽ có 2 mạng. Nếu bị cắn hoặc bị treo cổ, người đó tiếp tục sống tiếp như không có chuyện gì xảy ra.',
+    value: 6,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'body_count',
+    name: 'Đếm Xác',
+    description:
+      'Làng điểm danh mỗi sáng: quản trò công bố số lượng vai phe Sói và phe Ma Cà Rồng còn sống, chỉ con số chứ không nói danh tính.',
+    value: 4,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'holy_water',
+    name: 'Nước Thánh',
+    description:
+      'Làng còn giữ một bình nước thánh: một lần duy nhất trong cả ván, nếu cả làng đồng thuận chỉ vào một người thì quản trò công bố công khai người đó thuộc phe nào.',
+    value: 4,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'double_trial',
+    name: 'Toà Án Kép',
+    description:
+      'Toà xử không nghỉ: mỗi ngày làng treo cổ hai người thay vì một, bằng cách bỏ phiếu hai lượt liên tiếp.',
+    value: 5,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'great_storm',
+    name: 'Cơn Bão',
+    description:
+      'Một đêm nào đó bão sẽ ập xuống: quản trò bí mật chọn trước một đêm trong ván, đêm ấy mọi năng lực ban đêm đều thất bại, kể cả đòn cắn. Sáng ra không ai chết và không ai biết mình đã bị bão chặn.',
+    value: 0,
+    favors: 'other',
+    requires: [],
+  }
 ]
 
 export const THEMES = THEMES_DATA.map((theme) => ({
