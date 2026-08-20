@@ -7,8 +7,10 @@ import {
   formatMatchDate,
   loadMatches,
   normalizeRolesFromMatch,
+  normalizeThemeFromMatch,
   updateMatchWinner,
 } from '../data/matchHistory.js'
+import { THEME_BY_ID } from '../data/themes.js'
 
 function HistoryIcon() {
   return (
@@ -34,6 +36,7 @@ function HistoryIcon() {
 function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
   const [editingWinner, setEditingWinner] = useState(false)
   const winnerTeam = match.winner ? TEAMS[match.winner] : null
+  const theme = THEME_BY_ID[normalizeThemeFromMatch(match.themeId)] || null
   const roleSummary = Object.entries(match.roles || {})
     .filter(([, c]) => c > 0)
     .map(([id, c]) => {
@@ -53,6 +56,15 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
             {match.totalPlayers} người
           </span>
         </div>
+        {theme && (
+          <span
+            className="team-tag small history-item-theme"
+            style={{ '--team-color': TEAMS[theme.favors]?.color ?? '#eab308' }}
+            title={theme.description}
+          >
+            {theme.name} ({theme.value > 0 ? `+${theme.value}` : theme.value})
+          </span>
+        )}
         {editingWinner ? (
           <div className="history-winner-edit">
             {WINNER_TEAM_IDS.map((teamId) => {
@@ -202,7 +214,7 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
       return
     }
 
-    onLoadSetup(roles)
+    onLoadSetup(roles, normalizeThemeFromMatch(match.themeId))
     setOpen(false)
   }
 
