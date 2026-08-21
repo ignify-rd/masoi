@@ -258,15 +258,6 @@ const THEMES_DATA = [
     requires: [],
   },
   {
-    id: 'curfew',
-    name: 'Lệnh Giới Nghiêm',
-    description:
-      'Làng sợ bóng tối nên họp vội: mỗi ngày cả làng chỉ được thảo luận đúng 3 phút rồi phải vote ngay, không gia hạn.',
-    value: -2,
-    favors: 'werewolf',
-    requires: [],
-  },
-  {
     id: 'vow_of_silence',
     name: 'Lời Thề Im Lặng',
     description:
