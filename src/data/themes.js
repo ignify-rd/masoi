@@ -249,24 +249,6 @@ const THEMES_DATA = [
     requires: [],
   },
   {
-    id: 'secret_ballot',
-    name: 'Bỏ Phiếu Kín',
-    description:
-      'Làng bỏ phiếu bằng giấy: mỗi người ghi kín tên người mình muốn treo cổ, quản trò chỉ công bố kết quả cuối cùng chứ không nói ai đã bầu cho ai.',
-    value: -2,
-    favors: 'werewolf',
-    requires: [],
-  },
-  {
-    id: 'vow_of_silence',
-    name: 'Lời Thề Im Lặng',
-    description:
-      'Kẻ bị nghi phải câm lặng: sau vòng vote đầu tiên, người nhận nhiều phiếu nhất không được nói thêm câu nào cho tới khi cả làng vote lần cuối.',
-    value: -3,
-    favors: 'werewolf',
-    requires: [],
-  },
-  {
     id: 'distant_howl',
     name: 'Tiếng Hú Xa',
     description:
