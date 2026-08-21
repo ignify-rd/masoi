@@ -328,7 +328,19 @@ const THEMES_DATA = [
     value: 0,
     favors: 'other',
     requires: [],
-  }
+  },
+  {
+    id: 'holy_antidote',
+    name: 'Thuốc Giải Thánh',
+    description:
+      'Phù Thủy giữ được thuốc giải cho vết cắn ma cà rồng: khi có người chết vào buổi sáng vì Ma Cà Rồng, Phù Thủy được quyền lật bài công khai và dùng bình cứu ngay tại chỗ để cứu người đó.',
+    value: 1,
+    favors: 'village',
+    requires: [
+      { roles: ['witch'], min: 1, label: 'Có Phù Thủy' },
+      { team: 'vampire', min: 1, label: 'Có ít nhất 1 vai phe Ma cà rồng' },
+    ],
+  },
 ]
 
 export const THEMES = THEMES_DATA.map((theme) => ({
