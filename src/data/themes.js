@@ -288,7 +288,7 @@ const THEMES_DATA = [
     id: 'holy_water',
     name: 'Nước Thánh',
     description:
-      'Làng còn giữ một bình nước thánh: một lần duy nhất trong cả ván, nếu cả làng đồng thuận chỉ vào một người thì quản trò công bố công khai người đó thuộc phe nào.',
+      'Làng còn giữ một bình nước thánh: một lần duy nhất trong cả ván, nếu quá bán số người còn sống cùng chỉ vào một người thì quản trò công bố công khai người đó thuộc phe nào.',
     value: 4,
     favors: 'village',
     requires: [],
@@ -322,6 +322,51 @@ const THEMES_DATA = [
       { roles: ['witch'], min: 1, label: 'Có Phù Thủy' },
       { team: 'vampire', min: 1, label: 'Có ít nhất 1 vai phe Ma cà rồng' },
     ],
+  },
+  {
+    id: 'blood_thirst',
+    name: 'Cơn Khát',
+    description:
+      'Bầy Sói biết nhịn: nếu đêm nào bầy Sói tự nguyện không cắn ai thì đêm hôm sau chúng được cắn hai người.',
+    value: -2,
+    favors: 'werewolf',
+    requires: [],
+  },
+  {
+    id: 'tidal_moon',
+    name: 'Trăng Định Kỳ',
+    description:
+      'Trăng lên theo chu kỳ: các đêm chẵn bầy Sói được cắn hai người, các đêm lẻ chúng hoàn toàn không được cắn ai.',
+    value: 0,
+    favors: 'other',
+    requires: [],
+  },
+  {
+    id: 'last_stand',
+    name: 'Sói Cùng Đường',
+    description:
+      'Con sói cuối cùng liều mạng: khi phe Sói chỉ còn đúng một thành viên sống sót, một lần duy nhất trong ván nó được chọn một đêm để cắn hai người thay vì một. Nó tự chọn đêm nào, làng không được báo trước.',
+    value: -2,
+    favors: 'werewolf',
+    requires: [{ team: 'werewolf', min: 1, label: 'Có ít nhất 1 vai phe Sói' }],
+  },
+  {
+    id: 'white_list',
+    name: 'Danh Sách Trắng',
+    description:
+      'Làng lập danh sách người trong sạch: mỗi sáng quản trò công bố tên một người thuộc phe Dân làng, mỗi người chỉ được công bố một lần trong ván. Một lần duy nhất, bầy Sói được thay tên hôm đó bằng tên một con sói mà không tốn lượt cắn, và làng không có cách nào biết ngày nào bị thay.',
+    value: 2,
+    favors: 'village',
+    requires: [],
+  },
+  {
+    id: 'bite_mark',
+    name: 'Dấu Răng',
+    description:
+      '
+    value: 3,
+    favors: 'village',
+    requires: [{ team: 'werewolf', min: 1, label: 'Có ít nhất 1 vai phe Sói' }],
   },
 ]
 
