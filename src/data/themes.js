@@ -363,7 +363,7 @@ const THEMES_DATA = [
     id: 'bite_mark',
     name: 'Dấu Răng',
     description:
-      '
+      'Vết cắn để lại dấu chỉ hướng: mỗi sáng quản trò công bố khoảng cách từ nạn nhân đêm qua tới con Sói gần nhất là chẵn hay lẻ, tính theo số ghế trong vòng tròn người còn sống và theo chiều ngắn hơn. Nếu chính nạn nhân là Sói thì khoảng cách tính là 0, tức chẵn.',
     value: 3,
     favors: 'village',
     requires: [{ team: 'werewolf', min: 1, label: 'Có ít nhất 1 vai phe Sói' }],
