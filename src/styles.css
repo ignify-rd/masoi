@@ -1681,6 +1681,16 @@ body {
   border-color: var(--accent-2);
 }
 
+.theme-memo {
+  margin-top: 12px;
+}
+
+.theme-memo-input {
+  resize: vertical;
+  min-height: 44px;
+  line-height: 1.45;
+}
+
 .step-hide-btn {
   margin-left: auto;
   padding: 4px 10px;

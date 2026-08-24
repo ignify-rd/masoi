@@ -31,12 +31,15 @@ function loadHidden() {
 /** Khóa ổn định cho ghi chú từng bước (không phụ thuộc thứ tự hiển thị). */
 function getStepKey(step) {
   if (step.kind === 'close') {
-    const base = step.role?.id ?? `extra:${step.extra?.id}`
+    const base =
+      step.role?.id ??
+      (step.themeStep ? `theme:${step.themeStep.id}` : `extra:${step.extra?.id}`)
     const sub = step.sub?.name ? `:sub:${step.sub.name}` : ''
     return `close:${base}${sub}`
   }
   if (step.kind === 'sub') return `sub:${step.role.id}:${step.sub.name}`
   if (step.kind === 'extra') return `extra:${step.extra.id}`
+  if (step.kind === 'theme') return `theme:${step.themeStep.id}`
   return `role:${step.role.id}`
 }
 
@@ -45,10 +48,12 @@ function getStepPhase(step) {
     if (step.sub) return step.sub.phase
     if (step.role) return step.role.phase
     if (step.extra) return step.extra.phase
+    if (step.themeStep) return step.themeStep.phase
     return 'every'
   }
   if (step.kind === 'sub') return step.sub.phase
   if (step.kind === 'extra') return step.extra.phase
+  if (step.kind === 'theme') return step.themeStep.phase
   return step.role.phase
 }
 
@@ -58,6 +63,7 @@ function getVisibilityKey(step) {
     if (step.sub) return `sub:${step.role.id}:${step.sub.name}`
     if (step.role) return `role:${step.role.id}`
     if (step.extra) return `extra:${step.extra.id}`
+    if (step.themeStep) return `theme:${step.themeStep.id}`
   }
   return getStepKey(step)
 }
@@ -66,6 +72,7 @@ function getStepLabel(step) {
   if (step.kind === 'close') return 'Đóng mắt'
   if (step.kind === 'sub') return step.sub.name
   if (step.kind === 'extra') return step.extra.name
+  if (step.kind === 'theme') return step.themeStep.name
   return step.role.name
 }
 
@@ -77,7 +84,7 @@ function shouldIncludeExtra(extra, selected, totalPlayers) {
 }
 
 /** Mở rộng danh sách role thành các bước gọi đêm (kèm bước phụ / bước bổ sung). */
-function buildNightSteps(selected, totalPlayers) {
+function buildNightSteps(selected, totalPlayers, theme) {
   const roles = Object.keys(selected)
     .filter((id) => (selected[id] || 0) > 0)
     .map((id) => ROLE_BY_ID[id])
@@ -118,6 +125,18 @@ function buildNightSteps(selected, totalPlayers) {
         kind: 'close',
         extra,
         script: extra.scriptClose,
+      })
+    }
+  }
+
+  for (const themeStep of theme?.nightSteps ?? []) {
+    items.push({ sortKey: themeStep.nightOrder, kind: 'theme', themeStep })
+    if (themeStep.scriptClose) {
+      items.push({
+        sortKey: themeStep.nightOrder + 0.01,
+        kind: 'close',
+        themeStep,
+        script: themeStep.scriptClose,
       })
     }
   }
@@ -206,26 +225,46 @@ function StepCard({
 
   const isSub = step.kind === 'sub'
   const isExtra = step.kind === 'extra'
+  const isTheme = step.kind === 'theme'
+  const themeStep = step.themeStep
   const role = step.role
   const sub = step.sub
   const extra = step.extra
   const team = role ? TEAMS[role.team] : null
-  const name = isExtra ? extra.name : isSub ? sub.name : role.name
-  const script = isExtra ? extra.script : isSub ? sub.script : role.script
-  const moderatorNote = isExtra ? extra.moderatorNote : isSub ? sub.moderatorNote : null
+  const name = isTheme
+    ? themeStep.name
+    : isExtra
+      ? extra.name
+      : isSub
+        ? sub.name
+        : role.name
+  const script = isTheme
+    ? themeStep.script
+    : isExtra
+      ? extra.script
+      : isSub
+        ? sub.script
+        : role.script
+  const moderatorNote = isTheme
+    ? themeStep.moderatorNote
+    : isExtra
+      ? extra.moderatorNote
+      : isSub
+        ? sub.moderatorNote
+        : null
   const isCupid = step.kind === 'role' && role?.id === 'cupid'
-  const memoPlaceholder = isExtra
-    ? 'Ghi chú cho bước này...'
-    : `VD: ${name} — Minh, Lan...`
+  const memoPlaceholder =
+    isExtra || isTheme ? 'Ghi chú cho bước này...' : `VD: ${name} — Minh, Lan...`
 
   return (
-    <li className={`step ${isSub || isExtra ? 'step-sub' : ''}`}>
+    <li className={`step ${isSub || isExtra || isTheme ? 'step-sub' : ''}`}>
       <span className="step-no">{index}</span>
       <div className="step-body">
         <div className="step-title">
-          {(isSub || isExtra) && <span className="sub-arrow">↳</span>}
+          {(isSub || isExtra || isTheme) && <span className="sub-arrow">↳</span>}
           <span className="step-name">{name}</span>
-          {!isSub && !isExtra && team && (
+          {isTheme && <span className="phase-tag small condition">Chủ đề</span>}
+          {!isSub && !isExtra && !isTheme && team && (
             <span
               className="team-tag small"
               style={{ '--team-color': team.color }}
@@ -309,8 +348,8 @@ export default function NightCallOrder({
   const [copied, setCopied] = useState(false)
 
   const steps = useMemo(
-    () => buildNightSteps(selected, totalPlayers),
-    [selected, totalPlayers],
+    () => buildNightSteps(selected, totalPlayers, theme),
+    [selected, totalPlayers, theme],
   )
 
   useEffect(() => {
@@ -448,6 +487,16 @@ export default function NightCallOrder({
               </>
             )}
           </p>
+          <label className="step-memo theme-memo">
+            <span className="step-memo-label">Ghi chú của quản trò</span>
+            <textarea
+              className="step-memo-input theme-memo-input"
+              rows={2}
+              placeholder="Ghi lại luật riêng, ai đã dùng gì, nhắc việc..."
+              value={notes[`theme:${theme.id}`] || ''}
+              onChange={(e) => setNote(`theme:${theme.id}`, e.target.value)}
+            />
+          </label>
         </div>
       )}
 

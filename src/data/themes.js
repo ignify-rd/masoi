@@ -25,6 +25,19 @@ const THEMES_DATA = [
   {
     id: 'distant_howl',
     name: 'Tiếng Hú Xa',
+    nightSteps: [
+      {
+        id: 'distant_howl_reveal',
+        nightOrder: 900.99,
+        phase: 'night1',
+        name: 'Tiếng Hú Xa — Sói đánh hơi',
+        script:
+          'Bầy Sói hãy mở mắt một lần nữa. Tôi sẽ chỉ ra những người có năng lực ban đêm.',
+        moderatorNote:
+          'Gọi ở cuối đêm 1, sau khi tất cả các vai khác đã ngủ lại. Chỉ tay lần lượt vào từng người có năng lực ban đêm — KHÔNG nói đó là vai gì',
+        scriptClose: 'Bầy Sói hãy nhắm mắt lại và ngủ tiếp.',
+      },
+    ],
     description:
       'Bầy Sói đánh hơi được sức mạnh: đêm 1 quản trò cho bầy Sói biết những ai có năng lực ban đêm, nhưng không cho biết đó là vai gì.',
     value: -5,
@@ -97,7 +110,7 @@ const THEMES_DATA = [
     id: 'red_thread',
     name: 'Sợi Chỉ Đỏ',
     description:
-      'Lời thề tình nhân mạnh hơn lời thề với làng: Cặp đôi luôn tách thành phe thứ 3 (bất kể số người chơi) và thắng nếu là hai người cuối cùng còn sống.',
+      'Lời thề tình nhân mạnh hơn lời thề với làng: Cặp đôi luôn tách thành phe thứ 3.',
     value: -2,
     favors: 'other',
     requires: [{ roles: ['cupid'], min: 1, label: 'Có Thần Tình Yêu' }],
@@ -124,7 +137,7 @@ const THEMES_DATA = [
     id: 'last_stand',
     name: 'Sói Cùng Đường',
     description:
-      'Con sói cuối cùng liều mạng: khi phe Sói chỉ còn đúng một thành viên sống sót, một lần duy nhất trong ván nó được chọn một đêm để cắn hai người thay vì một. Nó tự chọn đêm nào, làng không được báo trước.',
+      'Con sói cuối cùng liều mạng: khi phe Sói chỉ còn đúng một thành viên sống sót, một lần duy nhất trong ván nó được chọn một đêm để cắn hai người thay vì một.',
     value: -2,
     favors: 'werewolf',
     requires: [{ team: 'werewolf', min: 1, label: 'Có ít nhất 1 vai phe Sói' }],
@@ -177,6 +190,28 @@ const THEMES_DATA = [
   {
     id: 'wolf_leader',
     name: 'Sói Trưởng',
+    nightSteps: [
+      {
+        id: 'wolf_leader_pick',
+        nightOrder: 3.05,
+        phase: 'night1',
+        name: 'Sói Trưởng — chọn đầu đàn',
+        script:
+          'Bầy Sói hãy thống nhất chỉ vào một con trong bầy để làm Sói Trưởng.',
+        moderatorNote:
+          'Gọi ngay sau lượt cắn của bầy Sói trong đêm 1, khi cả bầy còn đang mở mắt. Ghi lại ai là đầu đàn. Nếu đầu đàn chết, bầy Sói mất quyền cắn trong đêm hôm đó.',
+      },
+      {
+        id: 'wolf_leader_peek',
+        nightOrder: 3.06,
+        phase: 'every',
+        name: 'Sói Trưởng — đổi cắn lấy soi',
+        script:
+          'Sói Trưởng giơ tay nếu muốn đổi: không giết mục tiêu này nữa, mà biết vai của họ.',
+        moderatorNote:
+          'Chỉ hỏi SAU khi cả bầy đã chốt mục tiêu. Nếu đầu đàn giơ tay: mục tiêu sống, quản trò cho cả bầy biết vai của mục tiêu đó. Nếu không giơ tay thì cắn như bình thường.',
+      },
+    ],
     description:
       'Bầy sói có kẻ cầm đầu: đêm 1 bầy Sói tự chọn một con làm đầu đàn. Mỗi đêm sau khi cả bầy đã chỉ mục tiêu, riêng đầu đàn được giơ tay để đổi - không giết nữa mà quản trò cho bầy biết vai của chính mục tiêu đó. Nếu đầu đàn chết, bầy sói mất quyền cắn đêm hôm đó.',
     value: 0,
@@ -195,6 +230,19 @@ const THEMES_DATA = [
   {
     id: 'forest_journey',
     name: 'Chuyến Đi Rừng',
+    nightSteps: [
+      {
+        id: 'forest_journey_item',
+        nightOrder: 0.5,
+        phase: 'every',
+        name: 'Chuyến Đi Rừng — người vừa về làng',
+        script:
+          'Người vừa đi rừng về hãy thức dậy. Giơ tay nếu bạn muốn dùng món đồ của mình đêm nay.',
+        moderatorNote:
+          'Gọi ở đầu đêm, chỉ đêm mà có người vừa từ rừng trở về. Nếu họ dùng Áo Choàng Tàng Hình / La Bàn Hỏng / Mảnh Gương Vỡ thì xử lý ngay ở bước này và nhớ đánh dấu lá bài đã hết.',
+        scriptClose: 'Người đi rừng hãy nhắm mắt lại và ngủ tiếp.',
+      },
+    ],
     description:
       'Mụ Già đuổi ai thì người đó lang thang trong rừng cả ngày; khi trở về, quản trò bí mật trao cho họ một lá bốc ngẫu nhiên từ bộ 10 lá. Cả làng biết họ có mang thứ gì về nhưng chỉ mình họ biết đó là gì, và hết bài thì thôi.\n' +
       '1. Khẩu Súng Rỉ Sét: một lần, ban ngày, công khai bắn chết một người.\n' +
@@ -296,6 +344,15 @@ const THEMES_DATA = [
     requires: [],
   },
   {
+    id: 'village_militia',
+    name: 'Dân Quân Tự Vệ',
+    description:
+      'Làng đông người và đang giận dữ: 1 lần trong ván, làng được treo cổ 2 người (bỏ phiếu hai lượt liên tiếp).',
+    value: 2,
+    favors: 'village',
+    requires: [],
+  },
+  {
     id: 'white_list',
     name: 'Danh Sách Trắng',
     description:
@@ -352,19 +409,23 @@ const THEMES_DATA = [
     requires: [],
   },
   {
-    id: 'village_militia',
-    name: 'Dân Quân Tự Vệ',
-    description:
-      'Làng đông người và đang giận dữ: Chọn 1 buổi sáng trong game, làng được treo cổ 2 người (bỏ phiếu hai lượt liên tiếp).',
-    value: 3,
-    favors: 'village',
-    requires: [{ roles: ['villager'], min: 3, label: 'Có ít nhất 3 Dân Làng' }],
-  },
-  {
     id: 'death_note',
     name: 'Sổ Tang',
+    nightSteps: [
+      {
+        id: 'death_note_erase',
+        nightOrder: 0.6,
+        phase: 'every',
+        name: 'Sổ Tang — Sói xóa lời trăn trối',
+        script:
+          'Bầy Sói hãy thức dậy. Đây là lời trăn trối đang chờ công bố — giơ tay nếu bầy muốn xóa nó.',
+        moderatorNote:
+          'Gọi ở đầu đêm, chỉ khi đang có lời trăn trối chưa công bố. Cả ván bầy Sói chỉ được xóa MỘT lần — dùng rồi thì ẩn bước này đi.',
+        scriptClose: 'Bầy Sói hãy nhắm mắt lại và ngủ tiếp.',
+      },
+    ],
     description:
-      'Người chết để lại lời trăng trối: mỗi người chết ban đêm được để lại MỘT câu trước khi rời game. Quản trò sẽ quyết định câu đấy có hợp pháp hay không, chỉ được nói về người khác, không được khai vai của mình. Lời trăn trối sẽ được công bố vào buổi sáng 2 ngày sau. Phe sói sẽ được quyền xóa lời trăn trối 1 lần 1 game.',
+      'Người chết để lại lời trăn trối: mỗi người chết ban đêm được để lại MỘT câu trước khi rời game. Quản trò sẽ quyết định câu đấy có hợp pháp hay không, chỉ được nói về người khác, không được khai vai của mình. Lời trăn trối sẽ được công bố vào buổi sáng 2 ngày sau. Phe sói sẽ được quyền xóa lời trăn trối 1 lần 1 game.',
     value: 3,
     favors: 'village',
     requires: [],
