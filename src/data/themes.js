@@ -244,10 +244,10 @@ const THEMES_DATA = [
       },
     ],
     description:
-      'Mụ Già đuổi ai thì người đó lang thang trong rừng cả ngày; khi trở về, quản trò bí mật trao cho họ một lá bốc ngẫu nhiên từ bộ 10 lá. Cả làng biết họ có mang thứ gì về nhưng chỉ mình họ biết đó là gì, và hết bài thì thôi.\n' +
+      'Mụ Già đuổi ai thì người đó lang thang trong rừng cả ngày; khi trở về, họ một lá bốc ngẫu nhiên từ bộ gồm các lá dưới đây:\n' +
       '1. Khẩu Súng Rỉ Sét: một lần, ban ngày, công khai bắn chết một người.\n' +
       '2. Lọ Thuốc Giải: tự động cứu chính chủ khỏi đòn giết đầu tiên nhắm vào họ trong đêm.\n' +
-      '3. Mảnh Gương Vỡ: Có khả năng như Tiên tri nhưng dùng 1 lần trong đêm.\n' +
+      '3. Mảnh Gương Vỡ: Dùng 1 lần 1 ván trong đêm, Có khả năng như Tiên tri. Nếu phe sói bốc được thì sẽ như Tiên Tri Hào Quang\n' +
       '4. Áo choàng tàng hình: đêm hôm về làng, mọi năng lực nhắm vào họ đều trượt.\n' +
       '5. La Bàn Hỏng: đêm hôm về làng, biết có Sói ngồi cạnh hay không.\n' +
       '6. Chuyến Đi Vô Ích: không có gì xảy ra.\n' +
@@ -255,7 +255,8 @@ const THEMES_DATA = [
       '8. Vết Thương: ngày hôm sau mất quyền bỏ phiếu và đêm hôm đó không được thức dậy dùng năng lực.\n' +
       '9. Vết Cắn Trong Rừng: thắng cùng phe Sói và biết mặt bầy nhưng không có quyền cắn, nếu vốn đã là Sói thì lá này vô hiệu.\n' +
       '10. Nước Thánh Trong Rừng: nếu người bốc thuộc phe Sói thì họ mất trí nhớ, từ đó mất quyền cắn và không thức dậy cùng bầy nữa (vẫn thắng cùng phe Sói); bầy vẫn cắn bình thường. Nếu là Dân thì không có gì xảy ra.\n' +
-      '11. Chết Trong Rừng: người bốc lá này chết ngay lập tức.',
+      '11. Chết Trong Rừng: người bốc lá này chết ngay lập tức.\n' +
+      '12. Nấm độc: Người bốc ăn phải nấm độc, sẽ chết sau x đêm. Phù thủy có thể cứu bằng bình cứu. (Quản trò sẽ random x trong khoảng 1-4 và giữ bí mật)',
     value: 0,
     favors: 'other',
     requires: [{ roles: ['old_hag'], min: 1, label: 'Có Mụ Già' }],
