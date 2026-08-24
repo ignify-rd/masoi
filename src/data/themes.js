@@ -76,6 +76,15 @@ const THEMES_DATA = [
     ],
   },
   {
+    id: 'night_of_vengeance',
+    name: 'Đêm Trả Thù',
+    description:
+      'Bầy sói trả thù cho đồng loại: mỗi khi làng treo cổ trúng một con Sói thì đêm hôm đó bầy được cắn thêm một người. Chỉ áp dụng cho một nửa số Sói đầu tiên bị treo (làm tròn xuống), sau đó bầy hết khả năng trả thù.',
+    value: -3,
+    favors: 'werewolf',
+    requires: [{ team: 'werewolf', min: 2, label: 'Có ít nhất 2 vai phe Sói' }],
+  },
+  {
     id: 'creeping_curse',
     name: 'Lời Nguyền Lan Rộng',
     description:
@@ -121,6 +130,15 @@ const THEMES_DATA = [
     requires: [{ team: 'werewolf', min: 1, label: 'Có ít nhất 1 vai phe Sói' }],
   },
   {
+    id: 'scent_of_blood',
+    name: 'Mùi Máu',
+    description:
+      'Bầy sói ngửi được mùi quyền năng: mỗi khi cắn chết một người, quản trò gật đầu cho bầy Sói biết nạn nhân có năng lực ban đêm, hoặc lắc đầu nếu đó chỉ là dân thường.',
+    value: -2,
+    favors: 'werewolf',
+    requires: [{ team: 'werewolf', min: 1, label: 'Có ít nhất 1 vai phe Sói' }],
+  },
+  {
     id: 'long_night',
     name: 'Đêm Dài',
     description:
@@ -155,6 +173,15 @@ const THEMES_DATA = [
     value: 0,
     favors: 'other',
     requires: [],
+  },
+  {
+    id: 'wolf_leader',
+    name: 'Sói Trưởng',
+    description:
+      'Bầy sói có kẻ cầm đầu: đêm 1 bầy Sói tự chọn một con làm đầu đàn. Mỗi đêm sau khi cả bầy đã chỉ mục tiêu, riêng đầu đàn được giơ tay để đổi - không giết nữa mà quản trò cho bầy biết vai của chính mục tiêu đó. Nếu đầu đàn chết, bầy sói mất quyền cắn đêm hôm đó.',
+    value: 0,
+    favors: 'other',
+    requires: [{ team: 'werewolf', min: 2, label: 'Có ít nhất 2 vai phe Sói' }],
   },
   {
     id: 'lunar_eclipse',
@@ -259,6 +286,15 @@ const THEMES_DATA = [
     requires: [],
   },
   {
+    id: 'price_of_truth',
+    name: 'Giá Của Sự Thật',
+    description:
+      'Sự thật phải trả bằng máu: từ sáng ngày thứ 2 trở đi, nếu quá bán số người còn sống đồng ý thì làng bỏ luôn quyền treo cổ hôm đó để đổi lấy việc quản trò công bố công khai phe của một người bất kỳ.',
+    value: 2,
+    favors: 'village',
+    requires: [],
+  },
+  {
     id: 'inquisition',
     name: 'Toà Án Dị Giáo',
     description:
@@ -309,7 +345,7 @@ const THEMES_DATA = [
     id: 'death_note',
     name: 'Sổ Tang',
     description:
-      'Làng ghi lại lời trăng trối: mỗi người chết ban đêm được để lại MỘT câu trước khi rời game. Quản trò sẽ quyết định câu đấy có hợp pháp hay không, chỉ được nói về người khác, không được khai vai của mình. Phe sói sẽ được quyền xóa lời trăn trối của người bị cắn 1 lần 1 game.',
+      'Người chết để lại lời trăng trối: mỗi người chết ban đêm được để lại MỘT câu trước khi rời game. Quản trò sẽ quyết định câu đấy có hợp pháp hay không, chỉ được nói về người khác, không được khai vai của mình. Lời trăn trối sẽ được công bố vào buổi sáng 2 ngày sau. Phe sói sẽ được quyền xóa lời trăn trối 1 lần 1 game.',
     value: 3,
     favors: 'village',
     requires: [],
