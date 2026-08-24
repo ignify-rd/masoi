@@ -1106,6 +1106,7 @@ body {
   font-size: 15px;
   line-height: 1.65;
   color: #d4dceb;
+  white-space: pre-line;
 }
 
 .game-theme-hint {
@@ -1205,6 +1206,7 @@ body {
   font-size: 13px;
   line-height: 1.55;
   color: #d4dceb;
+  white-space: pre-line;
 }
 
 .theme-card-meta {
@@ -1677,6 +1679,16 @@ body {
 .step-memo-input:focus {
   outline: none;
   border-color: var(--accent-2);
+}
+
+.theme-memo {
+  margin-top: 12px;
+}
+
+.theme-memo-input {
+  resize: vertical;
+  min-height: 44px;
+  line-height: 1.45;
 }
 
 .step-hide-btn {
