@@ -106,6 +106,35 @@ body {
   top: 16px;
 }
 
+/* Desktop: khung Ván đấu tự cuộn, nút Bắt đầu luôn nằm trong tầm nhìn. */
+@media (min-width: 921px) {
+  .setup {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 32px);
+  }
+
+  .setup-sheet {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin: 0 -18px;
+    padding: 0 18px;
+  }
+
+  .setup-actions {
+    flex-shrink: 0;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .setup .selected-list {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 .setup-dock-bar {
   display: none;
 }

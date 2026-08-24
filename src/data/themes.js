@@ -254,7 +254,8 @@ const THEMES_DATA = [
       '7. Mùi Thú Hoang: từ đó đến hết ván, mọi vai soi nhắm vào chính họ đều nhận kết quả phe Sói.\n' +
       '8. Vết Thương: ngày hôm sau mất quyền bỏ phiếu và đêm hôm đó không được thức dậy dùng năng lực.\n' +
       '9. Vết Cắn Trong Rừng: thắng cùng phe Sói và biết mặt bầy nhưng không có quyền cắn, nếu vốn đã là Sói thì lá này vô hiệu.\n' +
-      '10. Nước Thánh Trong Rừng: nếu người bốc thuộc phe Sói thì họ mất trí nhớ, từ đó mất quyền cắn và không thức dậy cùng bầy nữa (vẫn thắng cùng phe Sói); bầy vẫn cắn bình thường. Nếu là Dân thì không có gì xảy ra.',
+      '10. Nước Thánh Trong Rừng: nếu người bốc thuộc phe Sói thì họ mất trí nhớ, từ đó mất quyền cắn và không thức dậy cùng bầy nữa (vẫn thắng cùng phe Sói); bầy vẫn cắn bình thường. Nếu là Dân thì không có gì xảy ra.\n' +
+      '11. Chết Trong Rừng: người bốc lá này chết ngay lập tức.',
     value: 0,
     favors: 'other',
     requires: [{ roles: ['old_hag'], min: 1, label: 'Có Mụ Già' }],
