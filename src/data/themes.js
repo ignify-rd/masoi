@@ -12,6 +12,56 @@
 
 import { ROLE_BY_ID, TEAMS } from './roles.js'
 
+// Mã cố định (1 ký tự base62) dùng để nhúng theme vào code chia sẻ setup.
+// QUY TẮC: KHÔNG BAO GIỜ đổi/xoá/dùng lại mã của theme đã tồn tại — mọi code
+// cũ đã share sẽ giải mã sai theme nếu mã bị đổi. Thêm theme mới thì luôn
+// gán 1 ký tự CHƯA từng dùng (xem roleCode.js để biết cách sinh ký tự tiếp theo).
+const THEME_CODE_BY_ID = {
+  endless_night: '0',
+  distant_howl: '1',
+  thick_fog: '2',
+  blood_moon: '3',
+  mob_rule: '4',
+  wolf_covenant: '5',
+  night_of_vengeance: '6',
+  creeping_curse: '7',
+  red_thread: '8',
+  blood_pact: '9',
+  blood_thirst: 'A',
+  last_stand: 'B',
+  scent_of_blood: 'C',
+  long_night: 'D',
+  reverse_trial: 'E',
+  great_storm: 'F',
+  tidal_moon: 'G',
+  wolf_leader: 'H',
+  sheriff: 'I',
+  forest_journey: 'J',
+  lunar_eclipse: 'K',
+  royal_decree: 'L',
+  first_dawn: 'M',
+  holy_antidote: 'N',
+  silver_claw: 'O',
+  garlic_harvest: 'P',
+  night_watch: 'Q',
+  village_ledger: 'R',
+  rumor_mill: 'S',
+  village_militia: 'T',
+  white_list: 'U',
+  price_of_truth: 'V',
+  inquisition: 'W',
+  silver_bullet: 'X',
+  witch_sabbath: 'Y',
+  talking_graveyard: 'Z',
+  death_note: 'a',
+  undying_village: 'b',
+  double_trial: 'c',
+  bite_mark: 'd',
+  body_count: 'e',
+  holy_water: 'f',
+  talisman: 'g',
+}
+
 const THEMES_DATA = [
   {
     id: 'endless_night',
@@ -505,9 +555,11 @@ export const THEMES = THEMES_DATA.map((theme) => ({
   requires: [],
   favors: 'village',
   ...theme,
+  code: THEME_CODE_BY_ID[theme.id],
 }))
 
 export const THEME_BY_ID = Object.fromEntries(THEMES.map((t) => [t.id, t]))
+export const THEME_BY_CODE = Object.fromEntries(THEMES.map((t) => [t.code, t]))
 
 function countRequirement(req, selected) {
   let total = 0

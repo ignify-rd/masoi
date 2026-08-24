@@ -1,5 +1,5 @@
 import { ROLES, clampRoleCount } from './roles.js'
-import { THEMES, THEME_BY_ID } from './themes.js'
+import { THEME_BY_ID, THEME_BY_CODE } from './themes.js'
 
 // Bảng ký tự base62 — không có ký tự trùng nhau dễ nhầm khi đọc/gõ tay.
 const ALPHABET =
@@ -9,6 +9,9 @@ const CHAR_INDEX = new Map([...ALPHABET].map((ch, i) => [ch, i]))
 
 // Chủ đề được gắn vào cuối mã, sau dấu phân cách: "<mã vai trò>-<mã chủ đề>".
 // Mã cũ (không có phần này) vẫn giải mã bình thường.
+// Mã chủ đề là 1 ký tự CỐ ĐỊNH gắn theo id (xem THEME_CODE_BY_ID trong
+// themes.js), KHÔNG phải vị trí trong mảng THEMES — nhờ vậy thêm/sắp xếp
+// lại theme không làm hỏng các code đã chia sẻ trước đó.
 const THEME_SEPARATOR = '-'
 
 /**
@@ -33,8 +36,8 @@ export function encodeSetupCode(selected, themeId = null) {
     n /= BASE
   }
 
-  const themeIndex = THEMES.findIndex((theme) => theme.id === themeId)
-  if (themeIndex >= 0) out += THEME_SEPARATOR + ALPHABET[themeIndex]
+  const theme = THEME_BY_ID[themeId]
+  if (theme?.code) out += THEME_SEPARATOR + theme.code
 
   return out
 }
@@ -53,9 +56,9 @@ export function decodeSetupCode(code) {
   let themeId = null
   if (themePart != null) {
     if (themePart.length !== 1) return null
-    const themeIndex = CHAR_INDEX.get(themePart)
-    if (themeIndex == null || !THEMES[themeIndex]) return null
-    themeId = THEMES[themeIndex].id
+    const theme = THEME_BY_CODE[themePart]
+    if (!theme) return null
+    themeId = theme.id
   }
 
   let n = 0n
