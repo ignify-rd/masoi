@@ -355,6 +355,19 @@ const THEMES_DATA = [
   {
     id: 'white_list',
     name: 'Danh Sách Trắng',
+    nightSteps: [
+      {
+        id: 'white_list_swap',
+        nightOrder: 3.999,
+        phase: 'every',
+        name: 'Danh Sách Trắng — Sói thay tên',
+        script:
+          'Bầy Sói hãy thức dậy. Người này sẽ được công bố. Có muốn thay tên sẽ được công bố sáng mai bằng tên một con sói khác không.',
+        moderatorNote:
+          'Cả ván bầy Sói chỉ được thay MỘT lần — dùng rồi thì bấm Ẩn bước này. Nếu bầy thay, sáng mai đọc tên con sói đó y như một cái tên trong sạch bình thường, không để lộ gì khác.',
+        scriptClose: 'Bầy Sói hãy nhắm mắt lại và ngủ tiếp.',
+      },
+    ],
     description:
       'Làng lập danh sách người trong sạch: mỗi sáng quản trò công bố tên một người thuộc phe Dân làng, mỗi người chỉ được công bố một lần trong ván. Một lần duy nhất, bầy Sói được thay tên hôm đó bằng tên một con sói, và làng không có cách nào biết ngày nào bị thay.',
     value: 2,
