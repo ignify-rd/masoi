@@ -13,6 +13,7 @@ import {
 import { decodeSetupCode, encodeSetupCode } from '../data/roleCode.js'
 import BalanceMeter from './BalanceMeter.jsx'
 import ThemePicker from './ThemePicker.jsx'
+import { showAlert, showConfirm, showPrompt } from '../ui/dialog.js'
 
 const TEAM_ORDER = ['other', 'vampire', 'werewolf', 'village']
 
@@ -89,28 +90,28 @@ export default function SetupPanel({
   const handleCopyCode = async () => {
     const code = encodeSetupCode(selected, themeId)
     if (!code) {
-      window.alert('Chưa có vai trò nào để tạo mã.')
+      showAlert('Chưa có vai trò nào để tạo mã.')
       return
     }
     try {
       await navigator.clipboard.writeText(code)
     } catch {
-      window.prompt('Sao chép mã ván bên dưới:', code)
+      await showPrompt('Sao chép mã ván bên dưới:', code)
       return
     }
     setCopiedCode(true)
     setTimeout(() => setCopiedCode(false), 2000)
   }
 
-  const handleLoadCode = () => {
+  const handleLoadCode = async () => {
     const decoded = decodeSetupCode(codeInput)
     if (!decoded || Object.keys(decoded.roles).length === 0) {
-      window.alert('Mã ván không hợp lệ.')
+      showAlert('Mã ván không hợp lệ.')
       return
     }
     if (
       totalPlayers > 0 &&
-      !window.confirm('Thay thế ván đấu hiện tại bằng ván từ mã này?')
+      !(await showConfirm('Thay thế ván đấu hiện tại bằng ván từ mã này?'))
     ) {
       return
     }
@@ -118,21 +119,21 @@ export default function SetupPanel({
     setCodeInput('')
   }
 
-  const handleSuggest = () => {
+  const handleSuggest = async () => {
     const count = Number(suggestCount)
     if (
       !Number.isFinite(count) ||
       count < SUGGEST_MIN_PLAYERS ||
       count > SUGGEST_MAX_PLAYERS
     ) {
-      window.alert(
+      showAlert(
         `Nhập số người chơi từ ${SUGGEST_MIN_PLAYERS} đến ${SUGGEST_MAX_PLAYERS}.`,
       )
       return
     }
     if (
       totalPlayers > 0 &&
-      !window.confirm('Thay thế ván đấu hiện tại bằng setup gợi ý?')
+      !(await showConfirm('Thay thế ván đấu hiện tại bằng setup gợi ý?'))
     ) {
       return
     }

@@ -42,10 +42,36 @@ export const NIGHT_EXTRAS = {
       'Thần Tình Yêu thức dậy. Tôi sẽ cho bạn biết bạn có thuộc phe thứ 3 (phe Cặp đôi) hay không.',
     moderatorNote:
       'Chỉ áp dụng khi có hơn 12 người chơi, thực hiện ngay sau khi Cặp đôi đã thức dậy. Nếu Cupid ghép hai người thuộc hai phe đối lập (ví dụ Sói/Ma cà rồng với Dân làng), báo cho Cupid biết họ thuộc phe thứ 3. Nếu không, báo Cupid vẫn thuộc phe Dân làng.',
-  },
+  }
 }
 
 const ROLES_DATA = [
+  {
+    id: 'dream_wolf',
+    name: 'Sói Mơ Mộng',
+    nameEn: 'Dreamwolf',
+    team: 'werewolf',
+    value: -5,
+    wakesAtNight: true,
+    nightOrder: 0,
+    phase: 'night1',
+    ability:
+      'Sói Mơ Mộng sẽ không thức dậy cùng phe Sói cho đến khi có một Ma Sói bị giết.',
+    script: 'Sói Mơ Mộng thức dậy để tôi ghi nhận vai trò của bạn.',
+  },
+  {
+    id: 'bigfoot',
+    name: 'Chân To',
+    nameEn: 'Big Foot',
+    team: 'village',
+    value: -2,
+    wakesAtNight: true,
+    nightOrder: 0,
+    phase: 'night1',
+    ability:
+      'Ban đầu thuộc phe Dân làng, nhưng khi bị Tiên Tri soi lại ra phe Sói vì trông lông lá giống Sói. Anh ta thuộc phe Dân làng cho đến ngày không có ai bị treo cổ; ngày hôm sau anh ta tức giận và chuyển sang phe Sói.',
+    script: 'Chân To hãy thức dậy để tôi ghi nhận vai trò của bạn.',
+  },
   {
     id: 'tanner',
     name: 'Chán Đời',
@@ -53,8 +79,8 @@ const ROLES_DATA = [
     team: 'other',
     value: -2,
     wakesAtNight: true,
-    nightOrder: 20,
-    phase: 'every',
+    nightOrder: 0,
+    phase: 'night1',
     ability: 'Bạn chỉ thắng khi bị giết trong buổi sáng.',
     script: 'Chán Đời hãy thức dậy để tôi ghi nhận vai trò của bạn.',
   },
@@ -66,7 +92,7 @@ const ROLES_DATA = [
     value: 2,
     wakesAtNight: true,
     nightOrder: 0,
-    phase: 'every',
+    phase: 'night1',
     ability:
       'Nếu bạn bị bình chọn để giết buổi sáng, bạn tiết lộ thân phận và được sống tiếp.',
     script: 'Hoàng Tử hãy thức dậy để tôi ghi nhận vai trò của bạn.',
@@ -276,6 +302,33 @@ const ROLES_DATA = [
       'Người Sói hãy thức dậy để các Ma Sói còn lại biết.',
   },
   {
+    id: 'wolverine',
+    name: 'Wolverine',
+    nameEn: 'Wolverine',
+    team: 'werewolf',
+    value: -4,
+    wakesAtNight: true,
+    nightOrder: 3.2,
+    phase: 'night1',
+    ability:
+      'Nếu Wolverine là con Sói ngồi gần nạn nhân nhất, những người chơi sẽ nghe thấy tiếng kim loại chạm vào nhau.',
+    script: 'Wolverine hãy thức dậy để các Ma Sói còn lại biết.',
+  },
+  {
+    id: 'big_bad_wolf',
+    name: 'Sói Đại Ca',
+    nameEn: 'Big Bad Wolf',
+    team: 'werewolf',
+    value: -10,
+    wakesAtNight: true,
+    nightOrder: 3.2,
+    phase: 'night1',
+    ability:
+      'Chừng nào Sói Đại Ca còn sống, mỗi đêm phe Ma Sói có thể giết thêm một người chơi ngồi cạnh nạn nhân đã chọn.',
+    script:
+      'Sói Đại Ca hãy thức dậy để các Ma Sói còn lại biết.',
+  },
+  {
     id: 'minion',
     name: 'Kẻ phản bội',
     nameEn: 'Minion',
@@ -302,6 +355,20 @@ const ROLES_DATA = [
       'Sau khi bầy sói chọn mục tiêu. Bạn có thể biến con mồi trở thành sói thay vì ăn thịt nếu con mồi bị ăn thịt thành công (1 ván 1 lần duy nhất).',
     script:
       'Sói Đầu đàn hãy thức dậy. Bạn có muốn biến con mồi trở thành sói không?',
+  },
+  {
+    id: 'dire_wolf',
+    name: 'Sói Tuyết',
+    nameEn: 'Dire Wolf',
+    team: 'werewolf',
+    value: -4,
+    wakesAtNight: true,
+    nightOrder: 3.3,
+    phase: 'night1',
+    ability:
+      'Đêm đầu tiên, chọn một người chơi khác làm bạn đồng hành. Nếu người đó chết, Sói Tuyết cũng chết theo. Nếu Sói Tuyết chết, người đó không chết.',
+    script:
+      'Sói Tuyết hãy thức dậy và chỉ vào một người chơi để làm bạn đồng hành.',
   },
   {
     id: 'fang_face',
@@ -433,6 +500,19 @@ const ROLES_DATA = [
       'Tiên Tri Tập sự hãy thức dậy để xem bạn có trở thành Tiên Tri hay không. Nếu bạn trở thành Tiên Tri, hãy chỉ vào 1 người để biết họ là Sói hay không.',
   },
   {
+    id: 'beholder',
+    name: 'Người quan Sát',
+    nameEn: 'Beholder',
+    team: 'village',
+    value: 2,
+    wakesAtNight: true,
+    nightOrder: 6.9999,
+    phase: 'night1',
+    ability: 'Đêm đầu tiên tỉnh dậy, được cho biết ai là Tiên Tri.',
+    script:
+      'Người Quan Sát hãy thức dậy, tôi sẽ chỉ cho bạn biết ai là Tiên Tri.',
+  },
+  {
     id: 'sorceress',
     name: 'Bà Đồng',
     nameEn: 'Sorceress',
@@ -530,47 +610,6 @@ const ROLES_DATA = [
     script:
       'Mụ Già hãy thức dậy. Bạn chọn ai rời khỏi làng vào ngày hôm sau? Có thể không chọn ai.',
   },
-  // {
-  //   id: 'blacksmith',
-  //   name: 'Thợ Rèn',
-  //   nameEn: 'Blacksmith',
-  //   team: 'village',
-  //   value: 2,
-  //   wakesAtNight: true,
-  //   nightOrder: 11,
-  //   phase: 'every',
-  //   ability:
-  //     'Một lần trong ván, rèn một thanh kiếm trao cho người khác; người nhận kiếm sẽ được gọi dậy để chỉ giết 1 người.',
-  //   script:
-  //     'Thợ Rèn hãy thức dậy. Bạn có muốn rèn kiếm và trao cho một người chơi khác không?',
-  //   scriptClose: 'Thợ Rèn đã chọn xong. Hãy nhắm mắt và ngủ lại.',
-  //   nightSubSteps: [
-  //     {
-  //       name: 'Người nhận kiếm',
-  //       phase: 'every',
-  //       optional: true,
-  //       script:
-  //         'Một thanh kiếm đã được rèn. Tôi vừa chạm vai một người — người đó hãy mở mắt và chỉ sang người muốn giết bằng kiếm.',
-  //       scriptClose:
-  //         'Kiếm đã hoàn thành nhiệm vụ và gãy vụn. Hãy nhắm mắt và ngủ lại.',
-  //       moderatorNote: 'Chỉ thực hiện nếu Thợ Rèn chọn rèn kiếm. Chạm vai người được chọn nhận kiếm.',
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: 'insomniac',
-  //   name: 'Kẻ Mất Ngủ',
-  //   nameEn: 'Insomniac',
-  //   team: 'village',
-  //   value: 3,
-  //   wakesAtNight: true,
-  //   nightOrder: 16,
-  //   phase: 'every',
-  //   ability:
-  //     'Cuối mỗi đêm, bạn biết được có ít nhất 1 trong 2 người ngồi cạnh mình đã hoạt động trong đêm hay không.',
-  //   script:
-  //     'Kẻ Mất Ngủ hãy thức dậy. Tôi sẽ cho bạn biết 1 trong 2 người cạnh bạn có hoạt động đêm nay hay không.',
-  // },
   {
     id: 'mentalist',
     name: 'Nhà ngoại cảm',
@@ -600,6 +639,34 @@ const ROLES_DATA = [
       'Con bạc hãy thức dậy, đêm nay bạn muốn chơi may rủi với ai?',
   },
   {
+    id: 'the_thing',
+    name: 'The Thing',
+    nameEn: 'The Thing',
+    team: 'village',
+    value: 2,
+    wakesAtNight: true,
+    nightOrder: 8,
+    phase: 'every',
+    ability:
+      'Mỗi đêm, tỉnh dậy và vỗ vào người ngồi bên cạnh mình.',
+    script:
+      'The Thing hãy thức dậy, bạn muốn vỗ vai ai?',
+  },
+  {
+    id: 'haunted_ghost',
+    name: 'Ma Ám',
+    nameEn: 'Haunted Ghost',
+    team: 'village',
+    value: -2,
+    wakesAtNight: true,
+    nightOrder: 8,
+    phase: 'night1',
+    ability:
+      'Đêm đầu tiên, chọn một người chơi để ám. Người đó sẽ được thông báo là mình bị ám. Nếu Ma Ám chết, người bị ám cũng chết theo.',
+    script:
+      'Ma Ám hãy thức dậy và chỉ vào một người chơi để ám họ.',
+  },
+  {
     id: 'cult_leader',
     name: 'Chủ Giáo Phái',
     nameEn: 'Cult Leader',
@@ -612,6 +679,20 @@ const ROLES_DATA = [
       'Mỗi đêm, chọn 1 người chơi tham gia vào giáo phái của bạn. Nếu tất cả người chơi còn sống đều trong giáo phái, bạn thắng.',
     script:
       'Chủ Giáo Phái hãy thức dậy. Bạn chọn 1 người chơi để tham gia vào giáo phái của bạn.',
+  },
+  {
+    id: 'insomniac',
+    name: 'Kẻ Mất Ngủ',
+    nameEn: 'Insomniac',
+    team: 'village',
+    value: 3,
+    wakesAtNight: true,
+    nightOrder: 100,
+    phase: 'every',
+    ability:
+      'Cuối mỗi đêm, bạn biết được có ít nhất 1 trong 2 người ngồi cạnh mình có hoạt động trong đêm hay không.',
+    script:
+      'Kẻ Mất Ngủ hãy thức dậy. Tôi sẽ cho bạn biết người ngồi cạnh bạn có hoạt động đêm nay hay không.',
   },
   {
     id: 'villager',
@@ -627,7 +708,7 @@ const ROLES_DATA = [
     ability:
       'Không có năng lực đặc biệt. Nhiệm vụ là tìm ra và treo cổ Sói/Ma cà rồng.',
     script: '',
-  }
+  },
 ]
 
 export const ROLES = ROLES_DATA.map((role) => ({
@@ -637,6 +718,80 @@ export const ROLES = ROLES_DATA.map((role) => ({
 }))
 
 export const ROLE_BY_ID = Object.fromEntries(ROLES.map((r) => [r.id, r]))
+
+// Bảng slot cố định dùng để nhúng vai trò vào code chia sẻ setup.
+// Mỗi phần tử: [id, sức chứa] — sức chứa là `max` tại thời điểm vai được thêm
+// vào bảng, quyết định cơ số của chữ số tương ứng trong mã.
+//
+// QUY TẮC (giống THEME_CODE_BY_ID trong themes.js): vị trí trong mảng này LÀ
+// một phần của định dạng mã. KHÔNG BAO GIỜ chèn vào giữa, xoá dòng, đổi thứ tự
+// hay đổi sức chứa của vai đã tồn tại — mọi code cũ đã share sẽ giải mã sai.
+// - Thêm vai mới  -> luôn append vào CUỐI bảng (vị trí trong ROLES_DATA thì tuỳ ý).
+// - Bỏ vai khỏi ROLES_DATA -> vẫn GIỮ NGUYÊN dòng ở đây (slot bị "chôn"), code
+//   cũ chứa vai đó vẫn giải mã được và phần vai đã bỏ sẽ bị lược đi.
+// - Đổi `max` trong ROLES_DATA -> an toàn, chỉ giới hạn UI; sức chứa ở đây giữ
+//   nguyên, số lượng vượt quá sẽ được kẹp lại khi giải mã.
+export const ROLE_SLOTS = [
+  ['tanner', 1],
+  ['prince', 1],
+  ['lone_wolf', 1],
+  ['halfblood', 1],
+  ['mayor', 1],
+  ['tough_guy', 1],
+  ['terrorist', 1],
+  ['rusty_knight', 1],
+  ['diseased', 1],
+  ['hoodlum', 1],
+  ['cupid', 1],
+  ['guard', 1],
+  ['priest', 1],
+  ['werewolf', 10],
+  ['fruit_wolf', 1],
+  ['wolf_cub', 1],
+  ['wolf_man', 1],
+  ['minion', 1],
+  ['alpha_wolf', 1],
+  ['fang_face', 1],
+  ['white_wolf', 1],
+  ['vampire', 6],
+  ['dracula', 1],
+  ['witch', 1],
+  ['seer', 1],
+  ['aura_seer', 1],
+  ['mystic_seeker', 1],
+  ['apprentice_seer', 1],
+  ['sorceress', 1],
+  ['hunter', 1],
+  ['huntress', 1],
+  ['investigator', 1],
+  ['spellcaster', 1],
+  ['cursed', 1],
+  ['old_hag', 1],
+  ['mentalist', 1],
+  ['gambler', 1],
+  ['cult_leader', 1],
+  ['villager', 30],
+  ['insomniac', 1],
+  ['big_bad_wolf', 1],
+  ['dire_wolf', 1],
+  ['wolverine', 1],
+  ['haunted_ghost', 1],
+  ['bigfoot', 1],
+  ['dream_wolf', 1],
+  ['the_thing', 1],
+  ['beholder', 1],
+]
+
+if (import.meta.env?.DEV) {
+  const slotted = new Set(ROLE_SLOTS.map(([id]) => id))
+  const missing = ROLES.filter((r) => !slotted.has(r.id)).map((r) => r.id)
+  if (missing.length > 0) {
+    console.warn(
+      `[roles] Thiếu slot mã hoá cho: ${missing.join(', ')}. ` +
+        'Hãy append vào CUỐI ROLE_SLOTS (xem quy tắc phía trên).',
+    )
+  }
+}
 
 const ROLE_IMAGE_IDS = new Set(
   Object.keys(import.meta.glob('../../public/roles/*.webp')).map((path) =>

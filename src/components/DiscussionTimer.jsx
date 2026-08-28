@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { showAlert } from '../ui/dialog.js'
 
 const PRESETS = [
   { label: '30s', seconds: 30 },
@@ -198,7 +199,7 @@ export default function DiscussionTimer() {
   const handleCustomStart = () => {
     const minutes = Number(customMinutes)
     if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 60) {
-      window.alert('Nhập số phút từ 1 đến 60.')
+      showAlert('Nhập số phút từ 1 đến 60.')
       return
     }
     startWith(Math.round(minutes * 60))

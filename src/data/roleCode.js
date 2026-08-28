@@ -1,4 +1,4 @@
-import { ROLES, clampRoleCount } from './roles.js'
+import { ROLE_BY_ID, ROLE_SLOTS, clampRoleCount } from './roles.js'
 import { THEME_BY_ID, THEME_BY_CODE } from './themes.js'
 
 // Bảng ký tự base62 — không có ký tự trùng nhau dễ nhầm khi đọc/gõ tay.
@@ -16,15 +16,16 @@ const THEME_SEPARATOR = '-'
 
 /**
  * Mã hoá setup (vai trò -> số lượng) thành 1 chuỗi ngắn (thường 5-8 ký tự)
- * bằng cách gộp số lượng từng vai trò (theo thứ tự cố định trong ROLES)
- * thành 1 số nguyên lớn (hệ cơ số hỗn hợp theo max của từng vai trò),
- * rồi chuyển số đó sang base62. Nếu có chủ đề, nối thêm mã chủ đề ở cuối.
+ * bằng cách gộp số lượng từng vai trò (theo thứ tự slot CỐ ĐỊNH trong
+ * ROLE_SLOTS, không phải thứ tự hiển thị trong ROLES) thành 1 số nguyên lớn
+ * (hệ cơ số hỗn hợp theo sức chứa của từng slot), rồi chuyển số đó sang base62.
+ * Nếu có chủ đề, nối thêm mã chủ đề ở cuối.
  */
 export function encodeSetupCode(selected, themeId = null) {
   let n = 0n
-  for (const role of ROLES) {
-    const radix = BigInt(role.max + 1)
-    const digit = BigInt(clampRoleCount(role.id, selected?.[role.id] || 0))
+  for (const [id, cap] of ROLE_SLOTS) {
+    const radix = BigInt(cap + 1)
+    const digit = BigInt(Math.min(clampRoleCount(id, selected?.[id] || 0), cap))
     n = n * radix + digit
   }
 
@@ -69,12 +70,16 @@ export function decodeSetupCode(code) {
   }
 
   const result = {}
-  for (let i = ROLES.length - 1; i >= 0; i--) {
-    const role = ROLES[i]
-    const radix = BigInt(role.max + 1)
+  for (let i = ROLE_SLOTS.length - 1; i >= 0; i--) {
+    const [id, cap] = ROLE_SLOTS[i]
+    const radix = BigInt(cap + 1)
     const digit = n % radix
     n /= radix
-    if (digit > 0n) result[role.id] = Number(digit)
+    if (digit <= 0n) continue
+    // Slot của vai đã bị bỏ khỏi bảng dữ liệu -> lược đi thay vì làm hỏng code.
+    if (!ROLE_BY_ID[id]) continue
+    const count = clampRoleCount(id, Number(digit))
+    if (count > 0) result[id] = count
   }
 
   // Còn dư sau khi tách hết vai trò -> code không thuộc bảng dữ liệu hiện tại.
