@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ROLES, ROLE_BY_ID, TEAMS, PHASE_LABEL, NIGHT_EXTRAS } from '../data/roles.js'
 import { saveMatch, WINNER_TEAM_IDS } from '../data/matchHistory.js'
 import { requirementLabel } from '../data/themes.js'
+import { showAlert, showConfirm, showPrompt } from '../ui/dialog.js'
 
 const NOTES_STORAGE_KEY = 'masoi.nightNotes'
 const HIDDEN_STORAGE_KEY = 'masoi.nightHidden'
@@ -383,11 +384,11 @@ export default function NightCallOrder({
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (
-      !window.confirm(
+      !(await showConfirm(
         'Đặt lại ván này? Toàn bộ ghi chú sẽ bị xóa và các bước đang ẩn sẽ hiện lại.',
-      )
+      ))
     ) {
       return
     }
@@ -400,23 +401,23 @@ export default function NightCallOrder({
     try {
       await navigator.clipboard.writeText(text)
     } catch {
-      window.prompt('Sao chép danh sách bên dưới:', text)
+      await showPrompt('Sao chép danh sách bên dưới:', text)
       return
     }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleEndMatch = () => {
+  const handleEndMatch = async () => {
     if (!winner) {
-      window.alert('Hãy chọn phe thắng trước khi lưu.')
+      showAlert('Hãy chọn phe thắng trước khi lưu.')
       return
     }
 
     if (
-      !window.confirm(
+      !(await showConfirm(
         'Kết thúc trận và lưu vào lịch sử? Ghi chú ban đêm của ván này cũng sẽ được lưu.',
-      )
+      ))
     ) {
       return
     }

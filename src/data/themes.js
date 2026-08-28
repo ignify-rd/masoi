@@ -85,7 +85,6 @@ const THEMES_DATA = [
           'Bầy Sói hãy mở mắt một lần nữa. Tôi sẽ chỉ ra những người có năng lực ban đêm.',
         moderatorNote:
           'Gọi ở cuối đêm 1, sau khi tất cả các vai khác đã ngủ lại. Chỉ tay lần lượt vào từng người có năng lực ban đêm — KHÔNG nói đó là vai gì',
-        scriptClose: 'Bầy Sói hãy nhắm mắt lại và ngủ tiếp.',
       },
     ],
     description:
@@ -290,7 +289,6 @@ const THEMES_DATA = [
           'Người vừa đi rừng về hãy thức dậy. Giơ tay nếu bạn muốn dùng món đồ của mình đêm nay.',
         moderatorNote:
           'Gọi ở đầu đêm, chỉ đêm mà có người vừa từ rừng trở về. Nếu họ dùng Áo Choàng Tàng Hình / La Bàn Hỏng / Mảnh Gương Vỡ thì xử lý ngay ở bước này và nhớ đánh dấu lá bài đã hết.',
-        scriptClose: 'Người đi rừng hãy nhắm mắt lại và ngủ tiếp.',
       },
     ],
     description:
@@ -417,7 +415,6 @@ const THEMES_DATA = [
           'Bầy Sói hãy thức dậy. Người này sẽ được công bố. Có muốn thay tên sẽ được công bố sáng mai bằng tên một con sói khác không.',
         moderatorNote:
           'Cả ván bầy Sói chỉ được thay MỘT lần — dùng rồi thì bấm Ẩn bước này. Nếu bầy thay, sáng mai đọc tên con sói đó y như một cái tên trong sạch bình thường, không để lộ gì khác.',
-        scriptClose: 'Bầy Sói hãy nhắm mắt lại và ngủ tiếp.',
       },
     ],
     description:
@@ -486,7 +483,6 @@ const THEMES_DATA = [
           'Bầy Sói hãy thức dậy. Đây là lời trăn trối đang chờ công bố — giơ tay nếu bầy muốn xóa nó.',
         moderatorNote:
           'Gọi ở đầu đêm, chỉ khi đang có lời trăn trối chưa công bố. Cả ván bầy Sói chỉ được xóa MỘT lần — dùng rồi thì ẩn bước này đi.',
-        scriptClose: 'Bầy Sói hãy nhắm mắt lại và ngủ tiếp.',
       },
     ],
     description:

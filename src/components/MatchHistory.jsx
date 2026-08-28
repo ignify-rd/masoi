@@ -11,6 +11,7 @@ import {
   updateMatchWinner,
 } from '../data/matchHistory.js'
 import { THEME_BY_ID } from '../data/themes.js'
+import { showAlert, showConfirm } from '../ui/dialog.js'
 
 function HistoryIcon() {
   return (
@@ -200,16 +201,16 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
     }
   }, [open])
 
-  const handleLoad = (match) => {
+  const handleLoad = async (match) => {
     const roles = normalizeRolesFromMatch(match.roles)
     if (Object.keys(roles).length === 0) {
-      window.alert('Không thể tải ván này — vai trò không còn hợp lệ.')
+      showAlert('Không thể tải ván này — vai trò không còn hợp lệ.')
       return
     }
 
     if (
       hasCurrentSetup &&
-      !window.confirm('Thay thế ván đấu hiện tại bằng ván từ lịch sử?')
+      !(await showConfirm('Thay thế ván đấu hiện tại bằng ván từ lịch sử?'))
     ) {
       return
     }
@@ -218,11 +219,11 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
     setOpen(false)
   }
 
-  const handleDelete = (match) => {
+  const handleDelete = async (match) => {
     if (
-      !window.confirm(
+      !(await showConfirm(
         `Xóa ván ${formatMatchDate(match.playedAt)} (${match.totalPlayers} người) khỏi lịch sử?`,
-      )
+      ))
     ) {
       return
     }

@@ -7,6 +7,7 @@ import {
   pickRandomTheme,
   requirementLabel,
 } from '../data/themes.js'
+import { showAlert } from '../ui/dialog.js'
 
 function valueLabel(value) {
   return value > 0 ? `+${value}` : String(value)
@@ -35,7 +36,7 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
   const handleRandom = () => {
     const theme = pickRandomTheme(selected, { excludeId: themeId })
     if (!theme) {
-      window.alert('Không có chủ đề nào hợp lệ với setup hiện tại.')
+      showAlert('Không có chủ đề nào hợp lệ với setup hiện tại.')
       return
     }
     onChangeTheme(theme.id)
