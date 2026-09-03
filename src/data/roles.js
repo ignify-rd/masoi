@@ -443,6 +443,20 @@ const ROLES_DATA = [
       'Phù Thủy hãy thức dậy. Đây là nạn nhân của Sói đêm nay. Bạn có muốn dùng bình cứu không? Bạn có muốn dùng bình độc với ai không?',
   },
   {
+    id: 'illusion_artist',
+    name: 'Họa Sĩ Ảo Ảnh',
+    nameEn: 'The Illusion Artist',
+    team: 'werewolf',
+    value: -4,
+    wakesAtNight: true,
+    nightOrder: 5.9,
+    phase: 'every',
+    ability:
+      'Mỗi đêm, chọn 1 người chơi. Nếu Tiên Tri soi người đó trong đêm nay, Tiên Tri sẽ thấy họ thuộc phe đối diện với phe thật của họ.',
+    script:
+      'Họa Sĩ Ảo Ảnh hãy thức dậy và chỉ vào 1 người chơi để đánh lừa Tiên Tri đêm nay.',
+  },
+  {
     id: 'seer',
     name: 'Tiên Tri',
     nameEn: 'Seer',
@@ -470,6 +484,20 @@ const ROLES_DATA = [
       'Mỗi đêm, chỉ vào 1 người để biết người đó có chức năng đặc biệt hay không (không phải Dân làng, Ma Sói, Ma cà rồng).',
     script:
       'Tiên Tri Hào Quang hãy thức dậy và chỉ vào 1 người để biết người đó có chức năng đặc biệt hay không.',
+  },
+  {
+    id: 'one_eye_seer',
+    name: 'Tiên Tri Chột',
+    nameEn: 'One-Eye Seer',
+    team: 'village',
+    value: 3,
+    wakesAtNight: true,
+    nightOrder: 6,
+    phase: 'every',
+    ability:
+      'Mỗi đêm, chọn 1 người chơi để biết họ có phải phe Sói hay không. Nếu soi ra Sói, bạn mất chức năng cho đến khi con Sói đó bị giết.',
+    script:
+      'Tiên Tri Chột hãy thức dậy và chỉ vào 1 người để biết họ có phải phe Sói hay không.',
   },
   {
     id: 'mystic_seeker',
@@ -552,6 +580,34 @@ const ROLES_DATA = [
     ability:
       'Trong đêm, bạn được phép giết một người chơi khác (1 lần duy nhất).',
     script: 'Nữ Thợ Săn hãy thức dậy. Bạn muốn bắn chết ai? Có thể không chọn ai.',
+  },
+  {
+    id: 'exposer',
+    name: 'Người Khám Phá',
+    nameEn: 'Exposer',
+    team: 'village',
+    value: 4,
+    wakesAtNight: true,
+    nightOrder: 8,
+    phase: 'every',
+    ability:
+      'Một đêm trong ván, chọn 1 người chơi. Chức năng của người đó sẽ bị lộ vào sáng hôm sau.',
+    script:
+      'Người Khám Phá hãy thức dậy. Bạn có muốn khám phá chức năng của ai? Có thể không chọn ai.',
+  },
+  {
+    id: 'evil_empath',
+    name: 'Kẻ Đọc Vị',
+    nameEn: 'Evil Empath',
+    team: 'werewolf',
+    value: -5,
+    wakesAtNight: true,
+    nightOrder: 8,
+    phase: 'every',
+    ability:
+      'Mỗi đêm, bạn biết được Tiên Tri có đang ngồi cạnh một con Sói hay không.',
+    script:
+      'Kẻ Đọc Vị hãy thức dậy. Tôi sẽ cho bạn biết Tiên Tri có đang ngồi cạnh Sói hay không.',
   },
   {
     id: 'investigator',
@@ -780,6 +836,10 @@ export const ROLE_SLOTS = [
   ['dream_wolf', 1],
   ['the_thing', 1],
   ['beholder', 1],
+  ['illusion_artist', 1],
+  ['evil_empath', 1],
+  ['one_eye_seer', 1],
+  ['exposer', 1],
 ]
 
 if (import.meta.env?.DEV) {
