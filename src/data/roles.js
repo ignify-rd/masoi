@@ -335,7 +335,7 @@ const ROLES_DATA = [
     team: 'werewolf',
     value: -6,
     wakesAtNight: true,
-    nightOrder: 3.2,
+    nightOrder: 3.3,
     phase: 'night1',
     ability:
       'Phản bội thức dậy cùng Sói và biết Sói là ai. Tham gia cùng Sói để giết Dân làng. Tuy nhiên Tiên tri khi soi vào Phản bội thì vẫn ra dân làng.',
@@ -472,20 +472,6 @@ const ROLES_DATA = [
       'Tiên Tri thức dậy và chỉ vào 1 người để biết người đó có phải Sói hay không.',
   },
   {
-    id: 'aura_seer',
-    name: 'Tiên Tri Hào Quang',
-    nameEn: 'Aura Seer',
-    team: 'village',
-    value: 3,
-    wakesAtNight: true,
-    nightOrder: 6,
-    phase: 'every',
-    ability:
-      'Mỗi đêm, chỉ vào 1 người để biết người đó có chức năng đặc biệt hay không (không phải Dân làng, Ma Sói, Ma cà rồng).',
-    script:
-      'Tiên Tri Hào Quang hãy thức dậy và chỉ vào 1 người để biết người đó có chức năng đặc biệt hay không.',
-  },
-  {
     id: 'one_eye_seer',
     name: 'Tiên Tri Chột',
     nameEn: 'One-Eye Seer',
@@ -498,6 +484,20 @@ const ROLES_DATA = [
       'Mỗi đêm, chọn 1 người chơi để biết họ có phải phe Sói hay không. Nếu soi ra Sói, bạn mất chức năng cho đến khi con Sói đó bị giết.',
     script:
       'Tiên Tri Chột hãy thức dậy và chỉ vào 1 người để biết họ có phải phe Sói hay không.',
+  },
+  {
+    id: 'aura_seer',
+    name: 'Tiên Tri Hào Quang',
+    nameEn: 'Aura Seer',
+    team: 'village',
+    value: 3,
+    wakesAtNight: true,
+    nightOrder: 100,
+    phase: 'every',
+    ability:
+      'Mỗi đêm, chỉ vào 1 người để biết người đó có chức năng đặc biệt hay không (không phải Dân làng, Ma Sói, Ma cà rồng).',
+    script:
+      'Tiên Tri Hào Quang hãy thức dậy và chỉ vào 1 người để biết người đó có chức năng đặc biệt hay không.',
   },
   {
     id: 'mystic_seeker',
