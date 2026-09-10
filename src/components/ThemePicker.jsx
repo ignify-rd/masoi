@@ -48,20 +48,33 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
         <label className="theme-label" htmlFor="theme-select">
           Chủ đề
         </label>
-        <select
-          id="theme-select"
-          className="theme-select"
-          value={themeId || ''}
-          onChange={(e) => onChangeTheme(e.target.value || null)}
-        >
-          <option value="">Mặc định (không chủ đề)</option>
-          {options.map(({ theme, available }) => (
-            <option key={theme.id} value={theme.id} disabled={!available}>
-              {theme.name} ({valueLabel(theme.value)})
-              {available ? '' : ' — thiếu vai bắt buộc'}
-            </option>
-          ))}
-        </select>
+        <div className="theme-select-wrap">
+          <select
+            id="theme-select"
+            className="theme-select"
+            value={themeId || ''}
+            onChange={(e) => onChangeTheme(e.target.value || null)}
+          >
+            <option value="">Mặc định (không chủ đề)</option>
+            {options.map(({ theme, available }) => (
+              <option key={theme.id} value={theme.id} disabled={!available}>
+                {theme.name} ({valueLabel(theme.value)})
+                {available ? '' : ' — thiếu vai bắt buộc'}
+              </option>
+            ))}
+          </select>
+          {themeId && (
+            <button
+              type="button"
+              className="theme-clear-btn"
+              onClick={() => onChangeTheme(null)}
+              title="Bỏ chủ đề — chơi ván không có chủ đề"
+              aria-label="Bỏ chủ đề"
+            >
+              ✕
+            </button>
+          )}
+        </div>
         <button
           type="button"
           className="ghost-btn small"
