@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ROLE_BY_ID, TEAMS } from '../data/roles.js'
+import { ROLE_BY_ID, TEAMS, normalizeSetup } from '../data/roles.js'
 import {
   WINNER_TEAM_IDS,
   deleteMatch,
   formatMatchDate,
   loadMatches,
-  normalizeRolesFromMatch,
   normalizeThemeFromMatch,
   updateMatchWinner,
 } from '../data/matchHistory.js'
 import { THEME_BY_ID } from '../data/themes.js'
 import { showAlert, showConfirm } from '../ui/dialog.js'
+import { formatValue } from '../ui/format.js'
+import './MatchHistory.css'
 
 function HistoryIcon() {
   return (
@@ -60,10 +61,10 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
         {theme && (
           <span
             className="team-tag small history-item-theme"
-            style={{ '--team-color': TEAMS[theme.favors]?.color ?? '#eab308' }}
+            style={{ '--team-color': TEAMS[theme.favors].color }}
             title={theme.description}
           >
-            {theme.name} ({theme.value > 0 ? `+${theme.value}` : theme.value})
+            {theme.name} ({formatValue(theme.value)})
           </span>
         )}
         {editingWinner ? (
@@ -202,7 +203,7 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
   }, [open])
 
   const handleLoad = async (match) => {
-    const roles = normalizeRolesFromMatch(match.roles)
+    const roles = normalizeSetup(match.roles)
     if (Object.keys(roles).length === 0) {
       showAlert('Không thể tải ván này — vai trò không còn hợp lệ.')
       return

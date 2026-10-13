@@ -1,6 +1,8 @@
 // Popup thay cho window.alert / confirm / prompt.
 // Safari đôi khi chặn hoặc lỗi các hộp thoại gốc, nên tự dựng popup DOM.
 
+import './dialog.css'
+
 let activeCleanup = null
 
 function buildOverlay() {

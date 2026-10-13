@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite build && vite preview --host 0.0.0.0 --port 9008"
+    "preview": "vite build && vite preview --host 0.0.0.0 --port 9008",
+    "test": "vitest run",
+    "gen:sheet": "node scripts/google-sheets/build.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -15,6 +17,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vitest": "^5.0.4"
   }
 }

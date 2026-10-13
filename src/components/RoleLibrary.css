@@ -1,0 +1,262 @@
+.role-library-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: -18px -18px 16px;
+  padding: 18px 18px 14px;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
+  border-radius: 16px 16px 0 0;
+}
+
+.role-library-sticky .toolbar {
+  margin-bottom: 0;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+.search:focus {
+  border-color: var(--accent-2);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip:hover {
+  color: var(--text);
+}
+
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Role grid */
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.role-card {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.12s, border-color 0.12s;
+}
+
+.role-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-2);
+}
+
+.role-card.has-img .add-btn {
+  grid-area: actions;
+}
+
+.role-card-img {
+  display: none;
+}
+
+.role-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.role-name {
+  margin: 0;
+  font-size: 16px;
+}
+
+.role-en {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.value-badge {
+  font-weight: 700;
+  font-size: 14px;
+  padding: 3px 9px;
+  border-radius: 8px;
+  min-width: 34px;
+  text-align: center;
+}
+
+.value-badge.pos {
+  background: rgba(34, 197, 94, 0.16);
+  color: var(--pos);
+}
+
+.value-badge.neg {
+  background: rgba(239, 68, 68, 0.16);
+  color: var(--neg);
+}
+
+.value-badge.zero {
+  background: rgba(148, 163, 196, 0.16);
+  color: var(--muted);
+}
+
+.role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.phase-tag.sleep {
+  opacity: 0.8;
+}
+
+.recommended-tag {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--gold);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.limit-tag {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+}
+
+.role-card.recommended {
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.role-ability {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-soft);
+  flex: 1;
+}
+
+.add-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.add-btn:hover:not(:disabled) {
+  background: var(--accent-2);
+}
+
+.add-btn:disabled {
+  background: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.count-pill {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 920px) {
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .role-card.has-img {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    grid-template-areas:
+      'img top'
+      'img tags'
+      'img ability'
+      'img actions';
+    column-gap: 14px;
+  }
+
+  .role-card.has-img .role-card-top {
+    grid-area: top;
+  }
+
+  .role-card.has-img .role-tags {
+    grid-area: tags;
+  }
+
+  .role-card.has-img .role-ability {
+    grid-area: ability;
+  }
+
+  .role-card.has-img .add-btn {
+    grid-area: actions;
+  }
+
+  .role-card-img {
+    display: block;
+    grid-area: img;
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    background: var(--panel);
+    align-self: start;
+  }
+
+  .chip {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+
+  .add-btn {
+    min-height: 44px;
+    font-size: 15px;
+  }
+}

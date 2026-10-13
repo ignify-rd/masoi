@@ -1,55 +1,29 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ROLE_BY_ID, canIncreaseRole, clampRoleCount } from './data/roles.js'
+import { useEffect, useMemo } from 'react'
+import { canIncreaseRole, normalizeSetup } from './data/roles.js'
+import { countPlayers, sumRoleValue } from './data/balance.js'
+import { THEME_BY_ID, getThemeValue, isThemeAvailable } from './data/themes.js'
+import { useStoredState } from './ui/useStoredState.js'
 import RoleLibrary from './components/RoleLibrary.jsx'
 import SetupPanel from './components/SetupPanel.jsx'
 import NightCallOrder from './components/NightCallOrder.jsx'
 import MatchHistory from './components/MatchHistory.jsx'
 import DiscussionTimer from './components/DiscussionTimer.jsx'
-import { THEME_BY_ID, getThemeValue, isThemeAvailable } from './data/themes.js'
 
-const STORAGE_KEY = 'masoi.setup'
-const THEME_STORAGE_KEY = 'masoi.theme'
-
-function loadSelected() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw)
-    // chỉ giữ lại các id hợp lệ
-    return Object.fromEntries(
-      Object.entries(parsed)
-        .filter(([id, c]) => ROLE_BY_ID[id] && Number(c) > 0)
-        .map(([id, c]) => [id, clampRoleCount(id, Number(c))])
-        .filter(([, c]) => c > 0),
-    )
-  } catch {
-    return {}
-  }
-}
-
-function loadThemeId() {
-  try {
-    const raw = localStorage.getItem(THEME_STORAGE_KEY)
-    return raw && THEME_BY_ID[raw] ? raw : null
-  } catch {
-    return null
-  }
-}
+const parseThemeId = (id) => (THEME_BY_ID[id] ? id : null)
+const parseTimestamp = (value) => (typeof value === 'string' ? value : null)
 
 export default function App() {
-  const [selected, setSelected] = useState(loadSelected)
-  const [themeId, setThemeId] = useState(loadThemeId)
-  const [started, setStarted] = useState(false)
-  const [startedAt, setStartedAt] = useState(null)
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(selected))
-  }, [selected])
-
-  useEffect(() => {
-    if (themeId) localStorage.setItem(THEME_STORAGE_KEY, themeId)
-    else localStorage.removeItem(THEME_STORAGE_KEY)
-  }, [themeId])
+  const [selected, setSelected] = useStoredState('masoi.setup', {}, {
+    parse: normalizeSetup,
+  })
+  const [themeId, setThemeId] = useStoredState('masoi.theme', null, {
+    parse: parseThemeId,
+  })
+  // Lưu lại để tải lại trang giữa ván không bị đá về màn sắp ván.
+  const [startedAt, setStartedAt] = useStoredState('masoi.startedAt', null, {
+    parse: parseTimestamp,
+  })
+  const started = startedAt != null
 
   // Bỏ chủ đề khi setup không còn thỏa yêu cầu vai bắt buộc.
   useEffect(() => {
@@ -57,13 +31,11 @@ export default function App() {
     if (theme && !isThemeAvailable(theme, selected)) setThemeId(null)
   }, [themeId, selected])
 
-  const add = (id) =>
+  const inc = (id) =>
     setSelected((s) => {
       if (!canIncreaseRole(id, s)) return s
       return { ...s, [id]: (s[id] || 0) + 1 }
     })
-
-  const inc = add
 
   const dec = (id) =>
     setSelected((s) => {
@@ -85,23 +57,13 @@ export default function App() {
 
   const loadSetup = (roles, nextThemeId = null) => {
     setSelected(roles)
-    setThemeId(THEME_BY_ID[nextThemeId] ? nextThemeId : null)
+    setThemeId(parseThemeId(nextThemeId))
   }
 
-  const totalPlayers = useMemo(
-    () => Object.values(selected).reduce((a, b) => a + b, 0),
-    [selected],
-  )
+  const stopMatch = () => setStartedAt(null)
 
-  const rolesValue = useMemo(
-    () =>
-      Object.entries(selected).reduce(
-        (sum, [id, c]) => sum + (ROLE_BY_ID[id]?.value || 0) * c,
-        0,
-      ),
-    [selected],
-  )
-
+  const totalPlayers = useMemo(() => countPlayers(selected), [selected])
+  const rolesValue = useMemo(() => sumRoleValue(selected), [selected])
   const totalValue = rolesValue + getThemeValue(themeId, selected)
 
   const theme = THEME_BY_ID[themeId] || null
@@ -133,20 +95,14 @@ export default function App() {
             theme={theme}
             totalPlayers={totalPlayers}
             startedAt={startedAt}
-            onBack={() => {
-              setStarted(false)
-              setStartedAt(null)
-            }}
-            onEndMatch={() => {
-              setStarted(false)
-              setStartedAt(null)
-            }}
+            onBack={stopMatch}
+            onEndMatch={stopMatch}
           />
           <DiscussionTimer />
         </main>
       ) : (
         <main className="app-main">
-          <RoleLibrary selected={selected} onAdd={add} />
+          <RoleLibrary selected={selected} onAdd={inc} />
           <SetupPanel
             selected={selected}
             totalPlayers={totalPlayers}
@@ -158,10 +114,7 @@ export default function App() {
             onRemove={remove}
             onClear={clear}
             onLoadSetup={loadSetup}
-            onStart={() => {
-              setStartedAt(new Date().toISOString())
-              setStarted(true)
-            }}
+            onStart={() => setStartedAt(new Date().toISOString())}
           />
         </main>
       )}

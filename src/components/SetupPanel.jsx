@@ -1,10 +1,7 @@
 import { useState } from 'react'
-import {
-  ROLE_BY_ID,
-  TEAMS,
-  canIncreaseRole,
-  getRoleImageSrc,
-} from '../data/roles.js'
+import { ROLE_BY_ID, TEAMS, canIncreaseRole } from '../data/roles.js'
+import { getRoleImageSrc } from '../data/roleImages.js'
+import { balanceTone } from '../data/balance.js'
 import {
   SUGGEST_MAX_PLAYERS,
   SUGGEST_MIN_PLAYERS,
@@ -14,6 +11,8 @@ import { decodeSetupCode, encodeSetupCode } from '../data/roleCode.js'
 import BalanceMeter from './BalanceMeter.jsx'
 import ThemePicker from './ThemePicker.jsx'
 import { showAlert, showConfirm, showPrompt } from '../ui/dialog.js'
+import { formatValue, valueTone } from '../ui/format.js'
+import './SetupPanel.css'
 
 const TEAM_ORDER = ['other', 'vampire', 'werewolf', 'village']
 
@@ -61,12 +60,6 @@ function TeamBreakdown({ counts }) {
       })}
     </div>
   )
-}
-
-function balanceClass(total) {
-  if (total > 3) return 'village'
-  if (total < -3) return 'werewolf'
-  return 'balanced'
 }
 
 export default function SetupPanel({
@@ -142,7 +135,6 @@ export default function SetupPanel({
   const entries = Object.entries(selected).filter(([, c]) => c > 0)
   const sortedEntries = sortEntriesByTeam(entries)
   const teamCounts = countByTeam(entries)
-  const valueLabel = totalValue > 0 ? `+${totalValue}` : String(totalValue)
 
   return (
     <section
@@ -193,8 +185,8 @@ export default function SetupPanel({
           <span>người chơi</span>
           {entries.length > 0 && <TeamBreakdown counts={teamCounts} />}
         </div>
-        <span className={`setup-dock-balance ${balanceClass(totalValue)}`}>
-          {valueLabel}
+        <span className={`setup-dock-balance ${balanceTone(totalValue)}`}>
+          {formatValue(totalValue)}
         </span>
         <span className="setup-dock-chevron" aria-hidden="true">
           {expanded ? '▾' : '▴'}
@@ -304,16 +296,8 @@ export default function SetupPanel({
                   )}
                   <div className="selected-main">
                     <span className="selected-name">{role.name}</span>
-                    <span
-                      className={`selected-value${
-                        role.value > 0
-                          ? ' pos'
-                          : role.value < 0
-                            ? ' neg'
-                            : ' zero'
-                      }`}
-                    >
-                      {role.value > 0 ? `+${role.value}` : role.value}
+                    <span className={`selected-value ${valueTone(role.value)}`}>
+                      {formatValue(role.value)}
                     </span>
                   </div>
                   <div className="stepper">
