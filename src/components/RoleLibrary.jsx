@@ -1,22 +1,27 @@
 import { useMemo, useState } from 'react'
-import { ROLES, TEAMS, PHASE_LABEL, getRoleImageSrc } from '../data/roles.js'
+import { ROLES, TEAMS, TEAM_IDS, PHASE_LABEL } from '../data/roles.js'
+import { getRoleImageSrc } from '../data/roleImages.js'
+import { formatValue, valueTone } from '../ui/format.js'
+import './RoleLibrary.css'
 
 const ROLE_ORDER = new Map(ROLES.map((role, index) => [role.id, index]))
 
 const FILTERS = [
   { id: 'all', label: 'Tất cả' },
-  { id: 'village', label: TEAMS.village.label },
-  { id: 'werewolf', label: TEAMS.werewolf.label },
-  { id: 'vampire', label: TEAMS.vampire.label },
-  { id: 'other', label: TEAMS.other.label },
+  ...TEAM_IDS.map((id) => ({ id, label: TEAMS[id].label })),
 ]
 
 function ValueBadge({ value }) {
-  const cls = value > 0 ? 'pos' : value < 0 ? 'neg' : 'zero'
   return (
-    <span className={`value-badge ${cls}`} title="Điểm cân bằng">
-      {value > 0 ? `+${value}` : value}
+    <span className={`value-badge ${valueTone(value)}`} title="Điểm cân bằng">
+      {formatValue(value)}
     </span>
+  )
+}
+
+function matchesQuery(role, q) {
+  return [role.name, role.nameEn, ...(role.aliases ?? [])].some((name) =>
+    name.toLowerCase().includes(q),
   )
 }
 
@@ -28,10 +33,7 @@ export default function RoleLibrary({ selected, onAdd }) {
     const q = query.trim().toLowerCase()
     return ROLES.filter((r) => {
       const okTeam = filter === 'all' || r.team === filter
-      const okQuery =
-        !q ||
-        r.name.toLowerCase().includes(q) ||
-        r.nameEn.toLowerCase().includes(q)
+      const okQuery = !q || matchesQuery(r, q)
       return okTeam && okQuery
     }).sort((a, b) => {
       if (Boolean(b.recommended) !== Boolean(a.recommended)) {

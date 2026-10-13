@@ -1,0 +1,115 @@
+/* Discussion timer */
+.discussion-timer {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.timer-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 52px;
+  height: 52px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: border-color 0.15s;
+}
+
+.timer-toggle-btn:hover {
+  border-color: var(--accent-2);
+}
+
+.timer-toggle-time {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-panel {
+  width: 240px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timer-display {
+  font-size: 40px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.timer-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.timer-presets .ghost-btn.active {
+  color: var(--text);
+  border-color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 15%, transparent);
+}
+
+.timer-custom {
+  display: flex;
+  gap: 6px;
+}
+
+.timer-custom-input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.timer-custom-input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
+
+.timer-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.discussion-timer.finished .timer-toggle-btn,
+.discussion-timer.finished .timer-display {
+  animation: timer-flash 0.6s ease-in-out infinite alternate;
+}
+
+.discussion-timer.finished .timer-toggle-btn {
+  border-color: var(--neg);
+}
+
+@keyframes timer-flash {
+  from {
+    color: var(--text);
+  }
+  to {
+    color: var(--neg);
+  }
+}

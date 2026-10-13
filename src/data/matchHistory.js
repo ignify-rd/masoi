@@ -1,9 +1,10 @@
-import { ROLE_BY_ID, clampRoleCount } from './roles.js'
+import { TEAM_IDS } from './roles.js'
 import { THEME_BY_ID } from './themes.js'
+import { readStored, writeStored } from './storage.js'
 
-export const MATCHES_STORAGE_KEY = 'masoi.matches'
+const MATCHES_STORAGE_KEY = 'masoi.matches'
 
-export const WINNER_TEAM_IDS = ['village', 'werewolf', 'vampire', 'other']
+export const WINNER_TEAM_IDS = TEAM_IDS
 
 function newId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -13,24 +14,14 @@ function newId() {
 }
 
 export function loadMatches() {
-  try {
-    const raw = localStorage.getItem(MATCHES_STORAGE_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
+  return readStored(MATCHES_STORAGE_KEY, [], (value) =>
+    Array.isArray(value) ? value : null,
+  )
 }
 
-export function normalizeRolesFromMatch(roles) {
-  if (!roles || typeof roles !== 'object') return {}
-  return Object.fromEntries(
-    Object.entries(roles)
-      .filter(([id, c]) => ROLE_BY_ID[id] && Number(c) > 0)
-      .map(([id, c]) => [id, clampRoleCount(id, Number(c))])
-      .filter(([, c]) => c > 0),
-  )
+function storeMatches(matches) {
+  writeStored(MATCHES_STORAGE_KEY, matches)
+  return matches
 }
 
 /** Chủ đề của ván đã lưu (null nếu ván chơi mặc định hoặc chủ đề đã bị xóa). */
@@ -72,22 +63,18 @@ export function saveMatch({
     themeId: normalizeThemeFromMatch(themeId),
   }
 
-  const matches = loadMatches()
-  matches.unshift(match)
-  localStorage.setItem(MATCHES_STORAGE_KEY, JSON.stringify(matches))
+  storeMatches([match, ...loadMatches()])
   return match
 }
 
 export function deleteMatch(id) {
-  const matches = loadMatches().filter((match) => match.id !== id)
-  localStorage.setItem(MATCHES_STORAGE_KEY, JSON.stringify(matches))
-  return matches
+  return storeMatches(loadMatches().filter((match) => match.id !== id))
 }
 
 export function updateMatchWinner(id, winner) {
-  const matches = loadMatches().map((match) =>
-    match.id === id ? { ...match, winner: winner || null } : match,
+  return storeMatches(
+    loadMatches().map((match) =>
+      match.id === id ? { ...match, winner: winner || null } : match,
+    ),
   )
-  localStorage.setItem(MATCHES_STORAGE_KEY, JSON.stringify(matches))
-  return matches
 }

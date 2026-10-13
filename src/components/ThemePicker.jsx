@@ -8,16 +8,8 @@ import {
   requirementLabel,
 } from '../data/themes.js'
 import { showAlert } from '../ui/dialog.js'
-
-function valueLabel(value) {
-  return value > 0 ? `+${value}` : String(value)
-}
-
-function valueClass(value) {
-  if (value > 0) return 'pos'
-  if (value < 0) return 'neg'
-  return 'zero'
-}
+import { formatValue, valueTone } from '../ui/format.js'
+import './ThemePicker.css'
 
 export default function ThemePicker({ selected, themeId, onChangeTheme }) {
   const options = useMemo(
@@ -58,7 +50,7 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
             <option value="">Mặc định (không chủ đề)</option>
             {options.map(({ theme, available }) => (
               <option key={theme.id} value={theme.id} disabled={!available}>
-                {theme.name} ({valueLabel(theme.value)})
+                {theme.name} ({formatValue(theme.value)})
                 {available ? '' : ' — thiếu vai bắt buộc'}
               </option>
             ))}
@@ -89,21 +81,21 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
       {current ? (
         <div
           className="theme-card"
-          style={{ '--team-color': TEAMS[current.favors]?.color ?? '#eab308' }}
+          style={{ '--team-color': TEAMS[current.favors].color }}
         >
           <div className="theme-card-head">
             <strong className="theme-card-name">{current.name}</strong>
-            <span className={`theme-card-value ${valueClass(current.value)}`}>
-              {valueLabel(current.value)}
+            <span className={`theme-card-value ${valueTone(current.value)}`}>
+              {formatValue(current.value)}
             </span>
           </div>
           <p className="theme-card-desc">{current.description}</p>
           <div className="theme-card-meta">
             <span
               className="team-tag small"
-              style={{ '--team-color': TEAMS[current.favors]?.color ?? '#eab308' }}
+              style={{ '--team-color': TEAMS[current.favors].color }}
             >
-              Lợi cho {TEAMS[current.favors]?.label ?? 'phe thứ 3'}
+              Lợi cho {TEAMS[current.favors].label}
             </span>
             {current.requires.length > 0 && (
               <span className="muted theme-card-req">

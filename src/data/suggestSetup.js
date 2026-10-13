@@ -1,4 +1,5 @@
 import { ROLE_BY_ID } from './roles.js'
+import { countPlayers, isBalanced, sumRoleValue } from './balance.js'
 
 export const SUGGEST_MIN_PLAYERS = 4
 export const SUGGEST_MAX_PLAYERS = 24
@@ -6,27 +7,18 @@ export const SUGGEST_MAX_PLAYERS = 24
 const WOLF_ID = 'werewolf'
 const VILLAGER_ID = 'villager'
 
-/** Vai có chữ "Sói" trong tên (Ma Sói, Sói Con, …). */
-export function isWolfNamedRole(id) {
-  return (ROLE_BY_ID[id]?.name || '').includes('Sói')
-}
-
-/** Số lá Dân Làng (dân thường). */
-export function countVillagers(setup) {
-  return setup[VILLAGER_ID] || 0
-}
-
-/** Tổng số lá có tên chứa "Sói". */
-export function countWolfNamed(setup) {
+function countWolves(setup) {
   return Object.entries(setup).reduce(
-    (sum, [id, count]) => (isWolfNamedRole(id) ? sum + count : sum),
+    (sum, [id, count]) =>
+      ROLE_BY_ID[id]?.team === 'werewolf' ? sum + count : sum,
     0,
   )
 }
 
-/** Dân Làng >= số vai tên Sói. */
-export function meetsVillagerGteWolf(setup) {
-  return countVillagers(setup) >= countWolfNamed(setup)
+/** Ràng buộc của setup gợi ý: phe Sói <= 1/3 số người và Dân Làng >= phe Sói. */
+function meetsWolfLimits(setup) {
+  const wolves = countWolves(setup)
+  return wolves * 3 <= countPlayers(setup) && (setup[VILLAGER_ID] || 0) >= wolves
 }
 
 const SPECIAL_TIERS = [
@@ -55,13 +47,6 @@ function specialCountFor(n) {
   return SPECIAL_TIERS.filter((t) => n >= t.minPlayers).length
 }
 
-function computeTotalValue(setup) {
-  return Object.entries(setup).reduce(
-    (sum, [id, count]) => sum + (ROLE_BY_ID[id]?.value || 0) * count,
-    0,
-  )
-}
-
 function canSwap(setup, { from, to }) {
   if ((setup[from] || 0) <= 0) return false
   if (from === WOLF_ID && setup[from] <= 1) return false
@@ -69,8 +54,7 @@ function canSwap(setup, { from, to }) {
   if (!toRole) return false
   if ((setup[to] || 0) >= toRole.max) return false
 
-  const next = applySwap(setup, { from, to })
-  return meetsVillagerGteWolf(next)
+  return meetsWolfLimits(applySwap(setup, { from, to }))
 }
 
 function applySwap(setup, { from, to }) {
@@ -82,28 +66,25 @@ function applySwap(setup, { from, to }) {
 }
 
 /** Giảm Sói hoặc đổi vai đặc biệt → Dân Làng cho đến khi đủ ràng buộc. */
-function enforceVillagerGteWolf(setup) {
+function enforceWolfLimits(setup) {
   let next = { ...setup }
-  while (!meetsVillagerGteWolf(next)) {
+  while (!meetsWolfLimits(next)) {
     if ((next[WOLF_ID] || 0) > 1) {
-      next[WOLF_ID] -= 1
-      if (next[WOLF_ID] <= 0) delete next[WOLF_ID]
-      next[VILLAGER_ID] = (next[VILLAGER_ID] || 0) + 1
+      next = applySwap(next, { from: WOLF_ID, to: VILLAGER_ID })
       continue
     }
     const special = [...SPECIAL_TIERS]
       .reverse()
       .find((t) => (next[t.id] || 0) > 0)
     if (!special) break
-    next[special.id] -= 1
-    if (next[special.id] <= 0) delete next[special.id]
-    next[VILLAGER_ID] = (next[VILLAGER_ID] || 0) + 1
+    next = applySwap(next, { from: special.id, to: VILLAGER_ID })
   }
   return next
 }
 
 /**
- * Gợi ý lineup cân bằng: số lá Dân Làng >= tổng vai có "Sói" trong tên.
+ * Gợi ý lineup cân bằng: phe Sói <= 1/3 số người, số lá Dân Làng >= phe Sói,
+ * tổng điểm trong khoảng cân bằng nếu đổi vai được.
  */
 export function suggestSetup(totalPlayers) {
   const n = Math.max(
@@ -115,10 +96,9 @@ export function suggestSetup(totalPlayers) {
   let setup = {}
 
   // Chỗ cho Dân Làng = n - sói - đặc biệt; cần >= số sói → sói <= (n - đặc biệt) / 2.
-  const slotsAfterSpecials = n - specials
-  const maxWolves = Math.max(1, Math.floor(slotsAfterSpecials / 2))
+  const maxWolves = Math.max(1, Math.floor((n - specials) / 2))
   const wolves = Math.min(
-    Math.max(1, Math.round(n / 3)),
+    Math.max(1, Math.floor(n / 3)),
     maxWolves,
     ROLE_BY_ID[WOLF_ID].max,
   )
@@ -135,8 +115,8 @@ export function suggestSetup(totalPlayers) {
   if (used < n) setup[VILLAGER_ID] = n - used
 
   for (let i = 0; i < 12; i++) {
-    const total = computeTotalValue(setup)
-    if (total >= -3 && total <= 3) break
+    const total = sumRoleValue(setup)
+    if (isBalanced(total)) break
 
     let best = null
     let bestDistance = Math.abs(total)
@@ -155,5 +135,5 @@ export function suggestSetup(totalPlayers) {
     setup = applySwap(setup, best)
   }
 
-  return enforceVillagerGteWolf(setup)
+  return enforceWolfLimits(setup)
 }

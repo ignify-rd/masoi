@@ -8,6 +8,7 @@
  *     { roles: [...id], min: 1 }  -> tổng số lượng các vai trong danh sách >= min
  *     { team: 'vampire', min: 1 } -> tổng số vai thuộc phe đó >= min
  *     label: mô tả điều kiện để hiển thị.
+ * - aliases: tên gọi khác (VD tên trên Google Sheet), tên chính đã tự được nhận.
  */
 
 import { ROLE_BY_ID, TEAMS } from './roles.js'
@@ -16,7 +17,9 @@ import { ROLE_BY_ID, TEAMS } from './roles.js'
 // QUY TẮC: KHÔNG BAO GIỜ đổi/xoá/dùng lại mã của theme đã tồn tại — mọi code
 // cũ đã share sẽ giải mã sai theme nếu mã bị đổi. Thêm theme mới thì luôn
 // gán 1 ký tự CHƯA từng dùng (xem roleCode.js để biết cách sinh ký tự tiếp theo).
-const THEME_CODE_BY_ID = {
+// Xoá theme thì GIỮ dòng mã ở đây để ký tự đó không bị dùng lại.
+// Sửa xong chạy `npm run gen:sheet` để cập nhật Google Sheet script.
+export const THEME_CODE_BY_ID = {
   endless_night: '0',
   distant_howl: '1',
   thick_fog: '2',
@@ -455,6 +458,7 @@ const THEMES_DATA = [
   {
     id: 'witch_sabbath',
     name: 'Đêm Hội Phù Thủy',
+    aliases: ['Hội Phù Thủy'],
     description:
       'Đêm hội mở kho thuốc: Phù Thủy được chọn dùng 3 bình giết thay vì 1 bình cứu và 1 bình giết.',
     value: 3,

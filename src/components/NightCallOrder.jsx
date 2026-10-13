@@ -1,150 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ROLES, ROLE_BY_ID, TEAMS, PHASE_LABEL, NIGHT_EXTRAS } from '../data/roles.js'
+import { useMemo, useState } from 'react'
+import { ROLES, TEAMS, PHASE_LABEL } from '../data/roles.js'
+import { buildNightSteps } from '../data/nightSteps.js'
 import { saveMatch, WINNER_TEAM_IDS } from '../data/matchHistory.js'
 import { requirementLabel } from '../data/themes.js'
 import { showAlert, showConfirm, showPrompt } from '../ui/dialog.js'
+import { formatValue, valueTone } from '../ui/format.js'
+import { useStoredState } from '../ui/useStoredState.js'
+import './NightCallOrder.css'
 
 const NOTES_STORAGE_KEY = 'masoi.nightNotes'
 const HIDDEN_STORAGE_KEY = 'masoi.nightHidden'
 
-function loadNotes() {
-  try {
-    const raw = localStorage.getItem(NOTES_STORAGE_KEY)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw)
-    return parsed && typeof parsed === 'object' ? parsed : {}
-  } catch {
-    return {}
-  }
-}
-
-function loadHidden() {
-  try {
-    const raw = localStorage.getItem(HIDDEN_STORAGE_KEY)
-    if (!raw) return new Set()
-    const parsed = JSON.parse(raw)
-    return new Set(Array.isArray(parsed) ? parsed : [])
-  } catch {
-    return new Set()
-  }
-}
-
-/** Khóa ổn định cho ghi chú từng bước (không phụ thuộc thứ tự hiển thị). */
-function getStepKey(step) {
-  if (step.kind === 'close') {
-    const base =
-      step.role?.id ??
-      (step.themeStep ? `theme:${step.themeStep.id}` : `extra:${step.extra?.id}`)
-    const sub = step.sub?.name ? `:sub:${step.sub.name}` : ''
-    return `close:${base}${sub}`
-  }
-  if (step.kind === 'sub') return `sub:${step.role.id}:${step.sub.name}`
-  if (step.kind === 'extra') return `extra:${step.extra.id}`
-  if (step.kind === 'theme') return `theme:${step.themeStep.id}`
-  return `role:${step.role.id}`
-}
-
-function getStepPhase(step) {
-  if (step.kind === 'close') {
-    if (step.sub) return step.sub.phase
-    if (step.role) return step.role.phase
-    if (step.extra) return step.extra.phase
-    if (step.themeStep) return step.themeStep.phase
-    return 'every'
-  }
-  if (step.kind === 'sub') return step.sub.phase
-  if (step.kind === 'extra') return step.extra.phase
-  if (step.kind === 'theme') return step.themeStep.phase
-  return step.role.phase
-}
-
-/** Khóa dùng chung cho bước chính và các bước đóng (close) đi kèm. */
-function getVisibilityKey(step) {
-  if (step.kind === 'close') {
-    if (step.sub) return `sub:${step.role.id}:${step.sub.name}`
-    if (step.role) return `role:${step.role.id}`
-    if (step.extra) return `extra:${step.extra.id}`
-    if (step.themeStep) return `theme:${step.themeStep.id}`
-  }
-  return getStepKey(step)
-}
-
-function getStepLabel(step) {
-  if (step.kind === 'close') return 'Đóng mắt'
-  if (step.kind === 'sub') return step.sub.name
-  if (step.kind === 'extra') return step.extra.name
-  if (step.kind === 'theme') return step.themeStep.name
-  return step.role.name
-}
-
-function shouldIncludeExtra(extra, selected, totalPlayers) {
-  if ((selected[extra.requiresRole] || 0) <= 0) return false
-  if (extra.minPlayers != null && totalPlayers < extra.minPlayers) return false
-  if (extra.maxPlayers != null && totalPlayers > extra.maxPlayers) return false
-  return true
-}
-
-/** Mở rộng danh sách role thành các bước gọi đêm (kèm bước phụ / bước bổ sung). */
-function buildNightSteps(selected, totalPlayers, theme) {
-  const roles = Object.keys(selected)
-    .filter((id) => (selected[id] || 0) > 0)
-    .map((id) => ROLE_BY_ID[id])
-    .filter((role) => role.wakesAtNight)
-    .sort((a, b) => a.nightOrder - b.nightOrder)
-
-  const items = []
-
-  for (const role of roles) {
-    const base = role.nightOrder
-    items.push({ sortKey: base, kind: 'role', role })
-
-    if (role.scriptClose) {
-      items.push({ sortKey: base + 0.01, kind: 'close', role, script: role.scriptClose })
-    }
-
-    for (const sub of role.nightSubSteps ?? []) {
-      items.push({ sortKey: base + 0.02, kind: 'sub', role, sub })
-      if (sub.scriptClose) {
-        items.push({
-          sortKey: base + 0.03,
-          kind: 'close',
-          role,
-          sub,
-          script: sub.scriptClose,
-        })
-      }
-    }
-  }
-
-  for (const extra of Object.values(NIGHT_EXTRAS)) {
-    if (!shouldIncludeExtra(extra, selected, totalPlayers)) continue
-
-    items.push({ sortKey: extra.nightOrder, kind: 'extra', extra })
-    if (extra.scriptClose) {
-      items.push({
-        sortKey: extra.nightOrder + 0.01,
-        kind: 'close',
-        extra,
-        script: extra.scriptClose,
-      })
-    }
-  }
-
-  for (const themeStep of theme?.nightSteps ?? []) {
-    items.push({ sortKey: themeStep.nightOrder, kind: 'theme', themeStep })
-    if (themeStep.scriptClose) {
-      items.push({
-        sortKey: themeStep.nightOrder + 0.01,
-        kind: 'close',
-        themeStep,
-        script: themeStep.scriptClose,
-      })
-    }
-  }
-
-  items.sort((a, b) => a.sortKey - b.sortKey)
-  return items
-}
+const parseNotes = (value) =>
+  value && typeof value === 'object' && !Array.isArray(value) ? value : null
+const parseHidden = (value) => (Array.isArray(value) ? new Set(value) : null)
+const serializeHidden = (set) => [...set]
 
 const TEAM_ORDER = ['vampire', 'werewolf', 'village', 'other']
 
@@ -183,32 +53,34 @@ function pickTwoRandomPlayers(totalPlayers) {
   return [pool[0], pool[1]].sort((a, b) => a - b)
 }
 
+function StepTag({ tag }) {
+  if (tag.team) {
+    return (
+      <span
+        className="team-tag small"
+        style={{ '--team-color': tag.team.color }}
+      >
+        {tag.team.label}
+      </span>
+    )
+  }
+  return (
+    <span className={`phase-tag small${tag.variant ? ` ${tag.variant}` : ''}`}>
+      {tag.label}
+    </span>
+  )
+}
+
 function StepCard({
   step,
   index,
   note,
   onNoteChange,
   hidden,
-  canToggle,
   onToggleVisibility,
   totalPlayers,
 }) {
-  const phase = getStepPhase(step)
-  const label = getStepLabel(step)
-
-  if (step.kind === 'close') {
-    if (hidden) return null
-    return (
-      <li className="step step-close">
-        <span className="step-no dim">{index}</span>
-        <div className="step-body">
-          <p className="step-script">"{step.script}"</p>
-        </div>
-      </li>
-    )
-  }
-
-  if (hidden && canToggle) {
+  if (hidden) {
     return (
       <li className="step step-collapsed">
         <button
@@ -216,79 +88,29 @@ function StepCard({
           className="step-reveal-btn"
           onClick={onToggleVisibility}
         >
-          <span className="step-reveal-phase">{PHASE_LABEL[phase]}</span>
-          <span className="step-reveal-name">{label}</span>
+          <span className="step-reveal-phase">{PHASE_LABEL[step.phase]}</span>
+          <span className="step-reveal-name">{step.name}</span>
           <span className="step-reveal-action">Hiện</span>
         </button>
       </li>
     )
   }
 
-  const isSub = step.kind === 'sub'
-  const isExtra = step.kind === 'extra'
-  const isTheme = step.kind === 'theme'
-  const themeStep = step.themeStep
-  const role = step.role
-  const sub = step.sub
-  const extra = step.extra
-  const team = role ? TEAMS[role.team] : null
-  const name = isTheme
-    ? themeStep.name
-    : isExtra
-      ? extra.name
-      : isSub
-        ? sub.name
-        : role.name
-  const script = isTheme
-    ? themeStep.script
-    : isExtra
-      ? extra.script
-      : isSub
-        ? sub.script
-        : role.script
-  const moderatorNote = isTheme
-    ? themeStep.moderatorNote
-    : isExtra
-      ? extra.moderatorNote
-      : isSub
-        ? sub.moderatorNote
-        : null
-  const isCupid = step.kind === 'role' && role?.id === 'cupid'
-  const memoPlaceholder =
-    isExtra || isTheme ? 'Ghi chú cho bước này...' : `VD: ${name} — Minh, Lan...`
+  const memoPlaceholder = step.nested
+    ? 'Ghi chú cho bước này...'
+    : `VD: ${step.name} — Minh, Lan...`
 
   return (
-    <li className={`step ${isSub || isExtra || isTheme ? 'step-sub' : ''}`}>
+    <li className={step.nested ? 'step step-sub' : 'step'}>
       <span className="step-no">{index}</span>
       <div className="step-body">
         <div className="step-title">
-          {(isSub || isExtra || isTheme) && <span className="sub-arrow">↳</span>}
-          <span className="step-name">{name}</span>
-          {isTheme && <span className="phase-tag small condition">Chủ đề</span>}
-          {!isSub && !isExtra && !isTheme && team && (
-            <span
-              className="team-tag small"
-              style={{ '--team-color': team.color }}
-            >
-              {team.label}
-            </span>
-          )}
-          {isSub && sub.optional && (
-            <span className="phase-tag small optional">Tùy chọn</span>
-          )}
-          <span className="phase-tag small">{PHASE_LABEL[phase]}</span>
-          {isExtra && extra.playerCondition && (
-            <span className="phase-tag small condition">{extra.playerCondition}</span>
-          )}
-          {isSub && (
-            <span className="phase-tag small parent">Sau {role.name}</span>
-          )}
-          {isExtra && (
-            <span className="phase-tag small parent">
-              Khi có {ROLE_BY_ID[extra.requiresRole]?.name}
-            </span>
-          )}
-          {canToggle && (
+          {step.nested && <span className="sub-arrow">↳</span>}
+          <span className="step-name">{step.name}</span>
+          {step.tags.map((tag, i) => (
+            <StepTag key={i} tag={tag} />
+          ))}
+          {step.hideable && (
             <button
               type="button"
               className="step-hide-btn"
@@ -298,8 +120,8 @@ function StepCard({
             </button>
           )}
         </div>
-        {script && <p className="step-script">"{script}"</p>}
-        {isCupid && (
+        {step.script && <p className="step-script">"{step.script}"</p>}
+        {step.randomPair && (
           <div className="step-cupid-random">
             <button
               type="button"
@@ -319,7 +141,7 @@ function StepCard({
             )}
           </div>
         )}
-        {moderatorNote && <p className="step-note">{moderatorNote}</p>}
+        {step.note && <p className="step-note">{step.note}</p>}
         <label className="step-memo">
           <span className="step-memo-label">Ghi chú</span>
           <input
@@ -343,8 +165,14 @@ export default function NightCallOrder({
   onBack,
   onEndMatch,
 }) {
-  const [notes, setNotes] = useState(loadNotes)
-  const [hiddenSteps, setHiddenSteps] = useState(loadHidden)
+  const [notes, setNotes] = useStoredState(NOTES_STORAGE_KEY, {}, {
+    parse: parseNotes,
+  })
+  const [hiddenSteps, setHiddenSteps] = useStoredState(
+    HIDDEN_STORAGE_KEY,
+    new Set(),
+    { parse: parseHidden, serialize: serializeHidden },
+  )
   const [winner, setWinner] = useState('')
   const [copied, setCopied] = useState(false)
 
@@ -352,17 +180,6 @@ export default function NightCallOrder({
     () => buildNightSteps(selected, totalPlayers, theme),
     [selected, totalPlayers, theme],
   )
-
-  useEffect(() => {
-    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes))
-  }, [notes])
-
-  useEffect(() => {
-    localStorage.setItem(
-      HIDDEN_STORAGE_KEY,
-      JSON.stringify([...hiddenSteps]),
-    )
-  }, [hiddenSteps])
 
   const toggleVisibility = (key) => {
     setHiddenSteps((prev) => {
@@ -431,12 +248,12 @@ export default function NightCallOrder({
       themeId: theme?.id ?? null,
     })
 
-    localStorage.removeItem(NOTES_STORAGE_KEY)
-    localStorage.removeItem(HIDDEN_STORAGE_KEY)
     setNotes({})
     setHiddenSteps(new Set())
     onEndMatch()
   }
+
+  let displayIndex = 0
 
   return (
     <section className="panel call-order">
@@ -466,16 +283,12 @@ export default function NightCallOrder({
       {theme && (
         <div
           className="game-theme"
-          style={{ '--team-color': TEAMS[theme.favors]?.color ?? '#eab308' }}
+          style={{ '--team-color': TEAMS[theme.favors].color }}
         >
           <div className="game-theme-head">
             <span className="game-theme-label">Chủ đề ván</span>
-            <span
-              className={`game-theme-value${
-                theme.value > 0 ? ' pos' : theme.value < 0 ? ' neg' : ' zero'
-              }`}
-            >
-              {theme.value > 0 ? `+${theme.value}` : theme.value} điểm
+            <span className={`game-theme-value ${valueTone(theme.value)}`}>
+              {formatValue(theme.value)} điểm
             </span>
           </div>
           <h3 className="game-theme-title">{theme.name}</h3>
@@ -519,34 +332,21 @@ export default function NightCallOrder({
         </p>
       ) : (
         <ol className="steps">
-          {(() => {
-            let displayIndex = 0
-            return steps.map((step) => {
-              const stepKey = getStepKey(step)
-              const visibilityKey = getVisibilityKey(step)
-              const hidden = hiddenSteps.has(visibilityKey)
-              const canToggle =
-                step.kind !== 'close' && getStepPhase(step) !== 'every' && getStepPhase(step) !== 'fromNight2'
-
-              if (step.kind === 'close' && hidden) return null
-
-              const index = hidden && canToggle ? null : ++displayIndex
-
-              return (
-                <StepCard
-                  key={stepKey}
-                  step={step}
-                  index={index}
-                  note={notes[stepKey] || ''}
-                  onNoteChange={(value) => setNote(stepKey, value)}
-                  hidden={hidden}
-                  canToggle={canToggle}
-                  onToggleVisibility={() => toggleVisibility(visibilityKey)}
-                  totalPlayers={totalPlayers}
-                />
-              )
-            })
-          })()}
+          {steps.map((step) => {
+            const hidden = step.hideable && hiddenSteps.has(step.key)
+            return (
+              <StepCard
+                key={step.key}
+                step={step}
+                index={hidden ? null : ++displayIndex}
+                note={notes[step.key] || ''}
+                onNoteChange={(value) => setNote(step.key, value)}
+                hidden={hidden}
+                onToggleVisibility={() => toggleVisibility(step.key)}
+                totalPlayers={totalPlayers}
+              />
+            )
+          })}
         </ol>
       )}
 

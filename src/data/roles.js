@@ -5,6 +5,12 @@
 // nightOrder: thứ tự được gọi dậy trong đêm (chuẩn rulebook).
 // phase: 'every' = gọi mỗi đêm | 'night1' = chỉ đêm 1 | 'night2' = chỉ đêm 2
 //        | 'fromNight2' = từ đêm 2 trở đi.
+// aliases: tên gọi khác (VD tên cột trên Google Sheet) — tên/nameEn/id đã tự
+//          được nhận, chỉ cần ghi những tên khác hẳn.
+// randomPair: bước gọi đêm có nút chọn ngẫu nhiên 2 số người chơi.
+//
+// File này phải là dữ liệu thuần (không dùng API riêng của Vite) để
+// scripts/google-sheets/build.mjs chạy được bằng node.
 
 export const TEAMS = {
   village: { id: 'village', label: 'Dân làng', color: '#22c55e' },
@@ -12,6 +18,8 @@ export const TEAMS = {
   vampire: { id: 'vampire', label: 'Ma cà rồng', color: '#a855f7' },
   other: { id: 'other', label: 'Khác', color: '#eab308' },
 }
+
+export const TEAM_IDS = Object.keys(TEAMS)
 
 export const PHASE_LABEL = {
   every: 'Mỗi đêm',
@@ -141,6 +149,7 @@ const ROLES_DATA = [
     id: 'tough_guy',
     name: 'Thanh Niên Cứng',
     nameEn: 'Tough Guy',
+    aliases: ['TN cứng'],
     team: 'village',
     value: 3,
     wakesAtNight: true,
@@ -153,6 +162,7 @@ const ROLES_DATA = [
     id: 'terrorist',
     name: 'Kẻ Khủng Bố',
     nameEn: 'Terrorist',
+    aliases: ['Khủng bố'],
     team: 'village',
     value: -1,
     wakesAtNight: true,
@@ -165,6 +175,7 @@ const ROLES_DATA = [
     id: 'rusty_knight',
     name: 'Hiệp sĩ Kiếm Rỉ',
     nameEn: 'Rusty Knight',
+    aliases: ['Kiếm rỉ'],
     team: 'village',
     value: 5,
     wakesAtNight: true,
@@ -206,6 +217,7 @@ const ROLES_DATA = [
     team: 'village',
     value: 3,
     recommended: true,
+    randomPair: true,
     wakesAtNight: true,
     nightOrder: 1,
     phase: 'night1',
@@ -332,6 +344,7 @@ const ROLES_DATA = [
     id: 'minion',
     name: 'Kẻ phản bội',
     nameEn: 'Minion',
+    aliases: ['Phản bội'],
     team: 'werewolf',
     value: -6,
     wakesAtNight: true,
@@ -446,6 +459,7 @@ const ROLES_DATA = [
     id: 'illusion_artist',
     name: 'Họa Sĩ Ảo Ảnh',
     nameEn: 'The Illusion Artist',
+    aliases: ['Họa sĩ'],
     team: 'werewolf',
     value: -4,
     wakesAtNight: true,
@@ -489,6 +503,7 @@ const ROLES_DATA = [
     id: 'aura_seer',
     name: 'Tiên Tri Hào Quang',
     nameEn: 'Aura Seer',
+    aliases: ['Tiên tri aura'],
     team: 'village',
     value: 3,
     wakesAtNight: true,
@@ -585,6 +600,7 @@ const ROLES_DATA = [
     id: 'exposer',
     name: 'Người Khám Phá',
     nameEn: 'Exposer',
+    aliases: ['Khám phá'],
     team: 'village',
     value: 4,
     wakesAtNight: true,
@@ -599,6 +615,7 @@ const ROLES_DATA = [
     id: 'evil_empath',
     name: 'Kẻ Đọc Vị',
     nameEn: 'Evil Empath',
+    aliases: ['Đọc vị'],
     team: 'werewolf',
     value: -5,
     wakesAtNight: true,
@@ -641,6 +658,7 @@ const ROLES_DATA = [
     id: 'cursed',
     name: 'Kẻ Bị Nguyền',
     nameEn: 'Cursed',
+    aliases: ['Bán Sói'],
     team: 'village',
     value: -2,
     recommended: true,
@@ -669,7 +687,8 @@ const ROLES_DATA = [
   {
     id: 'mentalist',
     name: 'Nhà ngoại cảm',
-    nameEn: 'Mentalist ',
+    nameEn: 'Mentalist',
+    aliases: ['Ngoại cảm'],
     team: 'village',
     value: 4,
     wakesAtNight: true,
@@ -740,6 +759,7 @@ const ROLES_DATA = [
     id: 'insomniac',
     name: 'Kẻ Mất Ngủ',
     nameEn: 'Insomniac',
+    aliases: ['Mất Ngủ'],
     team: 'village',
     value: 3,
     wakesAtNight: true,
@@ -782,11 +802,16 @@ export const ROLE_BY_ID = Object.fromEntries(ROLES.map((r) => [r.id, r]))
 // QUY TẮC (giống THEME_CODE_BY_ID trong themes.js): vị trí trong mảng này LÀ
 // một phần của định dạng mã. KHÔNG BAO GIỜ chèn vào giữa, xoá dòng, đổi thứ tự
 // hay đổi sức chứa của vai đã tồn tại — mọi code cũ đã share sẽ giải mã sai.
-// - Thêm vai mới  -> luôn append vào CUỐI bảng (vị trí trong ROLES_DATA thì tuỳ ý).
+// - Thêm vai mới  -> luôn chèn vào ĐẦU bảng (vị trí trong ROLES_DATA thì tuỳ ý).
+//   Dòng đầu là chữ số hàng cao nhất, dòng cuối là hàng đơn vị: chèn đầu chỉ
+//   thêm số 0 vô nghĩa nên code cũ giữ nguyên giá trị; append cuối sẽ đẩy lệch
+//   mọi chữ số và làm code cũ giải ra setup khác.
 // - Bỏ vai khỏi ROLES_DATA -> vẫn GIỮ NGUYÊN dòng ở đây (slot bị "chôn"), code
 //   cũ chứa vai đó vẫn giải mã được và phần vai đã bỏ sẽ bị lược đi.
 // - Đổi `max` trong ROLES_DATA -> an toàn, chỉ giới hạn UI; sức chứa ở đây giữ
 //   nguyên, số lượng vượt quá sẽ được kẹp lại khi giải mã.
+// - Sửa xong chạy `npm run gen:sheet` để cập nhật Google Sheet script;
+//   `npm test` sẽ báo nếu thiếu slot, sai thứ tự hoặc quên cập nhật sheet.
 export const ROLE_SLOTS = [
   ['tanner', 1],
   ['prince', 1],
@@ -842,27 +867,6 @@ export const ROLE_SLOTS = [
   ['exposer', 1],
 ]
 
-if (import.meta.env?.DEV) {
-  const slotted = new Set(ROLE_SLOTS.map(([id]) => id))
-  const missing = ROLES.filter((r) => !slotted.has(r.id)).map((r) => r.id)
-  if (missing.length > 0) {
-    console.warn(
-      `[roles] Thiếu slot mã hoá cho: ${missing.join(', ')}. ` +
-        'Hãy append vào CUỐI ROLE_SLOTS (xem quy tắc phía trên).',
-    )
-  }
-}
-
-const ROLE_IMAGE_IDS = new Set(
-  Object.keys(import.meta.glob('../../public/roles/*.webp')).map((path) =>
-    path.slice(path.lastIndexOf('/') + 1, -'.webp'.length),
-  ),
-)
-
-export function getRoleImageSrc(id) {
-  return ROLE_IMAGE_IDS.has(id) ? `/roles/${id}.webp` : null
-}
-
 export function canIncreaseRole(id, selected) {
   const role = ROLE_BY_ID[id]
   if (!role) return false
@@ -870,8 +874,20 @@ export function canIncreaseRole(id, selected) {
 }
 
 export function clampRoleCount(id, count) {
-  
   const role = ROLE_BY_ID[id]
   if (!role || count <= 0) return 0
   return Math.min(count, role.max)
+}
+
+/**
+ * Làm sạch setup đọc từ nguồn ngoài (localStorage, lịch sử ván): bỏ id không
+ * còn tồn tại, bỏ số lượng <= 0 và kẹp theo `max`.
+ */
+export function normalizeSetup(roles) {
+  if (!roles || typeof roles !== 'object') return {}
+  return Object.fromEntries(
+    Object.entries(roles)
+      .map(([id, c]) => [id, clampRoleCount(id, Number(c) || 0)])
+      .filter(([, c]) => c > 0),
+  )
 }

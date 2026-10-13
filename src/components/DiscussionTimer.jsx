@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { showAlert } from '../ui/dialog.js'
+import './DiscussionTimer.css'
 
 const PRESETS = [
   { label: '30s', seconds: 30 },

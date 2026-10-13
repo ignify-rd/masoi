@@ -1,24 +1,27 @@
+import { balanceTone } from '../data/balance.js'
+import { formatValue } from '../ui/format.js'
+import './BalanceMeter.css'
+
 const MAX = 20 // giới hạn hiển thị của thanh cân bằng
+
+const VERDICT_TEXT = {
+  village: 'Lợi cho Dân làng',
+  werewolf: 'Lợi cho Sói / Ma cà rồng',
+  balanced: 'Cân bằng tốt',
+}
 
 export default function BalanceMeter({ total }) {
   const clamped = Math.max(-MAX, Math.min(MAX, total))
   const percent = ((clamped + MAX) / (2 * MAX)) * 100
 
-  let verdict
-  if (total > 3) {
-    verdict = { cls: 'village', text: 'Lợi cho Dân làng' }
-  } else if (total < -3) {
-    verdict = { cls: 'werewolf', text: 'Lợi cho Sói / Ma cà rồng' }
-  } else {
-    verdict = { cls: 'balanced', text: 'Cân bằng tốt' }
-  }
+  const tone = balanceTone(total)
 
   return (
     <div className="balance">
       <div className="balance-head">
         <span className="muted">Điểm cân bằng</span>
-        <span className={`balance-total ${verdict.cls}`}>
-          {total > 0 ? `+${total}` : total}
+        <span className={`balance-total ${tone}`}>
+          {formatValue(total)}
         </span>
       </div>
 
@@ -33,7 +36,7 @@ export default function BalanceMeter({ total }) {
 
       <div className="balance-legend">
         <span>Sói</span>
-        <span className={`verdict ${verdict.cls}`}>{verdict.text}</span>
+        <span className={`verdict ${tone}`}>{VERDICT_TEXT[tone]}</span>
         <span>Dân làng</span>
       </div>
 
