@@ -131,7 +131,7 @@ const THEMES_DATA = [
     name: 'Khế Ước Bầy Sói',
     description:
       'Bầy sói ký khế ước với tay trong: Kẻ Phản Bội / Bà Đồng được thức dậy nhận mặt bầy Sói trong đêm 1 (nhưng Sói không biết họ là ai).',
-    value: -3,
+    value: -2,
     favors: 'werewolf',
     requires: [
       { roles: ['minion', 'sorceress'], min: 1, label: 'Có Kẻ Phản Bội hoặc Bà Đồng' },
@@ -151,7 +151,7 @@ const THEMES_DATA = [
     name: 'Lời Nguyền Lan Rộng',
     description:
       'Lời nguyền lan theo máu: Kẻ Bị Nguyền hoá sói khi bị cắn HOẶC khi ngồi cạnh (trái/phải, tính trong số người còn sống) nạn nhân bị Sói cắn đêm đó.',
-    value: -3,
+    value: -2,
     favors: 'werewolf',
     requires: [{ roles: ['cursed'], min: 1, label: 'Có Kẻ Bị Nguyền' }],
   },
@@ -223,7 +223,7 @@ const THEMES_DATA = [
     name: 'Cơn Bão',
     description:
       'Một đêm nào đó bão sẽ ập xuống: quản trò bí mật chọn trước một đêm trong ván, đêm ấy mọi năng lực ban đêm đều thất bại, kể cả đòn cắn. Sáng ra không ai chết và không ai biết mình đã bị bão chặn.',
-    value: 0,
+    value: 1,
     favors: 'other',
     requires: [],
   },
