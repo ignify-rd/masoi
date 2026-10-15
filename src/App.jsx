@@ -102,7 +102,7 @@ export default function App() {
         </main>
       ) : (
         <main className="app-main">
-          <RoleLibrary selected={selected} onAdd={inc} />
+          <RoleLibrary selected={selected} onAdd={inc} onDec={dec} />
           <SetupPanel
             selected={selected}
             totalPlayers={totalPlayers}

@@ -42,8 +42,8 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 12px;
   font-weight: 700;
   line-height: 22px;
@@ -55,7 +55,7 @@
   inset: 0;
   z-index: 180;
   border: none;
-  background: rgba(4, 8, 18, 0.62);
+  background: rgba(8, 6, 5, 0.66);
   cursor: pointer;
 }
 

@@ -13,10 +13,10 @@
 // scripts/google-sheets/build.mjs chạy được bằng node.
 
 export const TEAMS = {
-  village: { id: 'village', label: 'Dân làng', color: '#22c55e' },
-  werewolf: { id: 'werewolf', label: 'Sói', color: '#ef4444' },
-  vampire: { id: 'vampire', label: 'Ma cà rồng', color: '#a855f7' },
-  other: { id: 'other', label: 'Khác', color: '#eab308' },
+  village: { id: 'village', label: 'Dân làng', color: '#74b85f' },
+  werewolf: { id: 'werewolf', label: 'Sói', color: '#e35d4d' },
+  vampire: { id: 'vampire', label: 'Ma cà rồng', color: '#b47fe0' },
+  other: { id: 'other', label: 'Khác', color: '#62a8d9' },
 }
 
 export const TEAM_IDS = Object.keys(TEAMS)

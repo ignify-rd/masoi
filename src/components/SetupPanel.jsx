@@ -149,41 +149,8 @@ export default function SetupPanel({
         aria-controls="setup-sheet"
       >
         <div className="setup-dock-info">
-          {entries.length > 0 && (
-            <div className="setup-dock-avatars" aria-hidden="true">
-              {sortedEntries.slice(0, 5).map(([id, count]) => {
-                const role = ROLE_BY_ID[id]
-                const team = TEAMS[role.team]
-                const imageSrc = getRoleImageSrc(id)
-                return (
-                  <span key={id} className="setup-dock-avatar-wrap">
-                    {imageSrc ? (
-                      <img
-                        src={imageSrc}
-                        alt=""
-                        className="setup-dock-avatar"
-                        style={{ borderColor: team.color }}
-                      />
-                    ) : (
-                      <span
-                        className="setup-dock-avatar setup-dock-avatar-fallback"
-                        style={{ background: team.color }}
-                      />
-                    )}
-                    {count > 1 && (
-                      <span className="setup-dock-avatar-count">{count}</span>
-                    )}
-                  </span>
-                )
-              })}
-              {entries.length > 5 && (
-                <span className="setup-dock-more">+{entries.length - 5}</span>
-              )}
-            </div>
-          )}
           <strong>{totalPlayers}</strong>
           <span>người chơi</span>
-          {entries.length > 0 && <TeamBreakdown counts={teamCounts} />}
         </div>
         <span className={`setup-dock-balance ${balanceTone(totalValue)}`}>
           {formatValue(totalValue)}

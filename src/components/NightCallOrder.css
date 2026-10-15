@@ -10,10 +10,10 @@
   margin-bottom: 18px;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--team-color, #eab308) 45%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--team-color, var(--accent-2)) 45%, var(--border));
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--team-color, #eab308) 14%, var(--panel-2)) 0%,
+    color-mix(in srgb, var(--team-color, var(--accent-2)) 14%, var(--panel-2)) 0%,
     var(--panel-2) 100%
   );
 }
@@ -69,7 +69,7 @@
 }
 
 .game-theme-value.zero {
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .call-outro {
@@ -93,9 +93,9 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
+  color: var(--on-accent);
+  background: var(--accent);
+  box-shadow: 0 4px 16px rgba(200, 150, 62, 0.25);
 }
 
 .end-match-btn:hover:not(:disabled) {
@@ -152,8 +152,8 @@
   display: grid;
   place-items: center;
   font-weight: 700;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .step-body {
@@ -176,7 +176,7 @@
   margin: 8px 0 0;
   font-size: 14px;
   line-height: 1.55;
-  color: #d7deef;
+  color: var(--text-softer);
   font-style: italic;
 }
 
@@ -194,7 +194,7 @@
 .phase-tag.condition {
   color: var(--info);
   border-color: var(--info);
-  background: rgba(56, 189, 248, 0.12);
+  background: color-mix(in srgb, var(--info) 12%, transparent);
 }
 
 .phase-tag.parent {
@@ -321,7 +321,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--gold);
+  color: var(--accent-2);
   flex-shrink: 0;
 }
 

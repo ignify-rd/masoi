@@ -1,11 +1,11 @@
+/* Chỉ ô tìm + chip lọc dính khi cuộn; tiêu đề cuộn đi để nhường chỗ. */
 .role-library-sticky {
   position: sticky;
   top: 0;
   z-index: 5;
-  margin: -18px -18px 16px;
-  padding: 18px 18px 14px;
+  margin: -12px -18px 16px;
+  padding: 12px 18px 14px;
   background: linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
-  border-radius: 16px 16px 0 0;
 }
 
 .role-library-sticky .toolbar {
@@ -59,7 +59,7 @@
 .chip.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* Role grid */
@@ -83,14 +83,6 @@
 .role-card:hover {
   transform: translateY(-2px);
   border-color: var(--accent-2);
-}
-
-.role-card.has-img .add-btn {
-  grid-area: actions;
-}
-
-.role-card-img {
-  display: none;
 }
 
 .role-card-top {
@@ -120,17 +112,17 @@
 }
 
 .value-badge.pos {
-  background: rgba(34, 197, 94, 0.16);
+  background: color-mix(in srgb, var(--pos) 16%, transparent);
   color: var(--pos);
 }
 
 .value-badge.neg {
-  background: rgba(239, 68, 68, 0.16);
+  background: color-mix(in srgb, var(--neg) 16%, transparent);
   color: var(--neg);
 }
 
 .value-badge.zero {
-  background: rgba(148, 163, 196, 0.16);
+  background: color-mix(in srgb, var(--muted) 16%, transparent);
   color: var(--muted);
 }
 
@@ -148,9 +140,9 @@
   font-size: 12px;
   padding: 3px 9px;
   border-radius: 999px;
-  color: var(--gold);
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  background: rgba(251, 191, 36, 0.12);
+  color: var(--accent-2);
+  border: 1px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+  background: color-mix(in srgb, var(--accent-2) 12%, transparent);
 }
 
 .limit-tag {
@@ -162,7 +154,7 @@
 }
 
 .role-card.recommended {
-  border-color: rgba(251, 191, 36, 0.35);
+  border-color: color-mix(in srgb, var(--accent-2) 35%, transparent);
 }
 
 .role-ability {
@@ -174,11 +166,11 @@
 }
 
 .add-btn {
-  border: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
   border-radius: 10px;
   padding: 9px 12px;
-  background: var(--accent);
-  color: #fff;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent-2);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -190,73 +182,173 @@
 }
 
 .add-btn:hover:not(:disabled) {
-  background: var(--accent-2);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  border-color: var(--accent-2);
 }
 
 .add-btn:disabled {
+  border-color: transparent;
   background: var(--border);
   color: var(--muted);
   cursor: not-allowed;
 }
 
 .count-pill {
-  background: rgba(255, 255, 255, 0.25);
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
   border-radius: 999px;
   padding: 0 8px;
   font-size: 12px;
 }
 
+/* Mobile: mỗi vai một dòng (RoleRow) thay cho thẻ. */
+.role-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Vùng 'stepper' trùng tên với grid-area của .stepper dùng chung. */
+.role-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'main stepper'
+    'detail detail';
+  align-items: center;
+  column-gap: 8px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+.role-row.selected {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel-2));
+}
+
+.role-row-main {
+  grid-area: main;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.role-row-img {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 2px solid var(--team-color);
+  object-fit: cover;
+  background: var(--panel);
+}
+
+.role-row-img-fallback {
+  background: color-mix(in srgb, var(--team-color) 22%, var(--panel));
+}
+
+.role-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.role-row-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.role-row-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.role-row .value-badge {
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.role-row-meta {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-row-add {
+  grid-area: stepper;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent-2);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.role-row-detail {
+  grid-area: detail;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
 @media (max-width: 920px) {
-  .role-grid {
-    grid-template-columns: 1fr;
+  .role-library-sticky {
+    margin: -10px -14px 12px;
+    padding: 10px 14px 12px;
   }
 
-  .role-card.has-img {
-    display: grid;
-    grid-template-columns: 72px 1fr;
-    grid-template-areas:
-      'img top'
-      'img tags'
-      'img ability'
-      'img actions';
-    column-gap: 14px;
+  .toolbar {
+    gap: 10px;
   }
 
-  .role-card.has-img .role-card-top {
-    grid-area: top;
+  /* Chip lọc một hàng, vuốt ngang khi không đủ chỗ. */
+  .filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -14px;
+    padding: 0 14px;
+    scrollbar-width: none;
   }
 
-  .role-card.has-img .role-tags {
-    grid-area: tags;
-  }
-
-  .role-card.has-img .role-ability {
-    grid-area: ability;
-  }
-
-  .role-card.has-img .add-btn {
-    grid-area: actions;
-  }
-
-  .role-card-img {
-    display: block;
-    grid-area: img;
-    width: 72px;
-    height: 72px;
-    border-radius: 14px;
-    object-fit: cover;
-    border: 2px solid transparent;
-    background: var(--panel);
-    align-self: start;
+  .filters::-webkit-scrollbar {
+    display: none;
   }
 
   .chip {
+    flex-shrink: 0;
     padding: 8px 14px;
     font-size: 14px;
-  }
-
-  .add-btn {
-    min-height: 44px;
-    font-size: 15px;
+    white-space: nowrap;
   }
 }
