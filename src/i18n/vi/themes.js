@@ -25,6 +25,25 @@ export const THEME_TEXT = {
       },
     },
   },
+  mole: {
+    name: 'Kẻ Nội Gián',
+    description:
+      'Bầy Sói cài người vào làng: đêm 1, bầy Sói thống nhất chọn ra 1 người phe Dân làng làm kẻ nội gián. Kẻ nội gián chuyển sang thắng cùng phe Sói và thức dậy cùng bầy Sói nhưng không có khả năng giết người. Họ vẫn giữ năng lực của vai cũ, và Tiên Tri soi kẻ nội gián vẫn ra là người.',
+    steps: {
+      mole_pick: {
+        name: 'Kẻ Nội Gián — Sói chọn kẻ nội gián',
+        script: 'Bầy Sói hãy thống nhất chọn ai là kẻ nội gián.',
+        moderatorNote:
+          'Chỉ đêm 1, gọi ngay sau lượt cắn khi bầy Sói còn đang mở mắt. Ghi lại ai là kẻ nội gián.',
+      },
+      mole_wake: {
+        name: 'Kẻ Nội Gián — thức dậy cùng bầy Sói',
+        script: 'Kẻ nội gián hãy thức dậy cùng đàn Sói.',
+        moderatorNote:
+          'Đêm 1: chạm vào người vừa được chọn để họ mở mắt nhận mặt bầy Sói. Từ đêm 2, kẻ nội gián mở mắt cùng bầy nhưng không được cắn; vai cũ của họ vẫn được gọi như bình thường. Đêm nào cũng đọc câu này, kể cả khi kẻ nội gián đã chết.',
+      },
+    },
+  },
   thick_fog: {
     name: 'Sương Mù Dày',
     description:
@@ -39,6 +58,19 @@ export const THEME_TEXT = {
     name: 'Luật Đám Đông',
     description:
       'Dân làng sợ xử oan: muốn treo cổ phải có quá bán số người còn sống bỏ phiếu cho cùng một người, nếu không thì ngày hôm đó không ai chết.',
+  },
+  alpha_curse: {
+    name: 'Sói Nguyền',
+    description:
+      'Lời nguyền của đầu đàn xuyên qua mọi lớp bảo vệ: khi Sói Đầu đàn dùng năng lực biến con mồi thành sói, lời nguyền luôn thành công 100%, kể cả khi con mồi được Bảo Vệ che chắn, được Mục sư ban phước hay được Phù Thủy cứu.',
+    steps: {
+      alpha_curse_mark: {
+        name: 'Sói Nguyền — báo người bị nguyền',
+        script: 'Người sau đây bị nguyền, đêm sau sẽ tỉnh dậy cùng đàn Sói.',
+        moderatorNote:
+          'Gọi ngay sau Sói Đầu đàn. Đêm nào cũng đọc câu này để làng không đoán ra lời nguyền đã dùng hay chưa; chỉ trong đêm Sói Đầu đàn vừa nguyền thì chạm vào người bị nguyền để họ biết mình đã thành Sói. Từ đêm sau gọi người đó dậy cùng bầy Sói.',
+      },
+    },
   },
   wolf_covenant: {
     name: 'Khế Ước Bầy Sói',

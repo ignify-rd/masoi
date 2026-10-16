@@ -297,4 +297,6 @@
 
 .history-item-theme {
   align-self: flex-start;
+  margin-bottom: 4px;
+  white-space: nowrap;
 }

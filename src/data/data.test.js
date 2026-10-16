@@ -3,7 +3,7 @@
 // lực, câu gọi) được kiểm tra trong src/i18n/i18n.test.js.
 import { describe, expect, it } from 'vitest'
 import { NIGHT_EXTRAS, PHASE_IDS, ROLES, ROLE_BY_ID, ROLE_SLOTS, TEAMS } from './roles.js'
-import { THEMES, THEME_CODE_BY_ID } from './themes.js'
+import { THEMES, THEME_BY_ID, THEME_CODE_BY_ID, THEME_CONFLICTS } from './themes.js'
 
 const duplicates = (items) => items.filter((x, i) => items.indexOf(x) !== i)
 
@@ -65,6 +65,16 @@ describe('chủ đề', () => {
       for (const roleId of req.roles ?? []) {
         expect(ROLE_BY_ID, `requires.roles của ${id}`).toHaveProperty(roleId)
       }
+    }
+  })
+
+  it('cặp chủ đề xung đột trỏ tới chủ đề có thật, không trùng cặp', () => {
+    const keys = THEME_CONFLICTS.map((pair) => [...pair].sort().join('|'))
+    expect(duplicates(keys)).toEqual([])
+    for (const [a, b] of THEME_CONFLICTS) {
+      expect(THEME_BY_ID, a).toHaveProperty(a)
+      expect(THEME_BY_ID, b).toHaveProperty(b)
+      expect(a, 'chủ đề xung đột với chính nó').not.toBe(b)
     }
   })
 

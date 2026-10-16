@@ -12,7 +12,8 @@
  *     "Chỉ định tập lệnh" (Assign script) -> gõ copyMaVan.
  * Hộp thoại hiện mã kèm nút Copy. Cột được nhận theo tên ở dòng tiêu đề
  * (HEADER_ROW): cột nào trùng tên vai là số lượng vai đó, cột "Chủ đề" là chủ
- * đề, cột "Số Người" (nếu có) dùng để đối chiếu tổng số lá.
+ * đề (nhiều chủ đề thì ngăn cách bằng dấu phẩy, tối đa MAX_THEMES), cột
+ * "Số Người" (nếu có) dùng để đối chiếu tổng số lá.
  *
  * Tên vai/chủ đề so khớp không phân biệt hoa thường và dấu ("Tiên tri" =
  * "tien tri"), nhận cả tên trên sheet, tên trong app (tiếng Việt hoặc tiếng
@@ -93,9 +94,11 @@ var ROLE_SLOTS = [
 var THEMES = {
   endless_night: ['0', ['Đêm Vô Tận', 'Endless Night']],
   distant_howl: ['1', ['Tiếng Hú Xa', 'Distant Howl']],
+  mole: ['i', ['Kẻ Nội Gián', 'The Mole']],
   thick_fog: ['2', ['Sương Mù Dày', 'Thick Fog']],
   blood_moon: ['3', ['Trăng Máu', 'Blood Moon']],
   mob_rule: ['4', ['Luật Đám Đông', 'Mob Rule']],
+  alpha_curse: ['h', ['Sói Nguyền', 'Alpha\'s Curse']],
   wolf_covenant: ['5', ['Khế Ước Bầy Sói', 'Wolf Covenant']],
   night_of_vengeance: ['6', ['Đêm Trả Thù', 'Night of Vengeance']],
   creeping_curse: ['7', ['Lời Nguyền Lan Rộng', 'Creeping Curse']],
@@ -135,6 +138,31 @@ var THEMES = {
   holy_water: ['f', ['Nước Thánh', 'Holy Water']],
   talisman: ['g', ['Bùa Hộ Mệnh', 'Talisman']],
 }
+
+// Cặp chủ đề không được chọn chung — y hệt THEME_CONFLICTS trong app.
+var THEME_CONFLICTS = [
+  ['tidal_moon', 'blood_moon'],
+  ['tidal_moon', 'lunar_eclipse'],
+  ['tidal_moon', 'blood_thirst'],
+  ['tidal_moon', 'night_of_vengeance'],
+  ['tidal_moon', 'last_stand'],
+  ['tidal_moon', 'endless_night'],
+  ['blood_moon', 'lunar_eclipse'],
+  ['long_night', 'first_dawn'],
+  ['double_trial', 'village_militia'],
+  ['mob_rule', 'sheriff'],
+  ['witch_sabbath', 'holy_antidote'],
+  ['wolf_leader', 'alpha_curse'],
+  ['undying_village', 'talking_graveyard'],
+  ['undying_village', 'death_note'],
+  ['undying_village', 'body_count'],
+  ['undying_village', 'holy_antidote'],
+  ['undying_village', 'inquisition'],
+  ['undying_village', 'talisman'],
+  ['talisman', 'inquisition'],
+]
+
+var MAX_THEMES = 5
 // <<< DỮ LIỆU SINH TỰ ĐỘNG
 
 var NO_THEME = ['', 'khong', 'none']
@@ -247,6 +275,7 @@ ${warning ? '<div class="warn">' + esc_(warning) + '</div>' : ''}
 
 /**
  * { tên vai: số lượng } + tên chủ đề -> { code, picked: [[tên, số lượng]], total, theme }.
+ * Nhiều chủ đề thì ngăn cách bằng dấu phẩy / chấm phẩy / xuống dòng.
  * Số lượng vượt sức chứa bị kẹp lại giống app.
  */
 function buildCode_(counts, theme) {
@@ -280,19 +309,40 @@ function buildCode_(counts, theme) {
   var code = ''
   for (var d = digits.length - 1; d >= 0; d--) code += ALPHABET[digits[d]]
 
-  var themeKey = normalize_(theme == null ? '' : theme)
-  if (code && NO_THEME.indexOf(themeKey) === -1) {
-    var themeId = themeIndex_()[themeKey]
-    if (!themeId) throw new Error('App chưa có chủ đề "' + theme + '".')
-    code += '-' + THEMES[themeId][0]
+  var themeIds = code ? parseThemes_(theme) : []
+  if (themeIds.length) {
+    code += '-' + themeIds.map(function (id) { return THEMES[id][0] }).join('')
   }
 
   return {
     code: code,
     picked: order.map(function (id) { return [nameOf[id], selected[id]] }),
     total: order.reduce(function (sum, id) { return sum + selected[id] }, 0),
-    theme: NO_THEME.indexOf(themeKey) === -1 ? String(theme) : '',
+    theme: themeIds.length ? String(theme) : '',
   }
+}
+
+/** Ô "Chủ đề" -> [id chủ đề...]; báo lỗi nếu tên lạ, quá MAX_THEMES hoặc xung đột. */
+function parseThemes_(theme) {
+  var index = themeIndex_()
+  var ids = []
+  String(theme == null ? '' : theme).split(/[,;\n]/).forEach(function (name) {
+    var key = normalize_(name)
+    if (NO_THEME.indexOf(key) !== -1) return
+    var id = index[key]
+    if (!id) throw new Error('App chưa có chủ đề "' + name.trim() + '".')
+    if (ids.indexOf(id) === -1) ids.push(id)
+  })
+  if (ids.length > MAX_THEMES) {
+    throw new Error('Một ván chỉ được tối đa ' + MAX_THEMES + ' chủ đề.')
+  }
+  THEME_CONFLICTS.forEach(function (pair) {
+    if (ids.indexOf(pair[0]) !== -1 && ids.indexOf(pair[1]) !== -1) {
+      throw new Error('Chủ đề "' + THEMES[pair[0]][1][0] + '" xung đột với "' +
+        THEMES[pair[1]][1][0] + '", không chọn chung được.')
+    }
+  })
+  return ids
 }
 
 function mulAdd_(digits, mul, add) {

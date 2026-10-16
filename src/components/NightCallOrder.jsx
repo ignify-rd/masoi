@@ -162,7 +162,7 @@ function StepCard({
 
 export default function NightCallOrder({
   selected,
-  theme = null,
+  themes = [],
   totalPlayers,
   startedAt,
   onBack,
@@ -182,8 +182,14 @@ export default function NightCallOrder({
   const [copied, setCopied] = useState(false)
 
   const steps = useMemo(
-    () => buildNightSteps(selected, totalPlayers, theme?.id ?? null, locale),
-    [selected, totalPlayers, theme, locale],
+    () =>
+      buildNightSteps(
+        selected,
+        totalPlayers,
+        themes.map((theme) => theme.id),
+        locale,
+      ),
+    [selected, totalPlayers, themes, locale],
   )
 
   const toggleVisibility = (key) => {
@@ -242,7 +248,7 @@ export default function NightCallOrder({
       roles: selected,
       notes,
       winner,
-      themeId: theme?.id ?? null,
+      themeIds: themes.map((theme) => theme.id),
     })
 
     setNotes({})
@@ -277,8 +283,12 @@ export default function NightCallOrder({
         </div>
       </div>
 
-      {theme && (
+      {themes.length > 0 && (
+        <p className="game-themes-hint muted">{t('night.themeHint')}</p>
+      )}
+      {themes.map((theme) => (
         <div
+          key={theme.id}
           className="game-theme"
           style={{ '--team-color': teams[theme.favors].color }}
         >
@@ -290,18 +300,14 @@ export default function NightCallOrder({
           </div>
           <h3 className="game-theme-title">{theme.name}</h3>
           <p className="game-theme-desc">{theme.description}</p>
-          <p className="game-theme-hint muted">
-            {t('night.themeHint')}
-            {theme.requires.length > 0 && (
-              <>
-                {' '}
-                {t('theme.requires', {
-                  list: theme.requires.map(requirementLabel).join(' • '),
-                })}
-                .
-              </>
-            )}
-          </p>
+          {theme.requires.length > 0 && (
+            <p className="game-theme-hint muted">
+              {t('theme.requires', {
+                list: theme.requires.map(requirementLabel).join(' • '),
+              })}
+              .
+            </p>
+          )}
           <label className="step-memo theme-memo">
             <span className="step-memo-label">{t('night.themeMemoLabel')}</span>
             <textarea
@@ -313,7 +319,7 @@ export default function NightCallOrder({
             />
           </label>
         </div>
-      )}
+      ))}
 
       <p className="call-intro">
         {rich('night.intro', {

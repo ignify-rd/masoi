@@ -64,6 +64,8 @@ export const THEME_CODE_BY_ID = {
   body_count: 'e',
   holy_water: 'f',
   talisman: 'g',
+  alpha_curse: 'h',
+  mole: 'i',
 }
 
 const THEMES_DATA = [
@@ -79,6 +81,16 @@ const THEMES_DATA = [
     value: -5,
     favors: 'werewolf',
     requires: [],
+  },
+  {
+    id: 'mole',
+    nightSteps: [
+      { id: 'mole_pick', nightOrder: 3.01, phase: 'night1' },
+      { id: 'mole_wake', nightOrder: 3.02, phase: 'every' },
+    ],
+    value: -5,
+    favors: 'werewolf',
+    requires: [{ team: 'werewolf', min: 1 }],
   },
   {
     id: 'thick_fog',
@@ -102,6 +114,13 @@ const THEMES_DATA = [
     value: -3,
     favors: 'werewolf',
     requires: [],
+  },
+  {
+    id: 'alpha_curse',
+    nightSteps: [{ id: 'alpha_curse_mark', nightOrder: 3.35, phase: 'every' }],
+    value: -3,
+    favors: 'werewolf',
+    requires: [{ roles: ['alpha_wolf'], min: 1 }],
   },
   {
     id: 'wolf_covenant',
@@ -350,6 +369,73 @@ export const THEMES = THEMES_DATA.map((theme) => ({
 export const THEME_BY_ID = Object.fromEntries(THEMES.map((t) => [t.id, t]))
 export const THEME_BY_CODE = Object.fromEntries(THEMES.map((t) => [t.code, t]))
 
+/** Số chủ đề tối đa trong một ván. */
+export const MAX_THEMES = 5
+
+// Cặp chủ đề không được chọn chung vì luật mâu thuẫn hoặc trùng nhau (thứ tự
+// trong cặp không quan trọng). Sửa xong chạy `npm run gen:sheet`.
+export const THEME_CONFLICTS = [
+  // Trăng Định Kỳ đã cố định số lượt cắn theo đêm chẵn/lẻ.
+  ['tidal_moon', 'blood_moon'],
+  ['tidal_moon', 'lunar_eclipse'],
+  ['tidal_moon', 'blood_thirst'],
+  ['tidal_moon', 'night_of_vengeance'],
+  ['tidal_moon', 'last_stand'],
+  ['tidal_moon', 'endless_night'],
+  // Đêm 1 cắn 2 người / đêm 1 không được cắn.
+  ['blood_moon', 'lunar_eclipse'],
+  // Ngày đầu không treo cổ / mở màn bằng một lần treo cổ.
+  ['long_night', 'first_dawn'],
+  // Ngày nào cũng treo 2 người thì "1 lần treo 2" thành thừa.
+  ['double_trial', 'village_militia'],
+  // Phải quá bán mới treo được thì không bao giờ có hoà phiếu.
+  ['mob_rule', 'sheriff'],
+  // Chọn 3 bình độc là mất bình cứu.
+  ['witch_sabbath', 'holy_antidote'],
+  // Đầu đàn đổi cắn lấy soi, Sói Đầu đàn lại nguyền chính mục tiêu đó.
+  ['wolf_leader', 'alpha_curse'],
+  // Làng Bất Tử giấu ai đã chết thật và không ai rời game.
+  ['undying_village', 'talking_graveyard'],
+  ['undying_village', 'death_note'],
+  ['undying_village', 'body_count'],
+  ['undying_village', 'holy_antidote'],
+  ['undying_village', 'inquisition'],
+  ['undying_village', 'talisman'],
+  // Người bị treo vẫn còn mạng thì có bị lật bài không.
+  ['talisman', 'inquisition'],
+]
+
+const CONFLICTS_BY_ID = new Map()
+for (const [a, b] of THEME_CONFLICTS) {
+  if (!CONFLICTS_BY_ID.has(a)) CONFLICTS_BY_ID.set(a, new Set())
+  if (!CONFLICTS_BY_ID.has(b)) CONFLICTS_BY_ID.set(b, new Set())
+  CONFLICTS_BY_ID.get(a).add(b)
+  CONFLICTS_BY_ID.get(b).add(a)
+}
+
+/** Các chủ đề trong `themeIds` xung đột với `themeId`. */
+export function themeConflicts(themeId, themeIds) {
+  const conflicts = CONFLICTS_BY_ID.get(themeId)
+  return conflicts ? themeIds.filter((id) => conflicts.has(id)) : []
+}
+
+/**
+ * Làm sạch danh sách chủ đề đọc từ nguồn ngoài (localStorage, lịch sử, mã ván).
+ * Nhận cả giá trị cũ là một id; bỏ id không còn tồn tại, trùng, hoặc xung đột
+ * với chủ đề đứng trước; giữ tối đa MAX_THEMES.
+ */
+export function normalizeThemeIds(value) {
+  const ids = Array.isArray(value) ? value : value ? [value] : []
+  const result = []
+  for (const id of ids) {
+    if (result.length >= MAX_THEMES) break
+    if (typeof id !== 'string' || !THEME_BY_ID[id] || result.includes(id)) continue
+    if (themeConflicts(id, result).length > 0) continue
+    result.push(id)
+  }
+  return result
+}
+
 function countRequirement(req, selected) {
   let total = 0
   for (const [id, count] of Object.entries(selected || {})) {
@@ -369,23 +455,10 @@ export function isThemeAvailable(theme, selected) {
   )
 }
 
-export function getAvailableThemes(selected) {
-  return THEMES.filter((theme) => isThemeAvailable(theme, selected))
-}
-
-/** Random một chủ đề hợp lệ với setup hiện tại (null nếu không có chủ đề nào hợp lệ). */
-export function pickRandomTheme(selected, { excludeId = null } = {}) {
-  let pool = getAvailableThemes(selected)
-  if (excludeId && pool.length > 1) {
-    pool = pool.filter((theme) => theme.id !== excludeId)
-  }
-  if (pool.length === 0) return null
-  return pool[Math.floor(Math.random() * pool.length)]
-}
-
-/** Điểm chủ đề cộng vào điểm cân bằng (0 nếu chơi mặc định / chủ đề không còn hợp lệ). */
-export function getThemeValue(themeId, selected) {
-  const theme = THEME_BY_ID[themeId]
-  if (!theme || !isThemeAvailable(theme, selected)) return 0
-  return theme.value
+/** Tổng điểm các chủ đề cộng vào điểm cân bằng (chủ đề thiếu vai bắt buộc không tính). */
+export function getThemesValue(themeIds, selected) {
+  return normalizeThemeIds(themeIds).reduce((sum, id) => {
+    const theme = THEME_BY_ID[id]
+    return isThemeAvailable(theme, selected) ? sum + theme.value : sum
+  }, 0)
 }

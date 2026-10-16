@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { ROLE_BY_ID, ROLE_SLOTS } from '../../src/data/roles.js'
-import { THEMES } from '../../src/data/themes.js'
+import { MAX_THEMES, THEMES, THEME_CONFLICTS } from '../../src/data/themes.js'
 import { allNames } from '../../src/i18n/index.js'
 
 export const SHEET_SCRIPT_PATH = fileURLToPath(
@@ -80,6 +80,13 @@ export function renderSheetData() {
     'var THEMES = {',
     ...themes.map(([id, code, names]) => `  ${id}: [${quote(code)}, ${list(names)}],`),
     '}',
+    '',
+    '// Cặp chủ đề không được chọn chung — y hệt THEME_CONFLICTS trong app.',
+    'var THEME_CONFLICTS = [',
+    ...THEME_CONFLICTS.map((pair) => `  ${list(pair)},`),
+    ']',
+    '',
+    `var MAX_THEMES = ${MAX_THEMES}`,
     END,
   ].join('\n')
 }

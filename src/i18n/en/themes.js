@@ -21,6 +21,25 @@ export const THEME_TEXT = {
       },
     },
   },
+  mole: {
+    name: 'The Mole',
+    description:
+      "The pack plants a spy in the village: on night 1 the Werewolves agree on 1 Village-team player to be the mole. The mole now wins with the Werewolf team and wakes with the pack but cannot kill anyone. They keep their original role's ability, and the Seer still sees the mole as human.",
+    steps: {
+      mole_pick: {
+        name: 'The Mole — the wolves pick a mole',
+        script: 'Werewolves, agree on who will be the mole.',
+        moderatorNote:
+          "Night 1 only, right after the Werewolves' attack while the pack still has their eyes open. Write down who the mole is.",
+      },
+      mole_wake: {
+        name: 'The Mole — wakes with the pack',
+        script: 'Mole, wake up with the Werewolves.',
+        moderatorNote:
+          'Night 1: tap the player just chosen so they open their eyes and see the pack. From night 2 on, the mole opens their eyes with the pack but cannot attack; their original role is still called as usual. Read this line every night, even after the mole has died.',
+      },
+    },
+  },
   thick_fog: {
     name: 'Thick Fog',
     description:
@@ -35,6 +54,20 @@ export const THEME_TEXT = {
     name: 'Mob Rule',
     description:
       'The village fears convicting the innocent: a lynch needs more than half of the living players voting for the same person; otherwise nobody dies that day.',
+  },
+  alpha_curse: {
+    name: "Alpha's Curse",
+    description:
+      "The leader's curse pierces every protection: when the Alpha Wolf uses its power to turn the victim into a Werewolf, the curse always works (100%), even if the victim is shielded by the Guard, blessed by the Priest or saved by the Witch.",
+    steps: {
+      alpha_curse_mark: {
+        name: "Alpha's Curse — tell the cursed player",
+        script:
+          'The following player has been cursed and will wake up with the Werewolves from the next night on.',
+        moderatorNote:
+          'Call right after the Alpha Wolf. Read this line every night so the village cannot tell whether the curse has been used; only on the night the Alpha Wolf curses someone, tap the cursed player so they know they are now a Werewolf. From the next night on, wake that player with the pack.',
+      },
+    },
   },
   wolf_covenant: {
     name: 'Wolf Covenant',

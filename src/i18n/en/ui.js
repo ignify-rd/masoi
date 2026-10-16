@@ -75,18 +75,17 @@ export const UI_TEXT = {
     'Aim for a total near 0. New or mixed groups: +1 to +3. Experienced groups: -1 to -3 to give the Werewolves an edge.',
 
   'theme.label': 'Theme',
-  'theme.none': 'Default (no theme)',
+  'theme.add': 'Add a theme...',
+  'theme.full': 'Max {max} themes reached',
   'theme.missingRoles': 'missing required roles',
-  'theme.clear': 'Clear theme',
-  'theme.clearTitle': 'Clear theme — play without a theme',
-  'theme.random': 'Random',
-  'theme.randomTitle': 'Pick a random theme that fits the current setup',
-  'theme.noneAvailable': 'No theme fits the current setup.',
+  'theme.conflictsWith': 'conflicts with {themes}',
+  'theme.remove': 'Remove {theme}',
   'theme.favors': 'Favors {team}',
   'theme.requires': 'Requires: {list}',
   'theme.unmet':
     "The current setup doesn't meet this theme's requirements — its points are not counted.",
-  'theme.empty': 'Default rules. Pick a theme to change the rules and adjust the balance.',
+  'theme.empty':
+    'Default rules. Pick up to {max} themes to change the rules and adjust the balance.',
 
   'requirement.roles': '{roles}',
   'requirement.rolesMin': 'At least {count} of: {roles}',

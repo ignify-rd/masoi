@@ -68,8 +68,8 @@ export default function SetupPanel({
   selected,
   totalPlayers,
   totalValue,
-  themeId,
-  onChangeTheme,
+  themeIds,
+  onChangeThemes,
   onInc,
   onDec,
   onRemove,
@@ -84,7 +84,7 @@ export default function SetupPanel({
   const [copiedCode, setCopiedCode] = useState(false)
 
   const handleCopyCode = async () => {
-    const code = encodeSetupCode(selected, themeId)
+    const code = encodeSetupCode(selected, themeIds)
     if (!code) {
       showAlert(t('setup.noRolesForCode'))
       return
@@ -111,7 +111,7 @@ export default function SetupPanel({
     ) {
       return
     }
-    onLoadSetup(decoded.roles, decoded.themeId)
+    onLoadSetup(decoded.roles, decoded.themeIds)
     setCodeInput('')
   }
 
@@ -235,8 +235,8 @@ export default function SetupPanel({
 
         <ThemePicker
           selected={selected}
-          themeId={themeId}
-          onChangeTheme={onChangeTheme}
+          themeIds={themeIds}
+          onChangeThemes={onChangeThemes}
         />
 
         <BalanceMeter total={totalValue} />
