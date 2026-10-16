@@ -1,0 +1,64 @@
+/* Language switch — cao bằng nút Lịch sử bên cạnh. */
+.lang-switch {
+  display: inline-flex;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.lang-switch-btn {
+  min-width: 38px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lang-switch-btn:hover {
+  color: var(--text);
+}
+
+.lang-switch-btn.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Mobile: một nút vuông giống nút Lịch sử. */
+.lang-toggle {
+  display: none;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--accent-2);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 920px) {
+  .lang-switch {
+    display: none;
+  }
+
+  .lang-toggle {
+    display: inline-block;
+  }
+}

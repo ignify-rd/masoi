@@ -15,12 +15,14 @@
  * đề, cột "Số Người" (nếu có) dùng để đối chiếu tổng số lá.
  *
  * Tên vai/chủ đề so khớp không phân biệt hoa thường và dấu ("Tiên tri" =
- * "tien tri"), nhận cả tên trên sheet, tên trong app lẫn id ("seer").
+ * "tien tri"), nhận cả tên trên sheet, tên trong app (tiếng Việt hoặc tiếng
+ * Anh) lẫn id ("seer").
  *
  * ĐỒNG BỘ VỚI APP: phần ROLE_SLOTS/THEMES nằm giữa hai dòng ">>> / <<< DỮ LIỆU
- * SINH TỰ ĐỘNG" được sinh từ src/data/roles.js + themes.js bằng
- * `npm run gen:sheet` — đừng sửa tay. Tên cột trên sheet khác tên vai trong
- * app thì thêm vào `aliases` của vai đó (tên cột không khớp sẽ bị bỏ qua).
+ * SINH TỰ ĐỘNG" được sinh từ src/data + src/i18n bằng `npm run gen:sheet` —
+ * đừng sửa tay. Tên cột trên sheet khác tên vai trong app thì thêm vào
+ * `aliases` của vai đó trong src/i18n/vi/roles.js (tên cột không khớp sẽ bị
+ * bỏ qua).
  * Sinh lại xong nhớ dán lại toàn bộ file này vào Apps Script.
  */
 
@@ -89,49 +91,49 @@ var ROLE_SLOTS = [
 
 // id: [mã 1 ký tự, [tên gọi...]] — mã y hệt THEME_CODE_BY_ID trong app.
 var THEMES = {
-  endless_night: ['0', ['Đêm Vô Tận']],
-  distant_howl: ['1', ['Tiếng Hú Xa']],
-  thick_fog: ['2', ['Sương Mù Dày']],
-  blood_moon: ['3', ['Trăng Máu']],
-  mob_rule: ['4', ['Luật Đám Đông']],
-  wolf_covenant: ['5', ['Khế Ước Bầy Sói']],
-  night_of_vengeance: ['6', ['Đêm Trả Thù']],
-  creeping_curse: ['7', ['Lời Nguyền Lan Rộng']],
-  red_thread: ['8', ['Sợi Chỉ Đỏ']],
-  blood_pact: ['9', ['Giao Ước Máu']],
-  blood_thirst: ['A', ['Cơn Khát']],
-  last_stand: ['B', ['Sói Cùng Đường']],
-  scent_of_blood: ['C', ['Mùi Máu']],
-  long_night: ['D', ['Đêm Dài']],
-  reverse_trial: ['E', ['Phiên Toà Ngược']],
-  great_storm: ['F', ['Cơn Bão']],
-  tidal_moon: ['G', ['Trăng Định Kỳ']],
-  wolf_leader: ['H', ['Sói Trưởng']],
-  sheriff: ['I', ['Cảnh Sát Trưởng']],
-  forest_journey: ['J', ['Chuyến Đi Rừng']],
-  lunar_eclipse: ['K', ['Nguyệt Thực']],
-  royal_decree: ['L', ['Chiếu Chỉ Hoàng Gia']],
-  first_dawn: ['M', ['Bình Minh Đầu Tiên']],
-  holy_antidote: ['N', ['Thuốc Giải Thánh']],
-  silver_claw: ['O', ['Sói Bạc']],
-  garlic_harvest: ['P', ['Mùa Tỏi']],
-  night_watch: ['Q', ['Đèn Canh Đêm']],
-  village_ledger: ['R', ['Nhật Ký Làng']],
-  rumor_mill: ['S', ['Lời Đồn']],
-  village_militia: ['T', ['Dân Quân Tự Vệ']],
-  white_list: ['U', ['Danh Sách Trắng']],
-  price_of_truth: ['V', ['Giá Của Sự Thật']],
-  inquisition: ['W', ['Toà Án Dị Giáo']],
-  silver_bullet: ['X', ['Đạn Bạc']],
-  witch_sabbath: ['Y', ['Đêm Hội Phù Thủy', 'Hội Phù Thủy']],
-  talking_graveyard: ['Z', ['Nghĩa Địa Biết Nói']],
-  death_note: ['a', ['Sổ Tang']],
-  undying_village: ['b', ['Làng Bất Tử']],
-  double_trial: ['c', ['Toà Án Kép']],
-  bite_mark: ['d', ['Dấu Răng']],
-  body_count: ['e', ['Đếm Xác']],
-  holy_water: ['f', ['Nước Thánh']],
-  talisman: ['g', ['Bùa Hộ Mệnh']],
+  endless_night: ['0', ['Đêm Vô Tận', 'Endless Night']],
+  distant_howl: ['1', ['Tiếng Hú Xa', 'Distant Howl']],
+  thick_fog: ['2', ['Sương Mù Dày', 'Thick Fog']],
+  blood_moon: ['3', ['Trăng Máu', 'Blood Moon']],
+  mob_rule: ['4', ['Luật Đám Đông', 'Mob Rule']],
+  wolf_covenant: ['5', ['Khế Ước Bầy Sói', 'Wolf Covenant']],
+  night_of_vengeance: ['6', ['Đêm Trả Thù', 'Night of Vengeance']],
+  creeping_curse: ['7', ['Lời Nguyền Lan Rộng', 'Creeping Curse']],
+  red_thread: ['8', ['Sợi Chỉ Đỏ', 'Red Thread']],
+  blood_pact: ['9', ['Giao Ước Máu', 'Blood Pact']],
+  blood_thirst: ['A', ['Cơn Khát', 'Bloodthirst']],
+  last_stand: ['B', ['Sói Cùng Đường', 'Last Stand']],
+  scent_of_blood: ['C', ['Mùi Máu', 'Scent of Blood']],
+  long_night: ['D', ['Đêm Dài', 'Long Night']],
+  reverse_trial: ['E', ['Phiên Toà Ngược', 'Reverse Trial']],
+  great_storm: ['F', ['Cơn Bão', 'Great Storm']],
+  tidal_moon: ['G', ['Trăng Định Kỳ', 'Tidal Moon']],
+  wolf_leader: ['H', ['Sói Trưởng', 'Pack Leader']],
+  sheriff: ['I', ['Cảnh Sát Trưởng', 'Sheriff']],
+  forest_journey: ['J', ['Chuyến Đi Rừng', 'Forest Journey']],
+  lunar_eclipse: ['K', ['Nguyệt Thực', 'Lunar Eclipse']],
+  royal_decree: ['L', ['Chiếu Chỉ Hoàng Gia', 'Royal Decree']],
+  first_dawn: ['M', ['Bình Minh Đầu Tiên', 'First Dawn']],
+  holy_antidote: ['N', ['Thuốc Giải Thánh', 'Holy Antidote']],
+  silver_claw: ['O', ['Sói Bạc', 'Silver Claw']],
+  garlic_harvest: ['P', ['Mùa Tỏi', 'Garlic Harvest']],
+  night_watch: ['Q', ['Đèn Canh Đêm', 'Night Watch']],
+  village_ledger: ['R', ['Nhật Ký Làng', 'Village Ledger']],
+  rumor_mill: ['S', ['Lời Đồn', 'Rumor Mill']],
+  village_militia: ['T', ['Dân Quân Tự Vệ', 'Village Militia']],
+  white_list: ['U', ['Danh Sách Trắng', 'White List']],
+  price_of_truth: ['V', ['Giá Của Sự Thật', 'Price of Truth']],
+  inquisition: ['W', ['Toà Án Dị Giáo', 'Inquisition']],
+  silver_bullet: ['X', ['Đạn Bạc', 'Silver Bullet']],
+  witch_sabbath: ['Y', ['Đêm Hội Phù Thủy', 'Witches\' Sabbath', 'Hội Phù Thủy']],
+  talking_graveyard: ['Z', ['Nghĩa Địa Biết Nói', 'Talking Graveyard']],
+  death_note: ['a', ['Sổ Tang', 'Last Words']],
+  undying_village: ['b', ['Làng Bất Tử', 'Undying Village']],
+  double_trial: ['c', ['Toà Án Kép', 'Double Trial']],
+  bite_mark: ['d', ['Dấu Răng', 'Bite Mark']],
+  body_count: ['e', ['Đếm Xác', 'Body Count']],
+  holy_water: ['f', ['Nước Thánh', 'Holy Water']],
+  talisman: ['g', ['Bùa Hộ Mệnh', 'Talisman']],
 }
 // <<< DỮ LIỆU SINH TỰ ĐỘNG
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ROLE_BY_ID, TEAMS, canIncreaseRole } from '../data/roles.js'
+import { ROLE_BY_ID, canIncreaseRole } from '../data/roles.js'
 import { getRoleImageSrc } from '../data/roleImages.js'
 import { balanceTone } from '../data/balance.js'
 import {
@@ -8,6 +8,7 @@ import {
   suggestSetup,
 } from '../data/suggestSetup.js'
 import { decodeSetupCode, encodeSetupCode } from '../data/roleCode.js'
+import { useI18n } from '../i18n/useI18n.js'
 import BalanceMeter from './BalanceMeter.jsx'
 import ThemePicker from './ThemePicker.jsx'
 import { showAlert, showConfirm, showPrompt } from '../ui/dialog.js'
@@ -41,13 +42,14 @@ function sortEntriesByTeam(entries) {
 }
 
 function TeamBreakdown({ counts }) {
+  const { teams } = useI18n()
   const items = TEAM_ORDER.filter((id) => counts[id] > 0)
   if (items.length === 0) return null
 
   return (
     <div className="setup-team-stats">
       {items.map((teamId) => {
-        const team = TEAMS[teamId]
+        const team = teams[teamId]
         return (
           <span
             key={teamId}
@@ -75,6 +77,7 @@ export default function SetupPanel({
   onStart,
   onLoadSetup,
 }) {
+  const { t, teams, roleById } = useI18n()
   const [expanded, setExpanded] = useState(false)
   const [suggestCount, setSuggestCount] = useState('9')
   const [codeInput, setCodeInput] = useState('')
@@ -83,13 +86,13 @@ export default function SetupPanel({
   const handleCopyCode = async () => {
     const code = encodeSetupCode(selected, themeId)
     if (!code) {
-      showAlert('Chưa có vai trò nào để tạo mã.')
+      showAlert(t('setup.noRolesForCode'))
       return
     }
     try {
       await navigator.clipboard.writeText(code)
     } catch {
-      await showPrompt('Sao chép mã ván bên dưới:', code)
+      await showPrompt(t('setup.copyCodePrompt'), code)
       return
     }
     setCopiedCode(true)
@@ -99,12 +102,12 @@ export default function SetupPanel({
   const handleLoadCode = async () => {
     const decoded = decodeSetupCode(codeInput)
     if (!decoded || Object.keys(decoded.roles).length === 0) {
-      showAlert('Mã ván không hợp lệ.')
+      showAlert(t('setup.invalidCode'))
       return
     }
     if (
       totalPlayers > 0 &&
-      !(await showConfirm('Thay thế ván đấu hiện tại bằng ván từ mã này?'))
+      !(await showConfirm(t('setup.confirmLoadCode')))
     ) {
       return
     }
@@ -120,13 +123,16 @@ export default function SetupPanel({
       count > SUGGEST_MAX_PLAYERS
     ) {
       showAlert(
-        `Nhập số người chơi từ ${SUGGEST_MIN_PLAYERS} đến ${SUGGEST_MAX_PLAYERS}.`,
+        t('setup.suggestRange', {
+          min: SUGGEST_MIN_PLAYERS,
+          max: SUGGEST_MAX_PLAYERS,
+        }),
       )
       return
     }
     if (
       totalPlayers > 0 &&
-      !(await showConfirm('Thay thế ván đấu hiện tại bằng setup gợi ý?'))
+      !(await showConfirm(t('setup.confirmSuggest')))
     ) {
       return
     }
@@ -150,7 +156,7 @@ export default function SetupPanel({
       >
         <div className="setup-dock-info">
           <strong>{totalPlayers}</strong>
-          <span>người chơi</span>
+          <span>{t('setup.playersUnit', { count: totalPlayers })}</span>
         </div>
         <span className={`setup-dock-balance ${balanceTone(totalValue)}`}>
           {formatValue(totalValue)}
@@ -162,13 +168,15 @@ export default function SetupPanel({
 
       <div id="setup-sheet" className="setup-sheet">
         <div className="panel-head">
-          <h2>Ván đấu</h2>
-          <span className="muted">{totalPlayers} người chơi</span>
+          <h2>{t('setup.heading')}</h2>
+          <span className="muted">
+            {t('common.players', { count: totalPlayers })}
+          </span>
         </div>
 
         <div className="suggest-row">
           <label className="suggest-label" htmlFor="suggest-count">
-            Gợi ý setup
+            {t('setup.suggestLabel')}
           </label>
           <input
             id="suggest-count"
@@ -181,15 +189,15 @@ export default function SetupPanel({
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSuggest()
             }}
-            aria-label="Số người chơi cho setup gợi ý"
+            aria-label={t('setup.suggestAria')}
           />
-          <span className="suggest-unit muted">người</span>
+          <span className="suggest-unit muted">{t('setup.suggestUnit')}</span>
           <button
             type="button"
             className="ghost-btn small suggest-btn"
             onClick={handleSuggest}
           >
-            Gợi ý
+            {t('setup.suggestButton')}
           </button>
         </div>
 
@@ -197,13 +205,13 @@ export default function SetupPanel({
           <input
             type="text"
             className="code-input"
-            placeholder="Nhập mã ván..."
+            placeholder={t('setup.codePlaceholder')}
             value={codeInput}
             onChange={(e) => setCodeInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleLoadCode()
             }}
-            aria-label="Mã ván để tải setup"
+            aria-label={t('setup.codeAria')}
           />
           <button
             type="button"
@@ -211,7 +219,7 @@ export default function SetupPanel({
             disabled={!codeInput.trim()}
             onClick={handleLoadCode}
           >
-            Tải mã
+            {t('setup.loadCode')}
           </button>
           <button
             type="button"
@@ -219,7 +227,7 @@ export default function SetupPanel({
             disabled={entries.length === 0}
             onClick={handleCopyCode}
           >
-            {copiedCode ? 'Đã copy!' : 'Copy mã ván'}
+            {copiedCode ? t('common.copied') : t('setup.copyCode')}
           </button>
         </div>
 
@@ -234,14 +242,12 @@ export default function SetupPanel({
         <BalanceMeter total={totalValue} />
 
         {entries.length === 0 ? (
-          <p className="empty">
-            Chưa có vai trò nào. Hãy thêm từ thư viện vai trò.
-          </p>
+          <p className="empty">{t('setup.empty')}</p>
         ) : (
           <ul className="selected-list">
             {sortedEntries.map(([id, count]) => {
-              const role = ROLE_BY_ID[id]
-              const team = TEAMS[role.team]
+              const role = roleById[id]
+              const team = teams[role.team]
               const canInc = canIncreaseRole(id, selected)
               const imageSrc = getRoleImageSrc(id)
               return (
@@ -271,7 +277,7 @@ export default function SetupPanel({
                     <button
                       type="button"
                       onClick={() => onDec(id)}
-                      aria-label={`Giảm ${role.name}`}
+                      aria-label={t('role.decrease', { role: role.name })}
                     >
                       −
                     </button>
@@ -285,8 +291,8 @@ export default function SetupPanel({
                       type="button"
                       onClick={() => onInc(id)}
                       disabled={!canInc}
-                      aria-label={`Tăng ${role.name}`}
-                      title={!canInc ? `Tối đa ${role.max}` : undefined}
+                      aria-label={t('role.increase', { role: role.name })}
+                      title={!canInc ? t('common.max', { max: role.max }) : undefined}
                     >
                       +
                     </button>
@@ -295,7 +301,7 @@ export default function SetupPanel({
                     type="button"
                     className="remove-btn"
                     onClick={() => onRemove(id)}
-                    aria-label={`Xóa ${role.name}`}
+                    aria-label={t('role.remove', { role: role.name })}
                   >
                     ✕
                   </button>
@@ -313,9 +319,11 @@ export default function SetupPanel({
           disabled={totalPlayers === 0}
           onClick={onStart}
         >
-          Bắt đầu
+          {t('common.start')}
           {totalPlayers > 0 && (
-            <span className="start-btn-meta">{totalPlayers} người</span>
+            <span className="start-btn-meta">
+              {t('common.people', { count: totalPlayers })}
+            </span>
           )}
         </button>
         <button
@@ -324,7 +332,7 @@ export default function SetupPanel({
           disabled={entries.length === 0}
           onClick={onClear}
         >
-          Làm lại
+          {t('setup.clear')}
         </button>
       </div>
     </section>

@@ -12,6 +12,7 @@ Web app hỗ trợ quản trò game Ma Sói (Ultimate Werewolf): sắp ván, câ
 - **Hẹn giờ thảo luận** có chuông báo và giữ màn hình sáng.
 - **Lịch sử ván**: lưu phe thắng, ghi chú, chủ đề; dùng lại setup cũ.
 - **Google Sheet**: script sinh mã ván từ bảng ghi ván trên Google Sheet.
+- **Hai ngôn ngữ**: tiếng Việt và tiếng Anh, đổi bằng nút VI / EN trên header (mobile: một nút gọn). Lần đầu mở app thì chọn theo ngôn ngữ trình duyệt; người đã dùng app từ trước giữ tiếng Việt.
 
 ## Chạy dự án
 
@@ -46,6 +47,12 @@ src/
     storage.js            đọc/ghi localStorage an toàn
     roleImages.js         tìm ảnh vai trong public/roles/
     *.test.js             test
+  i18n/                   đa ngôn ngữ
+    index.js              ghép luật (data/) với chữ thành dữ liệu hiển thị: getLocale(lang)
+    I18nProvider.jsx      chọn/lưu ngôn ngữ, cấp dữ liệu hiển thị cho React
+    useI18n.js            hook useI18n() dùng trong component
+    vi/, en/              chữ của từng ngôn ngữ: ui.js, roles.js, themes.js
+    i18n.test.js          test đủ chữ cho mọi ngôn ngữ
   ui/                     dialog thay alert/confirm, format điểm, hook useStoredState
 scripts/google-sheets/
   MaSoiCode.gs            Apps Script dán vào Google Sheet
@@ -53,17 +60,17 @@ scripts/google-sheets/
 public/roles/<id>.webp    ảnh vai (vai chưa có ảnh thì hiện chấm màu phe)
 ```
 
-`roles.js` và `themes.js` phải là dữ liệu thuần, không dùng API riêng của Vite, vì `build.mjs` đọc chúng bằng Node.
+`data/` và `i18n/` (trừ file `.jsx` và `useI18n.js`) phải là JS thuần, không dùng API riêng của Vite, vì `build.mjs` đọc chúng bằng Node.
 
 ## Dữ liệu
+
+Luật (điểm, phe, thứ tự gọi…) nằm trong `src/data/`, không có chữ. Chữ hiển thị nằm trong `src/i18n/<ngôn ngữ>/`, khóa theo `id`. Xem [Đa ngôn ngữ](#đa-ngôn-ngữ).
 
 ### Vai trò — `ROLES_DATA` trong [src/data/roles.js](src/data/roles.js)
 
 | Trường | Ý nghĩa |
 |---|---|
 | `id` | Khóa cố định, dùng trong mã ván, ghi chú, lịch sử. Không đổi sau khi đã dùng. |
-| `name`, `nameEn` | Tên hiển thị tiếng Việt / tiếng Anh. |
-| `aliases` | Tên gọi khác, VD tên cột trên Google Sheet (`['TN cứng']`). Chỉ cần ghi tên khác hẳn tên chính. |
 | `team` | `village`, `werewolf`, `vampire` hoặc `other`. |
 | `value` | Điểm cân bằng: dương lợi Dân làng, âm lợi Sói/Ma cà rồng. |
 | `max` | Số lá tối đa trong một ván, mặc định 1. |
@@ -71,8 +78,6 @@ public/roles/<id>.webp    ảnh vai (vai chưa có ảnh thì hiện chấm màu
 | `wakesAtNight` | Có được gọi dậy ban đêm không. |
 | `nightOrder` | Thứ tự gọi, số nhỏ gọi trước (0 = nhận mặt đầu đêm 1, 3 = bầy Sói, 100 = cuối đêm). |
 | `phase` | `every` mỗi đêm, `night1` chỉ đêm 1, `night2` chỉ đêm 2, `fromNight2` từ đêm 2. Bước không phải `every`/`fromNight2` có nút Ẩn. |
-| `ability` | Mô tả năng lực trên thẻ vai. |
-| `script` | Câu quản trò đọc to khi gọi. |
 | `randomPair` | Bước gọi có nút chọn ngẫu nhiên 2 số người chơi. |
 
 `NIGHT_EXTRAS` (cùng file) là các bước gọi không phải vai, chỉ xuất hiện khi có vai `requiresRole` và đủ `minPlayers`. VD bước Cặp đôi khi có Thần Tình Yêu.
@@ -81,35 +86,56 @@ public/roles/<id>.webp    ảnh vai (vai chưa có ảnh thì hiện chấm màu
 
 | Trường | Ý nghĩa |
 |---|---|
-| `id`, `name`, `aliases` | Như vai trò. |
-| `description` | Luật của chủ đề, quản trò đọc cho cả bàn. |
+| `id` | Như vai trò. |
 | `value` | Điểm cộng vào điểm cân bằng của ván. |
 | `favors` | Phe được lợi (để tô màu). |
-| `requires` | Điều kiện bắt buộc, phải thỏa hết: `{ roles: ['witch'], min: 1, label }` (tổng số lá các vai trong danh sách) hoặc `{ team: 'vampire', min: 1, label }` (tổng số lá của phe). |
-| `nightSteps` | Bước gọi ban đêm thêm vào: `{ id, nightOrder, phase, name, script, moderatorNote }`. `id` không được trùng id chủ đề nào. |
+| `requires` | Điều kiện bắt buộc, phải thỏa hết: `{ roles: ['witch'], min: 1 }` (tổng số lá các vai trong danh sách) hoặc `{ team: 'vampire', min: 1 }` (tổng số lá của phe). Nhãn hiển thị ("Có Phù Thủy", "Có ít nhất 2 vai phe Sói") được sinh tự động theo ngôn ngữ. |
+| `nightSteps` | Bước gọi ban đêm thêm vào: `{ id, nightOrder, phase }`. `id` không được trùng id chủ đề nào. |
 
 Mã 1 ký tự của mỗi chủ đề nằm ở `THEME_CODE_BY_ID` cùng file.
+
+### Chữ — `src/i18n/<ngôn ngữ>/`
+
+| File | Nội dung |
+|---|---|
+| `roles.js` | `ROLE_TEXT[id]`: `name`, `ability` (năng lực trên thẻ vai), `script` (câu đọc to, chỉ vai thức dậy ban đêm), `aliases` (tên gọi khác, VD tên cột trên Google Sheet, chỉ ghi tên khác hẳn tên chính). `NIGHT_EXTRA_TEXT[id]`: `name`, `script`, `playerCondition`, `moderatorNote`. |
+| `themes.js` | `THEME_TEXT[id]`: `name`, `description` (luật đọc cho cả bàn), `aliases`, `steps[id bước]`: `{ name, script, moderatorNote }`. |
+| `ui.js` | Chữ giao diện theo khóa, VD `'setup.heading': 'Ván đấu'`. `{tên}` là tham số. Câu đổi theo số lượng viết `{ one, other }` (tiếng Anh: "1 player" / "2 players"). |
+
+Tên tiếng Anh của vai là tên in trên lá bài Ultimate Werewolf; khi giao diện tiếng Việt, tên này hiện kèm dưới tên vai.
 
 ## Quy trình thường gặp
 
 Sau mỗi lần sửa dữ liệu, chạy `npm test`. Test báo đỏ là có lỗi thật: id gõ sai, thiếu slot mã ván, quên sinh lại sheet…
 
 **Thêm vai**
-1. Thêm vào `ROLES_DATA`, đặt ở đâu cũng được. Tên cột trên sheet khác tên vai thì thêm `aliases`.
-2. Chèn `['<id>', <max>]` vào **ĐẦU** `ROLE_SLOTS`. Không bao giờ thêm vào cuối hay chèn giữa (xem [Mã ván](#mã-ván)).
-3. Có ảnh thì thêm `public/roles/<id>.webp`, app tự nhận.
-4. `npm run gen:sheet`, `npm test`, rồi dán lại `MaSoiCode.gs` vào Apps Script.
+1. Thêm vào `ROLES_DATA`, đặt ở đâu cũng được.
+2. Thêm chữ vào `src/i18n/vi/roles.js` **và** `src/i18n/en/roles.js`. Tên cột trên sheet khác tên vai thì thêm `aliases`.
+3. Chèn `['<id>', <max>]` vào **ĐẦU** `ROLE_SLOTS`. Không bao giờ thêm vào cuối hay chèn giữa (xem [Mã ván](#mã-ván)).
+4. Có ảnh thì thêm `public/roles/<id>.webp`, app tự nhận.
+5. `npm run gen:sheet`, `npm test`, rồi dán lại `MaSoiCode.gs` vào Apps Script.
 
-**Bỏ vai**: xoá khỏi `ROLES_DATA` nhưng **giữ nguyên** dòng trong `ROLE_SLOTS`. Mã cũ có vai đó vẫn giải được, phần vai đã bỏ bị lược đi.
+**Bỏ vai**: xoá khỏi `ROLES_DATA` và chữ của vai trong `src/i18n/*/roles.js`, nhưng **giữ nguyên** dòng trong `ROLE_SLOTS`. Mã cũ có vai đó vẫn giải được, phần vai đã bỏ bị lược đi.
 
 **Đổi số lá tối đa**: sửa `max` trong `ROLES_DATA`. Không sửa sức chứa trong `ROLE_SLOTS`.
 
 **Thêm chủ đề**
 1. Thêm vào `THEMES_DATA`.
-2. Gán một ký tự **chưa từng dùng** trong `THEME_CODE_BY_ID` (`0-9`, `A-Z`, `a-z`; ký tự tiếp theo hiện là `h`).
-3. `npm run gen:sheet`, `npm test`, dán lại script vào Apps Script.
+2. Thêm chữ vào `src/i18n/vi/themes.js` **và** `src/i18n/en/themes.js` (cả `steps` nếu có `nightSteps`).
+3. Gán một ký tự **chưa từng dùng** trong `THEME_CODE_BY_ID` (`0-9`, `A-Z`, `a-z`; ký tự tiếp theo hiện là `h`).
+4. `npm run gen:sheet`, `npm test`, dán lại script vào Apps Script.
 
-**Bỏ chủ đề**: xoá khỏi `THEMES_DATA` nhưng giữ dòng trong `THEME_CODE_BY_ID` để ký tự đó không bị dùng lại.
+**Bỏ chủ đề**: xoá khỏi `THEMES_DATA` và chữ trong `src/i18n/*/themes.js`, nhưng giữ dòng trong `THEME_CODE_BY_ID` để ký tự đó không bị dùng lại.
+
+**Thêm/sửa chữ giao diện**: thêm khóa vào `src/i18n/vi/ui.js` và `src/i18n/en/ui.js`, dùng trong component bằng `t('khóa', { tham số })`. Cần chèn phần tử React vào giữa câu (VD `<strong>`) thì dùng `rich` thay cho `t`.
+
+## Đa ngôn ngữ
+
+- Component lấy mọi thứ cần hiển thị từ `useI18n()`: `t`, `teams`, `phases`, `roleById`, `themeById`, `requirementLabel`, `formatDate`… Vai/chủ đề trong đó đã ghép sẵn luật với chữ của ngôn ngữ đang chọn.
+- Code ngoài React (test, `build.mjs`) dùng `getLocale('vi' | 'en')` trong [src/i18n/index.js](src/i18n/index.js).
+- Thiếu chữ ở ngôn ngữ nào thì lấy chữ tiếng Việt, nhưng [i18n.test.js](src/i18n/i18n.test.js) sẽ báo đỏ: thiếu chữ của vai/chủ đề/bước gọi, thừa chữ của thứ đã xoá, khóa `ui.js` lệch nhau hoặc khác tham số `{…}`.
+- Mã ván, lịch sử, ghi chú chỉ lưu id nên đổi ngôn ngữ không ảnh hưởng: ván cũ tự hiện theo ngôn ngữ mới. Ghi chú quản trò tự gõ thì giữ nguyên.
+- **Thêm ngôn ngữ**: tạo thư mục `src/i18n/<mã>/` cùng cấu trúc với `vi/` (`index.js` khai báo `name`, `short`, `locale`), thêm vào `DICTIONARIES` trong `src/i18n/index.js`, chạy `npm test` để biết còn thiếu gì, rồi `npm run gen:sheet`.
 
 ## Mã ván
 
@@ -132,7 +158,7 @@ Vì vậy vị trí trong `ROLE_SLOTS` là một phần của định dạng:
 
 - **Cài đặt**: Google Sheet → Tiện ích mở rộng → Apps Script → dán toàn bộ file → Lưu → tải lại sheet.
 - **Dùng**: bấm vào một ô trên dòng ván → menu **Ma Sói → Copy mã ván**. Có thể gán hàm `copyMaVan` cho một nút vẽ trên sheet.
-- **Bảng tính**: dòng 1 là tiêu đề. Cột trùng tên vai chứa số lượng vai đó; tên so khớp không phân biệt hoa thường và dấu, nhận tên tiếng Việt, tiếng Anh, `aliases` hoặc id. Cột `Chủ đề` chứa tên chủ đề. Cột `Số Người` (không bắt buộc) dùng để cảnh báo khi tổng số lá không khớp.
+- **Bảng tính**: dòng 1 là tiêu đề. Cột trùng tên vai chứa số lượng vai đó; tên so khớp không phân biệt hoa thường và dấu, nhận tên tiếng Việt, tiếng Anh, `aliases` hoặc id. Cột `Chủ đề` chứa tên chủ đề (tiếng Việt hoặc tiếng Anh). Cột `Số Người` (không bắt buộc) dùng để cảnh báo khi tổng số lá không khớp.
 
 Phần `ROLE_SLOTS`/`THEMES` giữa hai dòng `>>> / <<< DỮ LIỆU SINH TỰ ĐỘNG` do `npm run gen:sheet` sinh ra, đừng sửa tay. Sinh lại xong phải dán lại cả file vào Apps Script thì sheet mới cập nhật.
 
@@ -150,6 +176,7 @@ Mọi dữ liệu nằm trong `localStorage` của trình duyệt đang dùng. X
 | `masoi.nightNotes` | Ghi chú các bước gọi đêm, theo khóa `role:<id>`, `extra:<id>`, `theme:<id>` |
 | `masoi.nightHidden` | Các bước đang ẩn |
 | `masoi.matches` | Lịch sử ván |
+| `masoi.lang` | Ngôn ngữ đang chọn (`vi` / `en`) |
 
 ## Cân bằng và thiết kế chủ đề
 
@@ -162,6 +189,7 @@ Mọi dữ liệu nằm trong `localStorage` của trình duyệt đang dùng. X
 
 `npm test` chạy [vitest](https://vitest.dev) trên:
 - toàn vẹn dữ liệu vai/chủ đề,
+- chữ của mọi ngôn ngữ: đủ cho mọi vai/chủ đề/bước gọi, khóa giao diện khớp nhau,
 - mã ván (mã cố định + mã hoá/giải mã ngẫu nhiên),
 - gợi ý setup cho mọi số người 4–24,
 - các bước gọi đêm,

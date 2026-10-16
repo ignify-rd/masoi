@@ -1,34 +1,29 @@
 import { useMemo } from 'react'
-import { TEAMS } from '../data/roles.js'
-import {
-  THEMES,
-  THEME_BY_ID,
-  isThemeAvailable,
-  pickRandomTheme,
-  requirementLabel,
-} from '../data/themes.js'
+import { isThemeAvailable, pickRandomTheme } from '../data/themes.js'
+import { useI18n } from '../i18n/useI18n.js'
 import { showAlert } from '../ui/dialog.js'
 import { formatValue, valueTone } from '../ui/format.js'
 import './ThemePicker.css'
 
 export default function ThemePicker({ selected, themeId, onChangeTheme }) {
+  const { t, teams, themes, themeById, requirementLabel } = useI18n()
   const options = useMemo(
     () =>
-      THEMES.map((theme) => ({
+      themes.map((theme) => ({
         theme,
         available: isThemeAvailable(theme, selected),
       })),
-    [selected],
+    [themes, selected],
   )
 
-  const current = THEME_BY_ID[themeId] || null
+  const current = themeById[themeId] || null
   const currentAvailable = current ? isThemeAvailable(current, selected) : true
   const availableCount = options.filter((o) => o.available).length
 
   const handleRandom = () => {
     const theme = pickRandomTheme(selected, { excludeId: themeId })
     if (!theme) {
-      showAlert('Không có chủ đề nào hợp lệ với setup hiện tại.')
+      showAlert(t('theme.noneAvailable'))
       return
     }
     onChangeTheme(theme.id)
@@ -38,7 +33,7 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
     <div className="theme-picker">
       <div className="theme-row">
         <label className="theme-label" htmlFor="theme-select">
-          Chủ đề
+          {t('theme.label')}
         </label>
         <div className="theme-select-wrap">
           <select
@@ -47,11 +42,11 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
             value={themeId || ''}
             onChange={(e) => onChangeTheme(e.target.value || null)}
           >
-            <option value="">Mặc định (không chủ đề)</option>
+            <option value="">{t('theme.none')}</option>
             {options.map(({ theme, available }) => (
               <option key={theme.id} value={theme.id} disabled={!available}>
                 {theme.name} ({formatValue(theme.value)})
-                {available ? '' : ' — thiếu vai bắt buộc'}
+                {available ? '' : ` — ${t('theme.missingRoles')}`}
               </option>
             ))}
           </select>
@@ -60,8 +55,8 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
               type="button"
               className="theme-clear-btn"
               onClick={() => onChangeTheme(null)}
-              title="Bỏ chủ đề — chơi ván không có chủ đề"
-              aria-label="Bỏ chủ đề"
+              title={t('theme.clearTitle')}
+              aria-label={t('theme.clear')}
             >
               ✕
             </button>
@@ -72,16 +67,16 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
           className="ghost-btn small"
           onClick={handleRandom}
           disabled={availableCount === 0}
-          title="Random một chủ đề hợp lệ với setup hiện tại"
+          title={t('theme.randomTitle')}
         >
-          Random
+          {t('theme.random')}
         </button>
       </div>
 
       {current ? (
         <div
           className="theme-card"
-          style={{ '--team-color': TEAMS[current.favors].color }}
+          style={{ '--team-color': teams[current.favors].color }}
         >
           <div className="theme-card-head">
             <strong className="theme-card-name">{current.name}</strong>
@@ -93,27 +88,24 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
           <div className="theme-card-meta">
             <span
               className="team-tag small"
-              style={{ '--team-color': TEAMS[current.favors].color }}
+              style={{ '--team-color': teams[current.favors].color }}
             >
-              Lợi cho {TEAMS[current.favors].label}
+              {t('theme.favors', { team: teams[current.favors].label })}
             </span>
             {current.requires.length > 0 && (
               <span className="muted theme-card-req">
-                Yêu cầu: {current.requires.map(requirementLabel).join(' • ')}
+                {t('theme.requires', {
+                  list: current.requires.map(requirementLabel).join(' • '),
+                })}
               </span>
             )}
           </div>
           {!currentAvailable && (
-            <p className="theme-card-warning">
-              Setup hiện tại chưa thỏa yêu cầu của chủ đề này — điểm chủ đề không
-              được tính.
-            </p>
+            <p className="theme-card-warning">{t('theme.unmet')}</p>
           )}
         </div>
       ) : (
-        <p className="muted theme-empty">
-          Chơi mặc định. Chọn một chủ đề để đổi luật và cộng điểm cân bằng.
-        </p>
+        <p className="muted theme-empty">{t('theme.empty')}</p>
       )}
     </div>
   )

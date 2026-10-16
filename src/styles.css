@@ -83,6 +83,13 @@ body {
   font-size: 14px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* Layout */
 .app-main {
   display: grid;
@@ -241,14 +248,25 @@ body {
   .app-header {
     margin-bottom: 16px;
     align-items: flex-start;
+    gap: 8px;
   }
 
+  .brand {
+    gap: 10px;
+  }
+
+  /* Vừa một dòng cạnh nút ngôn ngữ + nút Lịch sử trên màn 390px. */
   .app-header h1 {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .app-header p {
     font-size: 13px;
+  }
+
+  .header-actions {
+    align-self: center;
+    gap: 6px;
   }
 
   .brand-icon {

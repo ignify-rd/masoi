@@ -1,15 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ROLE_BY_ID, TEAMS, normalizeSetup } from '../data/roles.js'
+import { normalizeSetup } from '../data/roles.js'
 import {
   WINNER_TEAM_IDS,
   deleteMatch,
-  formatMatchDate,
   loadMatches,
   normalizeThemeFromMatch,
   updateMatchWinner,
 } from '../data/matchHistory.js'
-import { THEME_BY_ID } from '../data/themes.js'
+import { useI18n } from '../i18n/useI18n.js'
 import { showAlert, showConfirm } from '../ui/dialog.js'
 import { formatValue } from '../ui/format.js'
 import './MatchHistory.css'
@@ -36,13 +35,14 @@ function HistoryIcon() {
 }
 
 function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
+  const { t, teams, roleById, themeById, formatDate } = useI18n()
   const [editingWinner, setEditingWinner] = useState(false)
-  const winnerTeam = match.winner ? TEAMS[match.winner] : null
-  const theme = THEME_BY_ID[normalizeThemeFromMatch(match.themeId)] || null
+  const winnerTeam = match.winner ? teams[match.winner] : null
+  const theme = themeById[normalizeThemeFromMatch(match.themeId)] || null
   const roleSummary = Object.entries(match.roles || {})
     .filter(([, c]) => c > 0)
     .map(([id, c]) => {
-      const name = ROLE_BY_ID[id]?.name || id
+      const name = roleById[id]?.name || id
       return c > 1 ? `${name} ×${c}` : name
     })
     .join(', ')
@@ -52,16 +52,16 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
       <div className="history-item-main">
         <div className="history-item-head">
           <time className="history-item-date">
-            {formatMatchDate(match.playedAt)}
+            {formatDate(match.playedAt)}
           </time>
           <span className="history-item-players">
-            {match.totalPlayers} người
+            {t('common.people', { count: match.totalPlayers })}
           </span>
         </div>
         {theme && (
           <span
             className="team-tag small history-item-theme"
-            style={{ '--team-color': TEAMS[theme.favors].color }}
+            style={{ '--team-color': teams[theme.favors].color }}
             title={theme.description}
           >
             {theme.name} ({formatValue(theme.value)})
@@ -70,7 +70,7 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
         {editingWinner ? (
           <div className="history-winner-edit">
             {WINNER_TEAM_IDS.map((teamId) => {
-              const team = TEAMS[teamId]
+              const team = teams[teamId]
               return (
                 <button
                   key={teamId}
@@ -93,7 +93,7 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
               className="ghost-btn small"
               onClick={() => setEditingWinner(false)}
             >
-              Hủy
+              {t('common.cancel')}
             </button>
           </div>
         ) : (
@@ -101,18 +101,18 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
             type="button"
             className="history-winner-btn"
             onClick={() => setEditingWinner(true)}
-            title="Bấm để đổi phe thắng"
+            title={t('history.changeWinner')}
           >
             {winnerTeam ? (
               <span
                 className="team-tag small history-winner"
                 style={{ '--team-color': winnerTeam.color }}
               >
-                {winnerTeam.label} thắng
+                {t('history.winner', { team: winnerTeam.label })}
               </span>
             ) : (
               <span className="history-winner unknown">
-                Chưa ghi phe thắng
+                {t('history.noWinner')}
               </span>
             )}
             <span className="history-winner-edit-hint" aria-hidden="true">
@@ -130,14 +130,14 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
           className="ghost-btn small history-load-btn"
           onClick={() => onLoad(match)}
         >
-          Dùng lại
+          {t('history.reuse')}
         </button>
         <button
           type="button"
           className="ghost-btn small danger history-delete-btn"
           onClick={() => onDelete(match)}
         >
-          Xóa
+          {t('history.delete')}
         </button>
       </div>
     </li>
@@ -145,13 +145,14 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
 }
 
 const SORT_OPTIONS = [
-  { value: 'date-desc', label: 'Mới nhất' },
-  { value: 'date-asc', label: 'Cũ nhất' },
-  { value: 'players-desc', label: 'Đông người nhất' },
-  { value: 'players-asc', label: 'Ít người nhất' },
+  { value: 'date-desc', label: 'history.sort.dateDesc' },
+  { value: 'date-asc', label: 'history.sort.dateAsc' },
+  { value: 'players-desc', label: 'history.sort.playersDesc' },
+  { value: 'players-asc', label: 'history.sort.playersAsc' },
 ]
 
 export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
+  const { t, teams, formatDate } = useI18n()
   const [open, setOpen] = useState(false)
   const [matches, setMatches] = useState(() => loadMatches())
   const [winnerFilter, setWinnerFilter] = useState('all')
@@ -205,13 +206,13 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
   const handleLoad = async (match) => {
     const roles = normalizeSetup(match.roles)
     if (Object.keys(roles).length === 0) {
-      showAlert('Không thể tải ván này — vai trò không còn hợp lệ.')
+      showAlert(t('history.invalidMatch'))
       return
     }
 
     if (
       hasCurrentSetup &&
-      !(await showConfirm('Thay thế ván đấu hiện tại bằng ván từ lịch sử?'))
+      !(await showConfirm(t('history.confirmLoad')))
     ) {
       return
     }
@@ -223,7 +224,10 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
   const handleDelete = async (match) => {
     if (
       !(await showConfirm(
-        `Xóa ván ${formatMatchDate(match.playedAt)} (${match.totalPlayers} người) khỏi lịch sử?`,
+        t('history.confirmDelete', {
+          date: formatDate(match.playedAt),
+          players: t('common.people', { count: match.totalPlayers }),
+        }),
       ))
     ) {
       return
@@ -243,10 +247,10 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="match-history-panel"
-        aria-label={`Lịch sử ván, ${matchCount} trận đã lưu`}
+        aria-label={t('history.buttonAria', { count: matchCount })}
       >
         <HistoryIcon />
-        <span className="history-header-label">Lịch sử</span>
+        <span className="history-header-label">{t('history.button')}</span>
         {matchCount > 0 && (
           <span className="history-header-badge">{matchCount}</span>
         )}
@@ -258,30 +262,28 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
             <button
               type="button"
               className="history-backdrop"
-              aria-label="Đóng lịch sử"
+              aria-label={t('history.closeAria')}
               onClick={() => setOpen(false)}
             />
             <div
               id="match-history-panel"
               className="history-panel"
               role="dialog"
-              aria-label="Lịch sử ván"
+              aria-label={t('history.heading')}
             >
               <div className="history-panel-head">
-                <h2>Lịch sử ván</h2>
+                <h2>{t('history.heading')}</h2>
                 <button
                   type="button"
                   className="ghost-btn small history-close-btn"
                   onClick={() => setOpen(false)}
                 >
-                  Đóng
+                  {t('history.close')}
                 </button>
               </div>
 
               {matches.length === 0 ? (
-                <p className="empty history-empty">
-                  Chưa có trận nào được lưu. Kết thúc ván để thêm vào lịch sử.
-                </p>
+                <p className="empty history-empty">{t('history.empty')}</p>
               ) : (
                 <>
                   <div className="history-toolbar">
@@ -289,25 +291,25 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
                       className="history-filter-select"
                       value={winnerFilter}
                       onChange={(e) => setWinnerFilter(e.target.value)}
-                      aria-label="Lọc theo phe thắng"
+                      aria-label={t('history.filterAria')}
                     >
-                      <option value="all">Tất cả phe thắng</option>
+                      <option value="all">{t('history.filterAll')}</option>
                       {WINNER_TEAM_IDS.map((teamId) => (
                         <option key={teamId} value={teamId}>
-                          {TEAMS[teamId].label}
+                          {teams[teamId].label}
                         </option>
                       ))}
-                      <option value="none">Chưa ghi phe thắng</option>
+                      <option value="none">{t('history.noWinner')}</option>
                     </select>
                     <select
                       className="history-filter-select"
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      aria-label="Sắp xếp"
+                      aria-label={t('history.sortAria')}
                     >
                       {SORT_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
-                          {opt.label}
+                          {t(opt.label)}
                         </option>
                       ))}
                     </select>
@@ -315,7 +317,7 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
 
                   {visibleMatches.length === 0 ? (
                     <p className="empty history-empty">
-                      Không có trận nào khớp với bộ lọc.
+                      {t('history.noMatches')}
                     </p>
                   ) : (
                     <ul className="history-list">

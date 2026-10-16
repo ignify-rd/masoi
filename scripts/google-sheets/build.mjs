@@ -1,10 +1,12 @@
-// Sinh phần dữ liệu (ROLE_SLOTS, THEMES) trong MaSoiCode.gs từ src/data.
+// Sinh phần dữ liệu (ROLE_SLOTS, THEMES) trong MaSoiCode.gs từ src/data, kèm
+// tên ở mọi ngôn ngữ trong src/i18n (sheet đặt tên cột tiếng nào cũng nhận).
 //   npm run gen:sheet            ghi đè MaSoiCode.gs
 //   npm run gen:sheet -- --check  chỉ kiểm tra, lỗi nếu file đang lệch
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { ROLE_BY_ID, ROLE_SLOTS } from '../../src/data/roles.js'
 import { THEMES } from '../../src/data/themes.js'
+import { allNames } from '../../src/i18n/index.js'
 
 export const SHEET_SCRIPT_PATH = fileURLToPath(
   new URL('./MaSoiCode.gs', import.meta.url),
@@ -56,14 +58,11 @@ function assertNoCollision(kind, entries) {
 
 export function renderSheetData() {
   const roles = ROLE_SLOTS.map(([id, cap]) => {
-    const role = ROLE_BY_ID[id]
     // Slot của vai đã bỏ khỏi app vẫn phải giữ để thứ tự/cơ số không đổi.
-    const names = role
-      ? uniqueNames([role.name, role.nameEn, ...(role.aliases ?? [])])
-      : []
+    const names = ROLE_BY_ID[id] ? uniqueNames(allNames('roles', id)) : []
     return [id, cap, names]
   })
-  const themes = THEMES.map((t) => [t.id, t.code, uniqueNames([t.name, ...(t.aliases ?? [])])])
+  const themes = THEMES.map((t) => [t.id, t.code, uniqueNames(allNames('themes', t.id))])
 
   assertNoCollision('vai', roles.map(([id, , names]) => [id, names]))
   assertNoCollision('chủ đề', themes.map(([id, , names]) => [id, names]))
