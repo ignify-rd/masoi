@@ -2,17 +2,20 @@ import { useEffect, useMemo } from 'react'
 import { canIncreaseRole, normalizeSetup } from './data/roles.js'
 import { countPlayers, sumRoleValue } from './data/balance.js'
 import { THEME_BY_ID, getThemeValue, isThemeAvailable } from './data/themes.js'
+import { useI18n } from './i18n/useI18n.js'
 import { useStoredState } from './ui/useStoredState.js'
 import RoleLibrary from './components/RoleLibrary.jsx'
 import SetupPanel from './components/SetupPanel.jsx'
 import NightCallOrder from './components/NightCallOrder.jsx'
 import MatchHistory from './components/MatchHistory.jsx'
 import DiscussionTimer from './components/DiscussionTimer.jsx'
+import LanguageSwitch from './components/LanguageSwitch.jsx'
 
 const parseThemeId = (id) => (THEME_BY_ID[id] ? id : null)
 const parseTimestamp = (value) => (typeof value === 'string' ? value : null)
 
 export default function App() {
+  const { t, themeById } = useI18n()
   const [selected, setSelected] = useStoredState('masoi.setup', {}, {
     parse: normalizeSetup,
   })
@@ -66,7 +69,7 @@ export default function App() {
   const rolesValue = useMemo(() => sumRoleValue(selected), [selected])
   const totalValue = rolesValue + getThemeValue(themeId, selected)
 
-  const theme = THEME_BY_ID[themeId] || null
+  const theme = themeById[themeId] || null
 
   return (
     <div className="app">
@@ -74,18 +77,19 @@ export default function App() {
         <div className="brand">
           <img src="/wolf.svg" alt="" className="brand-icon" />
           <div className="brand-text">
-            <h1>Quản Trò Ma Sói</h1>
-            <p className="muted">
-              Công cụ sắp ván &amp; gọi vai trò
-            </p>
+            <h1>{t('app.title')}</h1>
+            <p className="muted">{t('app.tagline')}</p>
           </div>
         </div>
-        {!started && (
-          <MatchHistory
-            hasCurrentSetup={totalPlayers > 0}
-            onLoadSetup={loadSetup}
-          />
-        )}
+        <div className="header-actions">
+          <LanguageSwitch />
+          {!started && (
+            <MatchHistory
+              hasCurrentSetup={totalPlayers > 0}
+              onLoadSetup={loadSetup}
+            />
+          )}
+        </div>
       </header>
 
       {started ? (
@@ -102,7 +106,7 @@ export default function App() {
         </main>
       ) : (
         <main className="app-main">
-          <RoleLibrary selected={selected} onAdd={inc} />
+          <RoleLibrary selected={selected} onAdd={inc} onDec={dec} />
           <SetupPanel
             selected={selected}
             totalPlayers={totalPlayers}
@@ -119,9 +123,7 @@ export default function App() {
         </main>
       )}
 
-      <footer className="app-footer muted">
-        Điểm cân bằng dựa trên giá trị nhân vật của Ultimate Werewolf.
-      </footer>
+      <footer className="app-footer muted">{t('app.footer')}</footer>
     </div>
   )
 }

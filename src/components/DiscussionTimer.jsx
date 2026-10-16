@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { useI18n } from '../i18n/useI18n.js'
 import { showAlert } from '../ui/dialog.js'
 import './DiscussionTimer.css'
 
-const PRESETS = [
-  { label: '30s', seconds: 30 },
-  { label: '1p', seconds: 60 },
-  { label: '2p', seconds: 120 },
-  { label: '5p', seconds: 300 },
-]
+const PRESET_SECONDS = [30, 60, 120, 300]
 
 const FLASH_DURATION_MS = 6000
 
@@ -108,7 +104,14 @@ function ClockIcon() {
   )
 }
 
+function presetLabel(seconds, t) {
+  return seconds < 60
+    ? t('timer.seconds', { count: seconds })
+    : t('timer.minutes', { count: seconds / 60 })
+}
+
 export default function DiscussionTimer() {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [duration, setDuration] = useState(60)
   const [customMinutes, setCustomMinutes] = useState('')
@@ -200,7 +203,7 @@ export default function DiscussionTimer() {
   const handleCustomStart = () => {
     const minutes = Number(customMinutes)
     if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 60) {
-      showAlert('Nhập số phút từ 1 đến 60.')
+      showAlert(t('timer.invalidMinutes'))
       return
     }
     startWith(Math.round(minutes * 60))
@@ -215,22 +218,20 @@ export default function DiscussionTimer() {
       }`}
     >
       {open && (
-        <div className="timer-panel" role="dialog" aria-label="Hẹn giờ">
+        <div className="timer-panel" role="dialog" aria-label={t('timer.dialog')}>
           <div className="timer-display" aria-live="polite">
             {formatTime(remainingMs)}
           </div>
 
           <div className="timer-presets">
-            {PRESETS.map((preset) => (
+            {PRESET_SECONDS.map((seconds) => (
               <button
-                key={preset.seconds}
+                key={seconds}
                 type="button"
-                className={`ghost-btn small${
-                  duration === preset.seconds ? ' active' : ''
-                }`}
-                onClick={() => startWith(preset.seconds)}
+                className={`ghost-btn small${duration === seconds ? ' active' : ''}`}
+                onClick={() => startWith(seconds)}
               >
-                {preset.label}
+                {presetLabel(seconds, t)}
               </button>
             ))}
           </div>
@@ -241,27 +242,27 @@ export default function DiscussionTimer() {
               className="timer-custom-input"
               min="1"
               max="60"
-              placeholder="Phút"
+              placeholder={t('timer.customPlaceholder')}
               value={customMinutes}
               onChange={(e) => setCustomMinutes(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCustomStart()
               }}
-              aria-label="Số phút tùy chọn"
+              aria-label={t('timer.customAria')}
             />
             <button
               type="button"
               className="ghost-btn small"
               onClick={handleCustomStart}
             >
-              Bắt đầu
+              {t('common.start')}
             </button>
           </div>
 
           <div className="timer-controls">
             {running ? (
               <button type="button" className="ghost-btn small" onClick={pause}>
-                Tạm dừng
+                {t('timer.pause')}
               </button>
             ) : (
               <button
@@ -270,11 +271,11 @@ export default function DiscussionTimer() {
                 onClick={resume}
                 disabled={remainingMs <= 0 || !showCountdown}
               >
-                Tiếp tục
+                {t('timer.resume')}
               </button>
             )}
             <button type="button" className="ghost-btn small" onClick={reset}>
-              Đặt lại
+              {t('common.reset')}
             </button>
           </div>
         </div>
@@ -285,7 +286,7 @@ export default function DiscussionTimer() {
         className="timer-toggle-btn"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        aria-label="Hẹn giờ thảo luận"
+        aria-label={t('timer.toggle')}
       >
         <ClockIcon />
         {(running || finished) && (

@@ -1,14 +1,13 @@
-import { NIGHT_EXTRAS, PHASE_LABEL, ROLE_BY_ID, TEAMS } from './roles.js'
-
 /**
  * Dựng danh sách bước gọi ban đêm từ 3 nguồn: vai trong ván, bước bổ sung
- * (NIGHT_EXTRAS) và bước của chủ đề. Mọi bước có cùng một dạng để UI chỉ việc
- * hiển thị:
+ * (NIGHT_EXTRAS) và bước của chủ đề. `locale` (getLocale trong src/i18n) quyết
+ * định ngôn ngữ của tên, câu gọi và nhãn. Mọi bước có cùng một dạng để UI chỉ
+ * việc hiển thị:
  *   key        khóa ổn định cho ghi chú và ẩn/hiện ("role:seer", "extra:lovers",
  *              "theme:<id bước>") — đừng đổi, ghi chú đã lưu dùng khóa này
  *   kind       'role' | 'extra' | 'theme'
  *   order      thứ tự gọi (nightOrder)
- *   phase      khóa của PHASE_LABEL
+ *   phase      id phase (xem PHASE_IDS)
  *   name, script, note (ghi chú cho quản trò, có thể không có)
  *   tags       nhãn sau tên, theo thứ tự hiển thị:
  *              { team } | { label, variant? }
@@ -16,19 +15,21 @@ import { NIGHT_EXTRAS, PHASE_LABEL, ROLE_BY_ID, TEAMS } from './roles.js'
  *   hideable   không phải đêm nào cũng gọi -> có nút Ẩn
  *   randomPair có nút chọn ngẫu nhiên 2 số người chơi
  */
-export function buildNightSteps(selected, totalPlayers, theme) {
+export function buildNightSteps(selected, totalPlayers, themeId, locale) {
   const roles = Object.keys(selected)
     .filter((id) => (selected[id] || 0) > 0)
-    .map((id) => ROLE_BY_ID[id])
+    .map((id) => locale.roleById[id])
     .filter((role) => role?.wakesAtNight)
     .sort((a, b) => a.nightOrder - b.nightOrder)
 
+  const theme = locale.themeById[themeId]
+
   const steps = [
-    ...roles.map(roleStep),
-    ...Object.values(NIGHT_EXTRAS)
+    ...roles.map((role) => roleStep(role, locale)),
+    ...locale.extras
       .filter((extra) => shouldIncludeExtra(extra, selected, totalPlayers))
-      .map(extraStep),
-    ...(theme?.nightSteps ?? []).map(themeStep),
+      .map((extra) => extraStep(extra, locale)),
+    ...(theme?.nightSteps ?? []).map((step) => themeStep(step, locale)),
   ]
 
   // sort ổn định: cùng `order` thì giữ thứ tự vai -> bước bổ sung -> chủ đề.
@@ -56,35 +57,40 @@ function baseStep(kind, source) {
   }
 }
 
-const phaseTag = (phase) => ({ label: PHASE_LABEL[phase] })
+const phaseTag = (phase, locale) => ({ label: locale.phases[phase] })
 
-function roleStep(role) {
+function roleStep(role, locale) {
   return {
     ...baseStep('role', role),
-    tags: [{ team: TEAMS[role.team] }, phaseTag(role.phase)],
+    tags: [{ team: locale.teams[role.team] }, phaseTag(role.phase, locale)],
   }
 }
 
-function extraStep(extra) {
+function extraStep(extra, locale) {
   return {
     ...baseStep('extra', extra),
     tags: [
-      phaseTag(extra.phase),
+      phaseTag(extra.phase, locale),
       extra.playerCondition && {
         label: extra.playerCondition,
         variant: 'condition',
       },
       {
-        label: `Khi có ${ROLE_BY_ID[extra.requiresRole]?.name}`,
+        label: locale.t('night.withRole', {
+          role: locale.roleById[extra.requiresRole]?.name,
+        }),
         variant: 'parent',
       },
     ].filter(Boolean),
   }
 }
 
-function themeStep(step) {
+function themeStep(step, locale) {
   return {
     ...baseStep('theme', step),
-    tags: [{ label: 'Chủ đề', variant: 'condition' }, phaseTag(step.phase)],
+    tags: [
+      { label: locale.t('night.themeTag'), variant: 'condition' },
+      phaseTag(step.phase, locale),
+    ],
   }
 }

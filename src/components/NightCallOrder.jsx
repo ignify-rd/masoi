@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
-import { ROLES, TEAMS, PHASE_LABEL } from '../data/roles.js'
 import { buildNightSteps } from '../data/nightSteps.js'
 import { saveMatch, WINNER_TEAM_IDS } from '../data/matchHistory.js'
-import { requirementLabel } from '../data/themes.js'
+import { useI18n } from '../i18n/useI18n.js'
 import { showAlert, showConfirm, showPrompt } from '../ui/dialog.js'
 import { formatValue, valueTone } from '../ui/format.js'
 import { useStoredState } from '../ui/useStoredState.js'
@@ -18,8 +17,8 @@ const serializeHidden = (set) => [...set]
 
 const TEAM_ORDER = ['vampire', 'werewolf', 'village', 'other']
 
-function buildRoleListText(selected, totalPlayers) {
-  const chosen = ROLES.filter((role) => (selected[role.id] || 0) > 0).sort(
+function buildRoleListText(selected, totalPlayers, { roles, t }) {
+  const chosen = roles.filter((role) => (selected[role.id] || 0) > 0).sort(
     (a, b) => {
       const teamA = TEAM_ORDER.indexOf(a.team)
       const teamB = TEAM_ORDER.indexOf(b.team)
@@ -38,8 +37,8 @@ function buildRoleListText(selected, totalPlayers) {
   })
   const header =
     totalPlayers > 0
-      ? `Danh sách vai trò (${totalPlayers} người chơi):`
-      : 'Danh sách vai trò:'
+      ? t('night.roleListHeader', { count: totalPlayers })
+      : t('night.roleListHeaderEmpty')
   return [header, ...lines].join('\n')
 }
 
@@ -80,6 +79,8 @@ function StepCard({
   onToggleVisibility,
   totalPlayers,
 }) {
+  const { t, phases } = useI18n()
+
   if (hidden) {
     return (
       <li className="step step-collapsed">
@@ -88,17 +89,17 @@ function StepCard({
           className="step-reveal-btn"
           onClick={onToggleVisibility}
         >
-          <span className="step-reveal-phase">{PHASE_LABEL[step.phase]}</span>
+          <span className="step-reveal-phase">{phases[step.phase]}</span>
           <span className="step-reveal-name">{step.name}</span>
-          <span className="step-reveal-action">Hiện</span>
+          <span className="step-reveal-action">{t('night.show')}</span>
         </button>
       </li>
     )
   }
 
   const memoPlaceholder = step.nested
-    ? 'Ghi chú cho bước này...'
-    : `VD: ${step.name} — Minh, Lan...`
+    ? t('night.stepNotesPlaceholder')
+    : t('night.roleNotesPlaceholder', { role: step.name })
 
   return (
     <li className={step.nested ? 'step step-sub' : 'step'}>
@@ -116,7 +117,7 @@ function StepCard({
               className="step-hide-btn"
               onClick={onToggleVisibility}
             >
-              Ẩn
+              {t('night.hide')}
             </button>
           )}
         </div>
@@ -129,21 +130,23 @@ function StepCard({
               disabled={totalPlayers < 2}
               onClick={() => {
                 const pair = pickTwoRandomPlayers(totalPlayers)
-                if (pair) onNoteChange(`Số ${pair[0]} và ${pair[1]}`)
+                if (pair) {
+                  onNoteChange(t('night.randomPairNote', { a: pair[0], b: pair[1] }))
+                }
               }}
             >
-              Chọn ngẫu nhiên 2 số (1–{totalPlayers || '?'})
+              {t('night.randomPair', { max: totalPlayers || '?' })}
             </button>
             {totalPlayers < 2 && (
               <span className="step-cupid-random-hint">
-                Cần ít nhất 2 người chơi
+                {t('night.randomPairHint')}
               </span>
             )}
           </div>
         )}
         {step.note && <p className="step-note">{step.note}</p>}
         <label className="step-memo">
-          <span className="step-memo-label">Ghi chú</span>
+          <span className="step-memo-label">{t('night.notes')}</span>
           <input
             type="text"
             className="step-memo-input"
@@ -165,6 +168,8 @@ export default function NightCallOrder({
   onBack,
   onEndMatch,
 }) {
+  const locale = useI18n()
+  const { t, rich, teams, requirementLabel } = locale
   const [notes, setNotes] = useStoredState(NOTES_STORAGE_KEY, {}, {
     parse: parseNotes,
   })
@@ -177,8 +182,8 @@ export default function NightCallOrder({
   const [copied, setCopied] = useState(false)
 
   const steps = useMemo(
-    () => buildNightSteps(selected, totalPlayers, theme),
-    [selected, totalPlayers, theme],
+    () => buildNightSteps(selected, totalPlayers, theme?.id ?? null, locale),
+    [selected, totalPlayers, theme, locale],
   )
 
   const toggleVisibility = (key) => {
@@ -202,11 +207,7 @@ export default function NightCallOrder({
   }
 
   const handleReset = async () => {
-    if (
-      !(await showConfirm(
-        'Đặt lại ván này? Toàn bộ ghi chú sẽ bị xóa và các bước đang ẩn sẽ hiện lại.',
-      ))
-    ) {
+    if (!(await showConfirm(t('night.confirmReset')))) {
       return
     }
     setNotes({})
@@ -214,11 +215,11 @@ export default function NightCallOrder({
   }
 
   const handleCopyRoleList = async () => {
-    const text = buildRoleListText(selected, totalPlayers)
+    const text = buildRoleListText(selected, totalPlayers, locale)
     try {
       await navigator.clipboard.writeText(text)
     } catch {
-      await showPrompt('Sao chép danh sách bên dưới:', text)
+      await showPrompt(t('night.copyRoleListPrompt'), text)
       return
     }
     setCopied(true)
@@ -227,15 +228,11 @@ export default function NightCallOrder({
 
   const handleEndMatch = async () => {
     if (!winner) {
-      showAlert('Hãy chọn phe thắng trước khi lưu.')
+      showAlert(t('night.pickWinnerFirst'))
       return
     }
 
-    if (
-      !(await showConfirm(
-        'Kết thúc trận và lưu vào lịch sử? Ghi chú ban đêm của ván này cũng sẽ được lưu.',
-      ))
-    ) {
+    if (!(await showConfirm(t('night.confirmEnd')))) {
       return
     }
 
@@ -258,24 +255,24 @@ export default function NightCallOrder({
   return (
     <section className="panel call-order">
       <div className="panel-head">
-        <h2>Thứ tự gọi ban đêm</h2>
+        <h2>{t('night.heading')}</h2>
         <div className="panel-head-actions">
           <button
             type="button"
             className="ghost-btn small"
             onClick={handleCopyRoleList}
           >
-            {copied ? 'Đã copy!' : 'Copy danh sách vai trò'}
+            {copied ? t('common.copied') : t('night.copyRoleList')}
           </button>
           <button
             type="button"
             className="ghost-btn small"
             onClick={handleReset}
           >
-            Đặt lại
+            {t('common.reset')}
           </button>
           <button className="ghost-btn small" onClick={onBack}>
-            Quay lại
+            {t('night.back')}
           </button>
         </div>
       </div>
@@ -283,30 +280,34 @@ export default function NightCallOrder({
       {theme && (
         <div
           className="game-theme"
-          style={{ '--team-color': TEAMS[theme.favors].color }}
+          style={{ '--team-color': teams[theme.favors].color }}
         >
           <div className="game-theme-head">
-            <span className="game-theme-label">Chủ đề ván</span>
+            <span className="game-theme-label">{t('night.themeLabel')}</span>
             <span className={`game-theme-value ${valueTone(theme.value)}`}>
-              {formatValue(theme.value)} điểm
+              {t('night.themePoints', { value: formatValue(theme.value) })}
             </span>
           </div>
           <h3 className="game-theme-title">{theme.name}</h3>
           <p className="game-theme-desc">{theme.description}</p>
           <p className="game-theme-hint muted">
-            Đọc to luật chủ đề cho cả bàn trước khi chia vai.
+            {t('night.themeHint')}
             {theme.requires.length > 0 && (
               <>
-                {' '}Yêu cầu: {theme.requires.map(requirementLabel).join(' • ')}.
+                {' '}
+                {t('theme.requires', {
+                  list: theme.requires.map(requirementLabel).join(' • '),
+                })}
+                .
               </>
             )}
           </p>
           <label className="step-memo theme-memo">
-            <span className="step-memo-label">Ghi chú của quản trò</span>
+            <span className="step-memo-label">{t('night.themeMemoLabel')}</span>
             <textarea
               className="step-memo-input theme-memo-input"
               rows={2}
-              placeholder="Ghi lại luật riêng, ai đã dùng gì, nhắc việc..."
+              placeholder={t('night.themeMemoPlaceholder')}
               value={notes[`theme:${theme.id}`] || ''}
               onChange={(e) => setNote(`theme:${theme.id}`, e.target.value)}
             />
@@ -315,21 +316,25 @@ export default function NightCallOrder({
       )}
 
       <p className="call-intro">
-        Đọc to: <em>"Đã khuya rồi, mọi người hãy nhắm mắt lại và đi ngủ."</em>
-        {' '}Sau đó gọi lần lượt các vai trò theo thứ tự dưới đây.
-        {' '}Bấm <strong>Ẩn</strong> ở các bước không phải mỗi đêm khi sang đêm khác.
-        {' '}Dùng ô <strong>Ghi chú</strong> để ghi tên người chơi hoặc nhắc việc cần làm.
+        {rich('night.intro', {
+          sleepLine: <em>{t('night.sleepLine')}</em>,
+          hide: <strong>{t('night.hide')}</strong>,
+          notes: <strong>{t('night.notes')}</strong>,
+        })}
         {totalPlayers > 0 && (
           <>
-            {' '}Ván hiện tại: <strong>{totalPlayers} người chơi</strong>.
+            {' '}
+            {rich('night.currentGame', {
+              players: (
+                <strong>{t('common.players', { count: totalPlayers })}</strong>
+              ),
+            })}
           </>
         )}
       </p>
 
       {steps.length === 0 ? (
-        <p className="empty">
-          Không có vai trò nào cần gọi ban đêm trong ván này.
-        </p>
+        <p className="empty">{t('night.empty')}</p>
       ) : (
         <ol className="steps">
           {steps.map((step) => {
@@ -351,15 +356,15 @@ export default function NightCallOrder({
       )}
 
       <p className="call-outro">
-        Khi xong, đọc to: <em>"Trời sáng rồi, mọi người hãy thức dậy!"</em>
+        {rich('night.outro', { wakeLine: <em>{t('night.wakeLine')}</em> })}
       </p>
 
       <div className="call-footer">
         <div className="winner-pick">
-          <span className="winner-pick-label">Phe thắng</span>
+          <span className="winner-pick-label">{t('night.winnerLabel')}</span>
           <div className="winner-pick-options">
             {WINNER_TEAM_IDS.map((teamId) => {
-              const team = TEAMS[teamId]
+              const team = teams[teamId]
               return (
                 <button
                   key={teamId}
@@ -380,7 +385,7 @@ export default function NightCallOrder({
           onClick={handleEndMatch}
           disabled={!winner}
         >
-          Kết thúc trận và lưu lại
+          {t('night.endMatch')}
         </button>
       </div>
     </section>

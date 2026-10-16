@@ -1,6 +1,7 @@
 // Popup thay cho window.alert / confirm / prompt.
 // Safari đôi khi chặn hoặc lỗi các hộp thoại gốc, nên tự dựng popup DOM.
 
+import { getActiveLocale } from '../i18n/index.js'
 import './dialog.css'
 
 let activeCleanup = null
@@ -24,6 +25,7 @@ function openDialog({ message, showCancel, prompt, defaultValue, okLabel }) {
     if (activeCleanup) activeCleanup()
 
     const { overlay, box } = buildOverlay()
+    const { t } = getActiveLocale()
 
     const text = document.createElement('p')
     text.className = 'app-dialog-message'
@@ -45,14 +47,14 @@ function openDialog({ message, showCancel, prompt, defaultValue, okLabel }) {
     const okBtn = document.createElement('button')
     okBtn.type = 'button'
     okBtn.className = 'app-dialog-btn primary'
-    okBtn.textContent = okLabel || 'OK'
+    okBtn.textContent = okLabel || t('common.ok')
 
     let cancelBtn = null
     if (showCancel) {
       cancelBtn = document.createElement('button')
       cancelBtn.type = 'button'
       cancelBtn.className = 'app-dialog-btn'
-      cancelBtn.textContent = 'Hủy'
+      cancelBtn.textContent = t('common.cancel')
       actions.appendChild(cancelBtn)
     }
     actions.appendChild(okBtn)

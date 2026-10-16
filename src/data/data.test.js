@@ -1,7 +1,8 @@
 // Kiểm tra tính toàn vẹn của dữ liệu vai/chủ đề — bắt lỗi gõ sai id, thiếu
-// trường, trùng mã... thay vì để app im lặng hoạt động sai.
+// trường, trùng mã... thay vì để app im lặng hoạt động sai. Chữ (tên, năng
+// lực, câu gọi) được kiểm tra trong src/i18n/i18n.test.js.
 import { describe, expect, it } from 'vitest'
-import { NIGHT_EXTRAS, PHASE_LABEL, ROLES, ROLE_BY_ID, ROLE_SLOTS, TEAMS } from './roles.js'
+import { NIGHT_EXTRAS, PHASE_IDS, ROLES, ROLE_BY_ID, ROLE_SLOTS, TEAMS } from './roles.js'
 import { THEMES, THEME_CODE_BY_ID } from './themes.js'
 
 const duplicates = (items) => items.filter((x, i) => items.indexOf(x) !== i)
@@ -13,21 +14,18 @@ describe('vai trò', () => {
 
   it.each(ROLES.map((r) => [r.id, r]))('%s có dữ liệu hợp lệ', (id, role) => {
     expect(TEAMS, `team của ${id}`).toHaveProperty(role.team)
-    expect(PHASE_LABEL, `phase của ${id}`).toHaveProperty(role.phase)
+    expect(PHASE_IDS, `phase của ${id}`).toContain(role.phase)
     expect(Number.isInteger(role.max) && role.max >= 1, `max của ${id}`).toBe(true)
     expect(typeof role.value, `value của ${id}`).toBe('number')
-    expect(role.name.trim(), `name của ${id}`).toBe(role.name)
-    expect(role.nameEn.trim(), `nameEn của ${id}`).toBe(role.nameEn)
     if (role.wakesAtNight) {
       expect(Number.isFinite(role.nightOrder), `nightOrder của ${id}`).toBe(true)
-      expect(role.script, `script của ${id}`).toBeTruthy()
     }
   })
 
   it('bước gọi bổ sung trỏ tới vai có thật', () => {
     for (const extra of Object.values(NIGHT_EXTRAS)) {
       expect(ROLE_BY_ID, extra.id).toHaveProperty(extra.requiresRole)
-      expect(PHASE_LABEL, extra.id).toHaveProperty(extra.phase)
+      expect(PHASE_IDS, extra.id).toContain(extra.phase)
     }
   })
 })
@@ -61,7 +59,6 @@ describe('chủ đề', () => {
   it.each(THEMES.map((t) => [t.id, t]))('%s có dữ liệu hợp lệ', (id, theme) => {
     expect(TEAMS, `favors của ${id}`).toHaveProperty(theme.favors)
     expect(typeof theme.value, `value của ${id}`).toBe('number')
-    expect(theme.description, `description của ${id}`).toBeTruthy()
     for (const req of theme.requires) {
       expect(req.min ?? 1, `min của ${id}`).toBeGreaterThanOrEqual(1)
       if (req.team) expect(TEAMS, `requires.team của ${id}`).toHaveProperty(req.team)
@@ -81,8 +78,7 @@ describe('chủ đề', () => {
 
     for (const step of THEMES.flatMap((t) => t.nightSteps ?? [])) {
       expect(Number.isFinite(step.nightOrder), step.id).toBe(true)
-      expect(PHASE_LABEL, step.id).toHaveProperty(step.phase)
-      expect(step.name && step.script, step.id).toBeTruthy()
+      expect(PHASE_IDS, step.id).toContain(step.phase)
     }
   })
 })

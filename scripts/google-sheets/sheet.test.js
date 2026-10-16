@@ -7,6 +7,7 @@ import { SHEET_SCRIPT_PATH, buildSheetScript } from './build.mjs'
 import { encodeSetupCode } from '../../src/data/roleCode.js'
 import { ROLES } from '../../src/data/roles.js'
 import { THEMES } from '../../src/data/themes.js'
+import { allNames } from '../../src/i18n/index.js'
 
 const source = readFileSync(SHEET_SCRIPT_PATH, 'utf8')
 
@@ -21,14 +22,14 @@ describe('MaSoiCode.gs', () => {
     expect(buildSheetScript(source)).toBe(source)
   })
 
-  it('sinh mã giống hệt app (đặt tên cột theo tên vai, tên tắt hoặc id)', () => {
+  it('sinh mã giống hệt app (đặt tên cột theo tên vai ở mọi ngôn ngữ, tên tắt hoặc id)', () => {
     const gs = loadSheetScript()
     let seed = 7
     const random = () => {
       seed = (seed * 16807) % 2147483647
       return seed / 2147483647
     }
-    const nameForms = (role) => [role.name, role.id, ...(role.aliases ?? [])]
+    const pickOne = (items) => items[Math.floor(random() * items.length)]
 
     for (let i = 0; i < 100; i++) {
       const counts = {}
@@ -36,14 +37,14 @@ describe('MaSoiCode.gs', () => {
       for (const role of ROLES) {
         if (random() >= 0.2) continue
         const count = 1 + Math.floor(random() * role.max)
-        const forms = nameForms(role)
-        counts[forms[Math.floor(random() * forms.length)]] = count
+        counts[pickOne([role.id, ...allNames('roles', role.id)])] = count
         roles[role.id] = count
       }
       if (Object.keys(roles).length === 0) continue
-      const theme = random() < 0.5 ? THEMES[Math.floor(random() * THEMES.length)] : null
+      const theme = random() < 0.5 ? pickOne(THEMES) : null
+      const themeName = theme ? pickOne(allNames('themes', theme.id)) : ''
 
-      const result = gs.buildCode_(counts, theme ? theme.name : '')
+      const result = gs.buildCode_(counts, themeName)
       expect(result.code).toBe(encodeSetupCode(roles, theme?.id))
     }
   })
