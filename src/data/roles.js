@@ -217,7 +217,7 @@ const ROLES_DATA = [
   {
     id: 'minion',
     team: 'werewolf',
-    value: -6,
+    value: -4,
     wakesAtNight: true,
     nightOrder: 3.3,
     phase: 'night1',

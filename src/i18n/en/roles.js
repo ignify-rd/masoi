@@ -97,7 +97,7 @@ export const ROLE_TEXT = {
   fruit_wolf: {
     name: 'Fruit Wolf',
     ability: 'If you are the last Werewolf alive, you cannot eat anyone.',
-    script: 'Fruit Wolf, wake up so the other Werewolves know who you are.',
+    script: 'Fruit Wolf, raise your hand so the other Werewolves know who you are.',
   },
   wolf_cub: {
     name: 'Wolf Cub',
@@ -108,19 +108,19 @@ export const ROLE_TEXT = {
     name: 'Wolf Man',
     ability:
       'You are a Werewolf with human blood, so the Seer does not see you as a Werewolf.',
-    script: 'Wolf Man, wake up so the other Werewolves know who you are.',
+    script: 'Wolf Man, raise your hand so the other Werewolves know who you are.',
   },
   wolverine: {
     name: 'Wolverine',
     ability:
       'If the Wolverine is the Werewolf sitting closest to the victim, everyone hears the clang of metal.',
-    script: 'Wolverine, wake up so the other Werewolves know who you are.',
+    script: 'Wolverine, raise your hand so the other Werewolves know who you are.',
   },
   big_bad_wolf: {
     name: 'Big Bad Wolf',
     ability:
       'As long as the Big Bad Wolf is alive, each night the Werewolves may also kill a player sitting next to their chosen victim.',
-    script: 'Big Bad Wolf, wake up so the other Werewolves know who you are.',
+    script: 'Big Bad Wolf, raise your hand so the other Werewolves know who you are.',
   },
   minion: {
     name: 'Minion',

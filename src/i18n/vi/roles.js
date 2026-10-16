@@ -106,7 +106,7 @@ export const ROLE_TEXT = {
   fruit_wolf: {
     name: 'Sói Ăn Chay',
     ability: 'Nếu bạn là con sói cuối cùng thì bạn sẽ không được ăn thịt.',
-    script: 'Sói Ăn Chay hãy thức dậy để các Ma Sói còn lại biết.',
+    script: 'Sói Ăn Chay giơ tay lên để các Ma Sói còn lại biết.',
   },
   wolf_cub: {
     name: 'Sói Con',
@@ -118,19 +118,19 @@ export const ROLE_TEXT = {
     name: 'Người sói',
     ability:
       'Bạn là sói nhưng có dòng máu của con người nên Tiên tri không soi ra bạn là Sói.',
-    script: 'Người Sói hãy thức dậy để các Ma Sói còn lại biết.',
+    script: 'Người Sói giơ tay lên để các Ma Sói còn lại biết.',
   },
   wolverine: {
     name: 'Wolverine',
     ability:
       'Nếu Wolverine là con Sói ngồi gần nạn nhân nhất, những người chơi sẽ nghe thấy tiếng kim loại chạm vào nhau.',
-    script: 'Wolverine hãy thức dậy để các Ma Sói còn lại biết.',
+    script: 'Wolverine giơ tay lên để các Ma Sói còn lại biết.',
   },
   big_bad_wolf: {
     name: 'Sói Đại Ca',
     ability:
       'Chừng nào Sói Đại Ca còn sống, mỗi đêm phe Ma Sói có thể giết thêm một người chơi ngồi cạnh nạn nhân đã chọn.',
-    script: 'Sói Đại Ca hãy thức dậy để các Ma Sói còn lại biết.',
+    script: 'Sói Đại Ca giơ tay lên để các Ma Sói còn lại biết.',
   },
   minion: {
     name: 'Kẻ phản bội',
