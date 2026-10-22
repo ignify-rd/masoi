@@ -76,18 +76,17 @@ export const UI_TEXT = {
     'Mục tiêu: tổng gần 0. Nhóm mới/lạ người nên để +1 đến +3; nhóm đã quen chơi nên để -1 đến -3 cho Sói có lợi thế.',
 
   'theme.label': 'Chủ đề',
-  'theme.none': 'Mặc định (không chủ đề)',
+  'theme.add': 'Thêm chủ đề...',
+  'theme.full': 'Đã đủ {max} chủ đề',
   'theme.missingRoles': 'thiếu vai bắt buộc',
-  'theme.clear': 'Bỏ chủ đề',
-  'theme.clearTitle': 'Bỏ chủ đề — chơi ván không có chủ đề',
-  'theme.random': 'Random',
-  'theme.randomTitle': 'Random một chủ đề hợp lệ với setup hiện tại',
-  'theme.noneAvailable': 'Không có chủ đề nào hợp lệ với setup hiện tại.',
+  'theme.conflictsWith': 'xung đột với {themes}',
+  'theme.remove': 'Bỏ chủ đề {theme}',
   'theme.favors': 'Lợi cho {team}',
   'theme.requires': 'Yêu cầu: {list}',
   'theme.unmet':
     'Setup hiện tại chưa thỏa yêu cầu của chủ đề này — điểm chủ đề không được tính.',
-  'theme.empty': 'Chơi mặc định. Chọn một chủ đề để đổi luật và cộng điểm cân bằng.',
+  'theme.empty':
+    'Chơi mặc định. Chọn tối đa {max} chủ đề để đổi luật và cộng điểm cân bằng.',
 
   'requirement.roles': 'Có {roles}',
   'requirement.rolesMin': 'Có ít nhất {count} trong: {roles}',

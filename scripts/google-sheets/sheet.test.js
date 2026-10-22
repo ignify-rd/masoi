@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { SHEET_SCRIPT_PATH, buildSheetScript } from './build.mjs'
 import { encodeSetupCode } from '../../src/data/roleCode.js'
 import { ROLES } from '../../src/data/roles.js'
-import { THEMES } from '../../src/data/themes.js'
+import { MAX_THEMES, THEMES, normalizeThemeIds } from '../../src/data/themes.js'
 import { allNames } from '../../src/i18n/index.js'
 
 const source = readFileSync(SHEET_SCRIPT_PATH, 'utf8')
@@ -41,16 +41,25 @@ describe('MaSoiCode.gs', () => {
         roles[role.id] = count
       }
       if (Object.keys(roles).length === 0) continue
-      const theme = random() < 0.5 ? pickOne(THEMES) : null
-      const themeName = theme ? pickOne(allNames('themes', theme.id)) : ''
+      const themeIds = normalizeThemeIds(
+        Array.from({ length: Math.floor(random() * (MAX_THEMES + 1)) }, () => pickOne(THEMES).id),
+      )
+      const themeNames = themeIds.map((id) => pickOne(allNames('themes', id))).join(', ')
 
-      const result = gs.buildCode_(counts, themeName)
-      expect(result.code).toBe(encodeSetupCode(roles, theme?.id))
+      const result = gs.buildCode_(counts, themeNames)
+      expect(result.code).toBe(encodeSetupCode(roles, themeIds))
     }
   })
 
   it('báo lỗi khi sheet có tên vai app chưa có', () => {
     const gs = loadSheetScript()
     expect(() => gs.buildCode_({ 'Vai Không Có': 1 }, '')).toThrow(/chưa có vai/)
+  })
+
+  it('báo lỗi khi chủ đề xung đột hoặc quá nhiều chủ đề', () => {
+    const gs = loadSheetScript()
+    expect(() => gs.buildCode_({ seer: 1 }, 'Trăng Máu; Nguyệt Thực')).toThrow(/xung đột/)
+    const tooMany = THEMES.slice(0, MAX_THEMES + 1).map((t) => t.id).join(', ')
+    expect(() => gs.buildCode_({ seer: 1 }, tooMany)).toThrow(/tối đa/)
   })
 })

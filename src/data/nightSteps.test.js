@@ -8,25 +8,25 @@ const keys = (steps) => steps.map((s) => s.key)
 
 describe('buildNightSteps', () => {
   it('sắp theo nightOrder, bỏ vai không thức dậy', () => {
-    const steps = buildNightSteps({ villager: 5, seer: 1, werewolf: 2, guard: 1 }, 9, null, vi)
+    const steps = buildNightSteps({ villager: 5, seer: 1, werewolf: 2, guard: 1 }, 9, [], vi)
     expect(keys(steps)).toEqual(['role:guard', 'role:werewolf', 'role:seer'])
   })
 
   it('bước bổ sung của Cupid theo số người chơi', () => {
     const selected = { cupid: 1, werewolf: 3, villager: 8 }
-    expect(keys(buildNightSteps(selected, 12, null, vi))).toEqual([
+    expect(keys(buildNightSteps(selected, 12, [], vi))).toEqual([
       'role:cupid',
       'extra:lovers',
       'role:werewolf',
     ])
-    expect(keys(buildNightSteps(selected, 13, null, vi))).toContain('extra:cupidThirdTeam')
+    expect(keys(buildNightSteps(selected, 13, [], vi))).toContain('extra:cupidThirdTeam')
   })
 
   it('chèn bước của chủ đề đúng chỗ', () => {
     const steps = buildNightSteps(
       { werewolf: 2, seer: 1, villager: 4 },
       7,
-      'wolf_leader',
+      ['wolf_leader'],
       vi,
     )
     expect(keys(steps)).toEqual([
@@ -42,7 +42,7 @@ describe('buildNightSteps', () => {
     const steps = buildNightSteps(
       { cupid: 1, werewolf: 2, seer: 1, gambler: 1, villager: 9 },
       14,
-      'forest_journey',
+      ['forest_journey'],
       vi,
     )
     expect(new Set(keys(steps)).size).toBe(steps.length)
@@ -59,10 +59,27 @@ describe('buildNightSteps', () => {
     expect(byKey['role:gambler'].hideable).toBe(false) // từ đêm 2
   })
 
+  it('gộp bước của nhiều chủ đề theo thứ tự gọi', () => {
+    const steps = buildNightSteps(
+      { alpha_wolf: 1, werewolf: 2, seer: 1, villager: 5 },
+      9,
+      ['alpha_curse', 'mole'],
+      vi,
+    )
+    expect(keys(steps)).toEqual([
+      'role:werewolf',
+      'theme:mole_pick',
+      'theme:mole_wake',
+      'role:alpha_wolf',
+      'theme:alpha_curse_mark',
+      'role:seer',
+    ])
+  })
+
   it('đổi ngôn ngữ chỉ đổi chữ, không đổi khóa và thứ tự', () => {
     const selected = { cupid: 1, werewolf: 3, seer: 1, villager: 8 }
-    const viSteps = buildNightSteps(selected, 13, 'wolf_leader', vi)
-    const enSteps = buildNightSteps(selected, 13, 'wolf_leader', en)
+    const viSteps = buildNightSteps(selected, 13, ['wolf_leader'], vi)
+    const enSteps = buildNightSteps(selected, 13, ['wolf_leader'], en)
     expect(keys(enSteps)).toEqual(keys(viSteps))
 
     const byKey = Object.fromEntries(enSteps.map((s) => [s.key, s]))

@@ -1,5 +1,5 @@
 import { TEAM_IDS } from './roles.js'
-import { THEME_BY_ID } from './themes.js'
+import { normalizeThemeIds } from './themes.js'
 import { readStored, writeStored } from './storage.js'
 
 const MATCHES_STORAGE_KEY = 'masoi.matches'
@@ -24,9 +24,12 @@ function storeMatches(matches) {
   return matches
 }
 
-/** Chủ đề của ván đã lưu (null nếu ván chơi mặc định hoặc chủ đề đã bị xóa). */
-export function normalizeThemeFromMatch(themeId) {
-  return themeId && THEME_BY_ID[themeId] ? themeId : null
+/**
+ * Các chủ đề của ván đã lưu (mảng rỗng nếu chơi mặc định). Ván cũ lưu một
+ * `themeId`, ván mới lưu mảng `themeIds`; chủ đề đã bị xoá thì bỏ qua.
+ */
+export function themeIdsOfMatch(match) {
+  return normalizeThemeIds(match?.themeIds ?? match?.themeId)
 }
 
 export function saveMatch({
@@ -35,7 +38,7 @@ export function saveMatch({
   roles,
   notes = {},
   winner,
-  themeId = null,
+  themeIds = [],
 }) {
   const match = {
     id: newId(),
@@ -45,7 +48,7 @@ export function saveMatch({
     roles: { ...roles },
     notes: { ...notes },
     winner: winner || null,
-    themeId: normalizeThemeFromMatch(themeId),
+    themeIds: normalizeThemeIds(themeIds),
   }
 
   storeMatches([match, ...loadMatches()])

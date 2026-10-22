@@ -1,6 +1,6 @@
 /**
  * Dựng danh sách bước gọi ban đêm từ 3 nguồn: vai trong ván, bước bổ sung
- * (NIGHT_EXTRAS) và bước của chủ đề. `locale` (getLocale trong src/i18n) quyết
+ * (NIGHT_EXTRAS) và bước của các chủ đề (`themeIds`). `locale` (getLocale trong src/i18n) quyết
  * định ngôn ngữ của tên, câu gọi và nhãn. Mọi bước có cùng một dạng để UI chỉ
  * việc hiển thị:
  *   key        khóa ổn định cho ghi chú và ẩn/hiện ("role:seer", "extra:lovers",
@@ -15,21 +15,21 @@
  *   hideable   không phải đêm nào cũng gọi -> có nút Ẩn
  *   randomPair có nút chọn ngẫu nhiên 2 số người chơi
  */
-export function buildNightSteps(selected, totalPlayers, themeId, locale) {
+export function buildNightSteps(selected, totalPlayers, themeIds, locale) {
   const roles = Object.keys(selected)
     .filter((id) => (selected[id] || 0) > 0)
     .map((id) => locale.roleById[id])
     .filter((role) => role?.wakesAtNight)
     .sort((a, b) => a.nightOrder - b.nightOrder)
 
-  const theme = locale.themeById[themeId]
-
   const steps = [
     ...roles.map((role) => roleStep(role, locale)),
     ...locale.extras
       .filter((extra) => shouldIncludeExtra(extra, selected, totalPlayers))
       .map((extra) => extraStep(extra, locale)),
-    ...(theme?.nightSteps ?? []).map((step) => themeStep(step, locale)),
+    ...(themeIds ?? [])
+      .flatMap((id) => locale.themeById[id]?.nightSteps ?? [])
+      .map((step) => themeStep(step, locale)),
   ]
 
   // sort ổn định: cùng `order` thì giữ thứ tự vai -> bước bổ sung -> chủ đề.

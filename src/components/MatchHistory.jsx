@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { normalizeSetup } from '../data/roles.js'
 import {
   WINNER_TEAM_IDS,
   deleteMatch,
   loadMatches,
-  normalizeThemeFromMatch,
+  themeIdsOfMatch,
   updateMatchWinner,
 } from '../data/matchHistory.js'
 import { useI18n } from '../i18n/useI18n.js'
@@ -38,7 +38,7 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
   const { t, teams, roleById, themeById, formatDate } = useI18n()
   const [editingWinner, setEditingWinner] = useState(false)
   const winnerTeam = match.winner ? teams[match.winner] : null
-  const theme = themeById[normalizeThemeFromMatch(match.themeId)] || null
+  const themes = themeIdsOfMatch(match).map((id) => themeById[id])
   const roleSummary = Object.entries(match.roles || {})
     .filter(([, c]) => c > 0)
     .map(([id, c]) => {
@@ -58,15 +58,18 @@ function MatchHistoryItem({ match, onLoad, onDelete, onChangeWinner }) {
             {t('common.people', { count: match.totalPlayers })}
           </span>
         </div>
-        {theme && (
-          <span
-            className="team-tag small history-item-theme"
-            style={{ '--team-color': teams[theme.favors].color }}
-            title={theme.description}
-          >
-            {theme.name} ({formatValue(theme.value)})
-          </span>
-        )}
+        {/* Khoảng trắng sau mỗi tag để nhiều tag xuống dòng nguyên khối. */}
+        {themes.map((theme) => (
+          <Fragment key={theme.id}>
+            <span
+              className="team-tag small history-item-theme"
+              style={{ '--team-color': teams[theme.favors].color }}
+              title={theme.description}
+            >
+              {theme.name} ({formatValue(theme.value)})
+            </span>{' '}
+          </Fragment>
+        ))}
         {editingWinner ? (
           <div className="history-winner-edit">
             {WINNER_TEAM_IDS.map((teamId) => {
@@ -217,7 +220,7 @@ export default function MatchHistory({ hasCurrentSetup, onLoadSetup }) {
       return
     }
 
-    onLoadSetup(roles, normalizeThemeFromMatch(match.themeId))
+    onLoadSetup(roles, themeIdsOfMatch(match))
     setOpen(false)
   }
 

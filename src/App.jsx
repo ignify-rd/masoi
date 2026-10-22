@@ -1,7 +1,12 @@
 import { useEffect, useMemo } from 'react'
 import { canIncreaseRole, normalizeSetup } from './data/roles.js'
 import { countPlayers, sumRoleValue } from './data/balance.js'
-import { THEME_BY_ID, getThemeValue, isThemeAvailable } from './data/themes.js'
+import {
+  THEME_BY_ID,
+  getThemesValue,
+  isThemeAvailable,
+  normalizeThemeIds,
+} from './data/themes.js'
 import { useI18n } from './i18n/useI18n.js'
 import { useStoredState } from './ui/useStoredState.js'
 import RoleLibrary from './components/RoleLibrary.jsx'
@@ -11,7 +16,6 @@ import MatchHistory from './components/MatchHistory.jsx'
 import DiscussionTimer from './components/DiscussionTimer.jsx'
 import LanguageSwitch from './components/LanguageSwitch.jsx'
 
-const parseThemeId = (id) => (THEME_BY_ID[id] ? id : null)
 const parseTimestamp = (value) => (typeof value === 'string' ? value : null)
 
 export default function App() {
@@ -19,8 +23,9 @@ export default function App() {
   const [selected, setSelected] = useStoredState('masoi.setup', {}, {
     parse: normalizeSetup,
   })
-  const [themeId, setThemeId] = useStoredState('masoi.theme', null, {
-    parse: parseThemeId,
+  // Key cũ lưu 1 id, giờ lưu mảng id — normalizeThemeIds nhận cả hai.
+  const [themeIds, setThemeIds] = useStoredState('masoi.theme', [], {
+    parse: normalizeThemeIds,
   })
   // Lưu lại để tải lại trang giữa ván không bị đá về màn sắp ván.
   const [startedAt, setStartedAt] = useStoredState('masoi.startedAt', null, {
@@ -30,9 +35,9 @@ export default function App() {
 
   // Bỏ chủ đề khi setup không còn thỏa yêu cầu vai bắt buộc.
   useEffect(() => {
-    const theme = THEME_BY_ID[themeId]
-    if (theme && !isThemeAvailable(theme, selected)) setThemeId(null)
-  }, [themeId, selected])
+    const available = themeIds.filter((id) => isThemeAvailable(THEME_BY_ID[id], selected))
+    if (available.length !== themeIds.length) setThemeIds(available)
+  }, [themeIds, selected])
 
   const inc = (id) =>
     setSelected((s) => {
@@ -58,18 +63,18 @@ export default function App() {
 
   const clear = () => setSelected({})
 
-  const loadSetup = (roles, nextThemeId = null) => {
+  const loadSetup = (roles, nextThemeIds = []) => {
     setSelected(roles)
-    setThemeId(parseThemeId(nextThemeId))
+    setThemeIds(normalizeThemeIds(nextThemeIds))
   }
 
   const stopMatch = () => setStartedAt(null)
 
   const totalPlayers = useMemo(() => countPlayers(selected), [selected])
   const rolesValue = useMemo(() => sumRoleValue(selected), [selected])
-  const totalValue = rolesValue + getThemeValue(themeId, selected)
+  const totalValue = rolesValue + getThemesValue(themeIds, selected)
 
-  const theme = themeById[themeId] || null
+  const themes = themeIds.map((id) => themeById[id]).filter(Boolean)
 
   return (
     <div className="app">
@@ -96,7 +101,7 @@ export default function App() {
         <main className="app-main single">
           <NightCallOrder
             selected={selected}
-            theme={theme}
+            themes={themes}
             totalPlayers={totalPlayers}
             startedAt={startedAt}
             onBack={stopMatch}
@@ -111,8 +116,8 @@ export default function App() {
             selected={selected}
             totalPlayers={totalPlayers}
             totalValue={totalValue}
-            themeId={themeId}
-            onChangeTheme={setThemeId}
+            themeIds={themeIds}
+            onChangeThemes={setThemeIds}
             onInc={inc}
             onDec={dec}
             onRemove={remove}

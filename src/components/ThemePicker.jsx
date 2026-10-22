@@ -1,33 +1,83 @@
 import { useMemo } from 'react'
-import { isThemeAvailable, pickRandomTheme } from '../data/themes.js'
+import {
+  MAX_THEMES,
+  isThemeAvailable,
+  themeConflicts,
+} from '../data/themes.js'
 import { useI18n } from '../i18n/useI18n.js'
-import { showAlert } from '../ui/dialog.js'
 import { formatValue, valueTone } from '../ui/format.js'
 import './ThemePicker.css'
 
-export default function ThemePicker({ selected, themeId, onChangeTheme }) {
-  const { t, teams, themes, themeById, requirementLabel } = useI18n()
+function ThemeCard({ theme, available, onRemove }) {
+  const { t, teams, requirementLabel } = useI18n()
+  const team = teams[theme.favors]
+
+  return (
+    <div className="theme-card" style={{ '--team-color': team.color }}>
+      <div className="theme-card-head">
+        <strong className="theme-card-name">{theme.name}</strong>
+        <span className="theme-card-actions">
+          <span className={`theme-card-value ${valueTone(theme.value)}`}>
+            {formatValue(theme.value)}
+          </span>
+          <button
+            type="button"
+            className="theme-card-remove"
+            onClick={onRemove}
+            title={t('theme.remove', { theme: theme.name })}
+            aria-label={t('theme.remove', { theme: theme.name })}
+          >
+            ✕
+          </button>
+        </span>
+      </div>
+      <p className="theme-card-desc">{theme.description}</p>
+      <div className="theme-card-meta">
+        <span className="team-tag small" style={{ '--team-color': team.color }}>
+          {t('theme.favors', { team: team.label })}
+        </span>
+        {theme.requires.length > 0 && (
+          <span className="muted theme-card-req">
+            {t('theme.requires', {
+              list: theme.requires.map(requirementLabel).join(' • '),
+            })}
+          </span>
+        )}
+      </div>
+      {!available && <p className="theme-card-warning">{t('theme.unmet')}</p>}
+    </div>
+  )
+}
+
+export default function ThemePicker({ selected, themeIds, onChangeThemes }) {
+  const { t, themes, themeById } = useI18n()
+  const full = themeIds.length >= MAX_THEMES
+
+  // Chủ đề chưa chọn, kèm lý do không chọn được (thiếu vai / xung đột).
   const options = useMemo(
     () =>
-      themes.map((theme) => ({
-        theme,
-        available: isThemeAvailable(theme, selected),
-      })),
-    [themes, selected],
+      themes
+        .filter((theme) => !themeIds.includes(theme.id))
+        .map((theme) => {
+          const conflicts = themeConflicts(theme.id, themeIds)
+          let reason = null
+          if (!isThemeAvailable(theme, selected)) {
+            reason = t('theme.missingRoles')
+          } else if (conflicts.length > 0) {
+            reason = t('theme.conflictsWith', {
+              themes: conflicts.map((id) => themeById[id].name).join(', '),
+            })
+          }
+          return { theme, reason }
+        }),
+    [themes, themeById, themeIds, selected, t],
   )
 
-  const current = themeById[themeId] || null
-  const currentAvailable = current ? isThemeAvailable(current, selected) : true
-  const availableCount = options.filter((o) => o.available).length
-
-  const handleRandom = () => {
-    const theme = pickRandomTheme(selected, { excludeId: themeId })
-    if (!theme) {
-      showAlert(t('theme.noneAvailable'))
-      return
-    }
-    onChangeTheme(theme.id)
+  const addTheme = (id) => {
+    if (id && !full) onChangeThemes([...themeIds, id])
   }
+
+  const removeTheme = (id) => onChangeThemes(themeIds.filter((x) => x !== id))
 
   return (
     <div className="theme-picker">
@@ -35,77 +85,41 @@ export default function ThemePicker({ selected, themeId, onChangeTheme }) {
         <label className="theme-label" htmlFor="theme-select">
           {t('theme.label')}
         </label>
-        <div className="theme-select-wrap">
-          <select
-            id="theme-select"
-            className="theme-select"
-            value={themeId || ''}
-            onChange={(e) => onChangeTheme(e.target.value || null)}
-          >
-            <option value="">{t('theme.none')}</option>
-            {options.map(({ theme, available }) => (
-              <option key={theme.id} value={theme.id} disabled={!available}>
-                {theme.name} ({formatValue(theme.value)})
-                {available ? '' : ` — ${t('theme.missingRoles')}`}
-              </option>
-            ))}
-          </select>
-          {themeId && (
-            <button
-              type="button"
-              className="theme-clear-btn"
-              onClick={() => onChangeTheme(null)}
-              title={t('theme.clearTitle')}
-              aria-label={t('theme.clear')}
-            >
-              ✕
-            </button>
-          )}
-        </div>
-        <button
-          type="button"
-          className="ghost-btn small"
-          onClick={handleRandom}
-          disabled={availableCount === 0}
-          title={t('theme.randomTitle')}
+        <span className="muted theme-count">
+          {themeIds.length}/{MAX_THEMES}
+        </span>
+        <select
+          id="theme-select"
+          className="theme-select"
+          value=""
+          disabled={full}
+          onChange={(e) => addTheme(e.target.value)}
         >
-          {t('theme.random')}
-        </button>
+          <option value="">
+            {full ? t('theme.full', { max: MAX_THEMES }) : t('theme.add')}
+          </option>
+          {options.map(({ theme, reason }) => (
+            <option key={theme.id} value={theme.id} disabled={Boolean(reason)}>
+              {theme.name} ({formatValue(theme.value)})
+              {reason ? ` — ${reason}` : ''}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {current ? (
-        <div
-          className="theme-card"
-          style={{ '--team-color': teams[current.favors].color }}
-        >
-          <div className="theme-card-head">
-            <strong className="theme-card-name">{current.name}</strong>
-            <span className={`theme-card-value ${valueTone(current.value)}`}>
-              {formatValue(current.value)}
-            </span>
-          </div>
-          <p className="theme-card-desc">{current.description}</p>
-          <div className="theme-card-meta">
-            <span
-              className="team-tag small"
-              style={{ '--team-color': teams[current.favors].color }}
-            >
-              {t('theme.favors', { team: teams[current.favors].label })}
-            </span>
-            {current.requires.length > 0 && (
-              <span className="muted theme-card-req">
-                {t('theme.requires', {
-                  list: current.requires.map(requirementLabel).join(' • '),
-                })}
-              </span>
-            )}
-          </div>
-          {!currentAvailable && (
-            <p className="theme-card-warning">{t('theme.unmet')}</p>
-          )}
-        </div>
+      {themeIds.length === 0 ? (
+        <p className="muted theme-empty">
+          {t('theme.empty', { max: MAX_THEMES })}
+        </p>
       ) : (
-        <p className="muted theme-empty">{t('theme.empty')}</p>
+        themeIds.map((id) => (
+          <ThemeCard
+            key={id}
+            theme={themeById[id]}
+            available={isThemeAvailable(themeById[id], selected)}
+            onRemove={() => removeTheme(id)}
+          />
+        ))
       )}
     </div>
   )

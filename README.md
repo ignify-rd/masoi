@@ -6,8 +6,8 @@ Web app hỗ trợ quản trò game Ma Sói (Ultimate Werewolf): sắp ván, câ
 
 - **Thư viện vai**: 52 vai, lọc theo phe, tìm theo tên tiếng Việt, tên tiếng Anh hoặc tên tắt.
 - **Sắp ván**: thêm/bớt vai, xem điểm cân bằng và số lá mỗi phe; gợi ý setup tự động cho 4–24 người.
-- **Chủ đề ván**: 43 chủ đề đổi luật và cộng điểm cân bằng, có điều kiện vai bắt buộc; có nút random chủ đề hợp lệ.
-- **Mã ván**: copy một mã ngắn (VD `8T6mF0Oe`, `1hrWDsXAm-3`) để chia sẻ setup kèm chủ đề, dán vào ô "Nhập mã" để tải lại.
+- **Chủ đề ván**: 45 chủ đề đổi luật và cộng điểm cân bằng, có điều kiện vai bắt buộc. Mỗi ván chọn tối đa 5 chủ đề; cặp chủ đề có luật mâu thuẫn không chọn chung được.
+- **Mã ván**: copy một mã ngắn (VD `8T6mF0Oe`, `1hrWDsXAm-3`, `1-3hg`) để chia sẻ setup kèm các chủ đề, dán vào ô "Nhập mã" để tải lại.
 - **Thứ tự gọi ban đêm**: kịch bản đọc to cho từng vai, ghi chú từng bước, ẩn các bước chỉ gọi đêm đầu, chọn ngẫu nhiên cặp đôi cho Thần Tình Yêu. Tải lại trang giữa ván không mất gì.
 - **Hẹn giờ thảo luận** có chuông báo và giữ màn hình sáng.
 - **Lịch sử ván**: lưu phe thắng, ghi chú, chủ đề; dùng lại setup cũ.
@@ -94,6 +94,8 @@ Luật (điểm, phe, thứ tự gọi…) nằm trong `src/data/`, không có c
 
 Mã 1 ký tự của mỗi chủ đề nằm ở `THEME_CODE_BY_ID` cùng file.
 
+Cũng trong file này: `MAX_THEMES` (số chủ đề tối đa mỗi ván, hiện là 5) và `THEME_CONFLICTS`, danh sách cặp chủ đề không được chọn chung vì luật mâu thuẫn hoặc trùng nhau. Ô chọn chủ đề làm mờ chủ đề xung đột kèm lý do; mã ván hay lịch sử có cặp xung đột thì giữ chủ đề đứng trước. Thêm chủ đề mới thì xem nó có mâu thuẫn với chủ đề nào không để thêm cặp vào danh sách, sửa xong chạy `npm run gen:sheet`.
+
 ### Chữ — `src/i18n/<ngôn ngữ>/`
 
 | File | Nội dung |
@@ -122,7 +124,7 @@ Sau mỗi lần sửa dữ liệu, chạy `npm test`. Test báo đỏ là có l�
 **Thêm chủ đề**
 1. Thêm vào `THEMES_DATA`.
 2. Thêm chữ vào `src/i18n/vi/themes.js` **và** `src/i18n/en/themes.js` (cả `steps` nếu có `nightSteps`).
-3. Gán một ký tự **chưa từng dùng** trong `THEME_CODE_BY_ID` (`0-9`, `A-Z`, `a-z`; ký tự tiếp theo hiện là `h`).
+3. Gán một ký tự **chưa từng dùng** trong `THEME_CODE_BY_ID` (`0-9`, `A-Z`, `a-z`; ký tự tiếp theo hiện là `j`).
 4. `npm run gen:sheet`, `npm test`, dán lại script vào Apps Script.
 
 **Bỏ chủ đề**: xoá khỏi `THEMES_DATA` và chữ trong `src/i18n/*/themes.js`, nhưng giữ dòng trong `THEME_CODE_BY_ID` để ký tự đó không bị dùng lại.
@@ -139,10 +141,10 @@ Sau mỗi lần sửa dữ liệu, chạy `npm test`. Test báo đỏ là có l�
 
 ## Mã ván
 
-Dạng `<mã vai>` hoặc `<mã vai>-<mã chủ đề>`.
+Dạng `<mã vai>` hoặc `<mã vai>-<mã chủ đề...>`.
 
 - **Mã vai**: số lượng từng vai ghép thành một số lớn theo thứ tự `ROLE_SLOTS` (mỗi vai là một chữ số, cơ số = sức chứa + 1), rồi viết ở hệ base62. Vai đầu bảng là hàng cao nhất, vai cuối bảng là hàng đơn vị.
-- **Mã chủ đề**: 1 ký tự cố định theo `THEME_CODE_BY_ID`.
+- **Mã chủ đề**: mỗi chủ đề 1 ký tự cố định theo `THEME_CODE_BY_ID`, nối liền theo thứ tự chọn, tối đa 5 ký tự (VD `-3hg` = Trăng Máu + Sói Nguyền + Bùa Hộ Mệnh). Mã cũ chỉ có 1 chủ đề vẫn giải đúng.
 
 Vì vậy vị trí trong `ROLE_SLOTS` là một phần của định dạng:
 - Chèn vai mới vào **đầu** bảng chỉ thêm một chữ số 0 ở hàng cao nhất, mọi mã cũ giữ nguyên giá trị.
@@ -158,7 +160,7 @@ Vì vậy vị trí trong `ROLE_SLOTS` là một phần của định dạng:
 
 - **Cài đặt**: Google Sheet → Tiện ích mở rộng → Apps Script → dán toàn bộ file → Lưu → tải lại sheet.
 - **Dùng**: bấm vào một ô trên dòng ván → menu **Ma Sói → Copy mã ván**. Có thể gán hàm `copyMaVan` cho một nút vẽ trên sheet.
-- **Bảng tính**: dòng 1 là tiêu đề. Cột trùng tên vai chứa số lượng vai đó; tên so khớp không phân biệt hoa thường và dấu, nhận tên tiếng Việt, tiếng Anh, `aliases` hoặc id. Cột `Chủ đề` chứa tên chủ đề (tiếng Việt hoặc tiếng Anh). Cột `Số Người` (không bắt buộc) dùng để cảnh báo khi tổng số lá không khớp.
+- **Bảng tính**: dòng 1 là tiêu đề. Cột trùng tên vai chứa số lượng vai đó; tên so khớp không phân biệt hoa thường và dấu, nhận tên tiếng Việt, tiếng Anh, `aliases` hoặc id. Cột `Chủ đề` chứa tên chủ đề (tiếng Việt hoặc tiếng Anh); nhiều chủ đề thì ngăn cách bằng dấu phẩy, tối đa 5, và script báo lỗi nếu có cặp xung đột. Cột `Số Người` (không bắt buộc) dùng để cảnh báo khi tổng số lá không khớp.
 
 Phần `ROLE_SLOTS`/`THEMES` giữa hai dòng `>>> / <<< DỮ LIỆU SINH TỰ ĐỘNG` do `npm run gen:sheet` sinh ra, đừng sửa tay. Sinh lại xong phải dán lại cả file vào Apps Script thì sheet mới cập nhật.
 
@@ -171,7 +173,7 @@ Mọi dữ liệu nằm trong `localStorage` của trình duyệt đang dùng. X
 | Key | Nội dung |
 |---|---|
 | `masoi.setup` | Setup đang sắp: `{ id vai: số lượng }` |
-| `masoi.theme` | Chủ đề đang chọn |
+| `masoi.theme` | Các chủ đề đang chọn (mảng id; bản cũ lưu 1 id vẫn đọc được) |
 | `masoi.startedAt` | Thời điểm bắt đầu ván đang chơi (không có = đang sắp ván) |
 | `masoi.nightNotes` | Ghi chú các bước gọi đêm, theo khóa `role:<id>`, `extra:<id>`, `theme:<id>` |
 | `masoi.nightHidden` | Các bước đang ẩn |

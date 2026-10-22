@@ -18,41 +18,14 @@
   color: var(--text-soft);
 }
 
-.theme-select-wrap {
-  position: relative;
-  flex: 1;
-  min-width: 160px;
-  display: flex;
-}
-
-.theme-clear-btn {
-  position: absolute;
-  right: 26px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--text) 12%, transparent);
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.theme-clear-btn:hover {
-  background: color-mix(in srgb, var(--text) 24%, transparent);
-  color: var(--text);
+.theme-count {
+  font-size: 12px;
 }
 
 .theme-select {
   flex: 1;
-  min-width: 0;
-  padding: 7px 52px 7px 10px;
+  min-width: 160px;
+  padding: 7px 30px 7px 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
   color: var(--text);
@@ -62,6 +35,11 @@
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23cdc3b3' stroke-width='1.6' stroke-linecap='round'/></svg>")
       no-repeat right 10px center / 11px 7px,
     var(--panel-2);
+}
+
+.theme-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .theme-empty {
@@ -88,6 +66,33 @@
 
 .theme-card-name {
   font-size: 15px;
+}
+
+.theme-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.theme-card-remove {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.theme-card-remove:hover {
+  background: color-mix(in srgb, var(--text) 24%, transparent);
+  color: var(--text);
 }
 
 .theme-card-value {
